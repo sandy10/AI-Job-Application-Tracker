@@ -1,0 +1,168 @@
+<resources>
+    <string name="app_name">AIJobApplicationTracker</string>
+    <string name="home_title">Home</string>
+    <string name="add_item">Add Item</string>
+    <string name="no_data_title">No items yet</string>
+    <string name="no_data_desc">Tap the plus button to add your first item.</string>
+    <string name="retry">Retry</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="loading">Loading...</string>
+    <string name="item_prefix">Item %s</string>
+    <string name="back">Back</string>
+    <string name="splash_text">AI Job Application Tracker</string>
+    <string name="error_title">Error</string>
+    <string name="unknown_error">An unexpected error occurred</string>
+    
+    <!-- Sign In Screen -->
+    <string name="app_brand_name">JobTrack AI</string>
+    <string name="app_brand_subtitle">Your AI-powered job search copilot</string>
+    <string name="sign_in_title">Welcome back</string>
+    <string name="sign_in_subtitle">Sign in to track applications and stay ahead in your job search.</string>
+    <string name="email_label">Email address</string>
+    <string name="email_placeholder">Enter your email</string>
+    <string name="password_label">Password</string>
+    <string name="password_placeholder">Enter your password</string>
+    <string name="sign_in_button">Sign In</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="or_continue_with_email">or continue with email</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="terms_and_privacy">By continuing, you agree to our Terms &amp; Privacy Policy.</string>
+
+    <!-- Career Setup Screen -->
+    <string name="career_setup_title">Build your career profile</string>
+    <string name="career_setup_subtitle">Help AI personalize job matches, interview preparation and recommendations.</string>
+    <string name="step_1_of_1">STEP 1 OF 1</string>
+    <string name="name_label">Full Name</string>
+    <string name="name_placeholder">e.g. Alex Johnson</string>
+    <string name="target_role_label">Target Role</string>
+    <string name="target_role_placeholder">e.g. Senior Android Developer</string>
+    <string name="experience_level_label">Experience Level</string>
+    <string name="experience_level_placeholder">Select level</string>
+    <string name="years_experience_label">Years of Exp</string>
+    <string name="years_experience_placeholder">0</string>
+    <string name="primary_skills_label">Primary Skills</string>
+    <string name="ai_extracted_skills_note">AI extracted these from your resume upload.</string>
+    <string name="add_skill_button">+ Add Skill</string>
+    <string name="location_label">Location</string>
+    <string name="location_placeholder">City, Country</string>
+    <string name="work_preference_label">Work Preference</string>
+    <string name="work_pref_remote">Remote</string>
+    <string name="work_pref_hybrid">Hybrid</string>
+    <string name="work_pref_onsite">Onsite</string>
+    <string name="continue_to_dashboard">Continue to Dashboard</string>
+    
+    <!-- Optional Indian-specific fields -->
+    <string name="current_ctc_label">Current CTC (Optional)</string>
+    <string name="expected_ctc_label">Expected CTC (Optional)</string>
+    <string name="notice_period_label">Notice Period (Optional)</string>
+    
+    <string name="save_profile_button">Save &amp; Continue</string>
+
+    <!-- Home Dashboard Screen -->
+    <string name="greeting">Good morning, %1$s 👋</string>
+    <string name="home_subtitle">Here\'s what needs your attention today.</string>
+    <string name="view_all">View All</string>
+    <string name="your_job_search">Your Job Search</string>
+    <string name="stat_applications">Applications</string>
+    <string name="stat_interviews">Interviews</string>
+    <string name="stat_followups">Follow-ups</string>
+    <string name="stat_offers">Offers</string>
+    <string name="needs_attention">Needs Attention</string>
+    <string name="recent_applications">Recent Applications</string>
+    <string name="match_score_format">%1$d%% Match</string>
+
+    <!-- Applications List Screen -->
+    <string name="applications_title">My Applications</string>
+    <string name="filter_all">All</string>
+    <string name="filter_saved">Saved</string>
+    <string name="filter_applied">Applied</string>
+    <string name="filter_interview">Interview</string>
+    <string name="filter_offer">Offer</string>
+    <string name="filter_rejected">Rejected</string>
+    <string name="applied_on_format">Applied: %1$s</string>
+
+    <!-- Add Application Screen -->
+    <string name="add_application_title">Add Job Application</string>
+    <string name="analyze_with_ai">✨ Analyze Job Description with AI</string>
+    <string name="analyze_with_ai_desc">Paste a job description and Gemini will fill the form for you.</string>
+    <string name="or_add_manually">Or Add Manually</string>
+    <string name="company_label">Company *</string>
+    <string name="job_title_label">Job Title *</string>
+    <string name="job_url_label">Job URL (Optional)</string>
+    <string name="work_mode_label">Work Mode (Optional)</string>
+    <string name="status_label">Status (Optional)</string>
+    <string name="notes_label">Notes (Optional)</string>
+    <string name="save_application_button">Save Application</string>
+
+    <!-- Application Detail Screen -->
+    <string name="application_detail_title">Application Detail</string>
+    <string name="next_action_title">NEXT ACTION 🔥</string>
+    <string name="job_description_title">JOB DESCRIPTION</string>
+    <string name="resume_title">RESUME</string>
+    <string name="interviews_title">INTERVIEWS</string>
+    <string name="notes_title">NOTES</string>
+    <string name="prepare_with_ai">Prepare with AI</string>
+
+    <!-- Add Interview Screen -->
+    <string name="add_interview_title">Add Interview</string>
+    <string name="round_number_label">Round Number *</string>
+    <string name="round_number_placeholder">e.g. 1, 2, Final</string>
+    <string name="interview_type_label">Interview Type *</string>
+    <string name="interview_type_placeholder">e.g. Technical, HR, System Design</string>
+    <string name="date_time_label">Date &amp; Time *</string>
+    <string name="date_time_placeholder">e.g. 31 Aug, 11:00 AM</string>
+    <string name="meeting_url_label">Meeting URL (Optional)</string>
+    <string name="interviewer_name_label">Interviewer Name (Optional)</string>
+    <string name="save_interview_button">Save Interview</string>
+
+    <!-- AI Job Analyzer Screen -->
+    <string name="ai_analyzer_title">AI Job Analyzer</string>
+    <string name="paste_jd_label">Paste Job Description</string>
+    <string name="paste_jd_placeholder">Paste the full job description here...</string>
+    <string name="analyze_jd_button">Analyze with Gemini ✨</string>
+
+    <!-- AI Analysis Result Screen -->
+    <string name="analysis_result_title">Analysis Result</string>
+    <string name="confirm_and_save_button">Confirm &amp; Save Application</string>
+    <string name="extracted_role">Role</string>
+    <string name="extracted_company">Company</string>
+    <string name="extracted_location">Location</string>
+    <string name="extracted_experience">Experience</string>
+    <string name="extracted_skills">Skills &amp; Keywords</string>
+    <string name="review_extracted_data">Review the details extracted by AI.</string>
+
+    <!-- My Resumes Screen -->
+    <string name="my_resumes_title">My Resumes</string>
+    <string name="primary_badge">Primary</string>
+    <string name="upload_resume_button">Upload Resume</string>
+    <string name="resume_uploaded_on">Uploaded %1$s</string>
+
+    <!-- AI Resume Match Screen -->
+    <string name="resume_match_title">Resume Match</string>
+    <string name="skills_matched_label">Skills Matched:</string>
+    <string name="missing_skills_label">Missing / Weak:</string>
+    <string name="experience_label">Experience:</string>
+    <string name="recommendation_label">Recommendation:</string>
+
+    <!-- AI Assistant Screen -->
+    <string name="ai_assistant_title">AI Assistant</string>
+    <string name="generate_follow_up_button">Generate Follow-up</string>
+    <string name="start_preparation_button">Start Preparation</string>
+
+    <!-- AI Interview Prep Screen -->
+    <string name="ai_interview_prep_title">AI Interview Plan</string>
+    <string name="focus_areas_label">Focus Areas:</string>
+    <string name="likely_questions_label">Likely Questions:</string>
+    <string name="generate_more_questions_button">Generate More Questions</string>
+
+    <!-- Profile & Settings Screen -->
+    <string name="profile_settings_title">Profile</string>
+    <string name="career_profile_label">Career Profile</string>
+    <string name="profile_skills_label">Skills</string>
+    <string name="preferences_label">Preferences</string>
+    <string name="theme_label">Theme Settings</string>
+    <string name="logout_button">Logout</string>
+    <string name="version_label">Version 1.0 (MVP)</string>
+</resources>
