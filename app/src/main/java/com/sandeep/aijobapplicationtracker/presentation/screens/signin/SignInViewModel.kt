@@ -10,8 +10,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.sandeep.aijobapplicationtracker.domain.repository.AuthRepository
+
 @HiltViewModel
-class SignInViewModel @Inject constructor() : ViewModel() {
+class SignInViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val uiState: StateFlow<UiState<Unit>> = _uiState
 
@@ -19,14 +23,12 @@ class SignInViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             
-            // Simulate network request
-            // TODO: Implement actual Firebase Auth here
-            delay(1500)
+            val result = authRepository.login(email, pass)
             
-            if (email.isNotBlank() && pass.isNotBlank()) {
+            if (result.isSuccess) {
                 _uiState.value = UiState.Success(Unit)
             } else {
-                _uiState.value = UiState.Error("Email and password cannot be empty")
+                _uiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "Sign in failed")
                 // Reset to idle after error to allow user to try again
                 delay(2000)
                 _uiState.value = UiState.Idle
@@ -37,9 +39,16 @@ class SignInViewModel @Inject constructor() : ViewModel() {
     fun signInWithGoogle() {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            // TODO: Implement actual Google Sign In here
-            delay(1500)
-            _uiState.value = UiState.Success(Unit)
+            
+            val result = authRepository.loginWithGoogle()
+            
+            if (result.isSuccess) {
+                _uiState.value = UiState.Success(Unit)
+            } else {
+                _uiState.value = UiState.Error("Google Sign In failed")
+                delay(2000)
+                _uiState.value = UiState.Idle
+            }
         }
     }
 }

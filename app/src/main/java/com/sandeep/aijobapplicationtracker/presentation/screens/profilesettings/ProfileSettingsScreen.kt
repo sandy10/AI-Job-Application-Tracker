@@ -59,6 +59,11 @@ import com.sandeep.aijobapplicationtracker.presentation.components.AppBottomBar
 import com.sandeep.aijobapplicationtracker.presentation.components.BottomNavItem
 import com.sandeep.aijobapplicationtracker.presentation.navigation.Screen
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import com.sandeep.aijobapplicationtracker.utils.UiState
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ProfileSettingsScreen(
@@ -69,6 +74,14 @@ fun ProfileSettingsScreen(
     onLogout: () -> Unit = {},
     viewModel: ProfileSettingsViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(uiState) {
+        if (uiState is UiState.Empty) {
+            onLogout()
+        }
+    }
+
     val bottomNavItems = listOf(
         BottomNavItem("Home", Icons.Filled.Home, Screen.Home.route),
         BottomNavItem("Jobs", Icons.Filled.List, Screen.ApplicationsList.route),
@@ -403,7 +416,7 @@ fun ProfileSettingsScreen(
                         .clip(RoundedCornerShape(12.dp))
                         .background(MaterialTheme.colorScheme.error.copy(alpha = 0.1f))
                         .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
-                        .clickable { onLogout() },
+                        .clickable { viewModel.logout() },
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {

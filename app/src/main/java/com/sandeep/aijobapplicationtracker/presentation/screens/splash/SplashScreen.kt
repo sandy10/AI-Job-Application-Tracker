@@ -41,13 +41,19 @@ import com.sandeep.aijobapplicationtracker.utils.UiState
 @Composable
 fun SplashScreen(
     onNavigateToHome: () -> Unit,
+    onNavigateToSignIn: () -> Unit,
     viewModel: SplashViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState) {
         if (uiState is UiState.Success) {
-            onNavigateToHome()
+            val isLoggedIn = (uiState as UiState.Success<Boolean>).data
+            if (isLoggedIn) {
+                onNavigateToHome()
+            } else {
+                onNavigateToSignIn()
+            }
         }
     }
 

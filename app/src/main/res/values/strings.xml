@@ -55,8 +55,11 @@
     
     <!-- Optional Indian-specific fields -->
     <string name="current_ctc_label">Current CTC (Optional)</string>
+    <string name="current_ctc_placeholder">e.g. 12 LPA</string>
     <string name="expected_ctc_label">Expected CTC (Optional)</string>
+    <string name="expected_ctc_placeholder">e.g. 15 LPA</string>
     <string name="notice_period_label">Notice Period (Optional)</string>
+    <string name="notice_period_placeholder">e.g. 30 Days</string>
     
     <string name="save_profile_button">Save &amp; Continue</string>
 

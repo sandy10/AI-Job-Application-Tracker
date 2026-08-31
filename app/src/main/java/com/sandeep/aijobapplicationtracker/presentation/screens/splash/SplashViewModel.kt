@@ -9,15 +9,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.flow.first
+import com.sandeep.aijobapplicationtracker.domain.repository.AuthRepository
 
 /**
  * ViewModel for Splash Screen.
  */
 @HiltViewModel
-class SplashViewModel @Inject constructor() : ViewModel() {
+class SplashViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
-    val uiState: StateFlow<UiState<Unit>> = _uiState
+    private val _uiState = MutableStateFlow<UiState<Boolean>>(UiState.Idle)
+    val uiState: StateFlow<UiState<Boolean>> = _uiState
 
     init {
         startSplashDelay()
@@ -26,10 +30,13 @@ class SplashViewModel @Inject constructor() : ViewModel() {
     private fun startSplashDelay() {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            // Simulate splash delay or initialization checks (e.g., Auth check)
-            // TODO: Add real auth checking here in the future
+            
+            // Wait for 1.5s for splash effect
             delay(1500)
-            _uiState.value = UiState.Success(Unit)
+            
+            // Check auth state
+            val isLoggedIn = authRepository.isLoggedIn().first()
+            _uiState.value = UiState.Success(isLoggedIn)
         }
     }
 }

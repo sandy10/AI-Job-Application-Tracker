@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.sandeep.aijobapplicationtracker.domain.repository.AuthRepository
 
 data class UserProfile(
     val name: String,
@@ -17,7 +18,9 @@ data class UserProfile(
 )
 
 @HiltViewModel
-class ProfileSettingsViewModel @Inject constructor() : ViewModel() {
+class ProfileSettingsViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<UserProfile>>(UiState.Loading)
     val uiState: StateFlow<UiState<UserProfile>> = _uiState
 
@@ -42,7 +45,7 @@ class ProfileSettingsViewModel @Inject constructor() : ViewModel() {
 
     fun logout() {
         viewModelScope.launch {
-            // Trigger logout logic
+            authRepository.logout()
             _uiState.value = UiState.Empty // using empty state to trigger navigation to SignIn
         }
     }

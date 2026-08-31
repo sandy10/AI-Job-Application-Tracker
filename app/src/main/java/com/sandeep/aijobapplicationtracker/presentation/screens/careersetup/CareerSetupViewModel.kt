@@ -10,8 +10,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.sandeep.aijobapplicationtracker.domain.repository.ProfileRepository
+import com.sandeep.aijobapplicationtracker.domain.model.UserProfileModel
+
 @HiltViewModel
-class CareerSetupViewModel @Inject constructor() : ViewModel() {
+class CareerSetupViewModel @Inject constructor(
+    private val profileRepository: ProfileRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val uiState: StateFlow<UiState<Unit>> = _uiState
 
@@ -24,23 +29,38 @@ class CareerSetupViewModel @Inject constructor() : ViewModel() {
         location: String,
         currentCtc: String,
         expectedCtc: String,
-        noticePeriod: String
+        noticePeriod: String,
+        workPreference: String
     ) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             
             // Basic validation
             if (name.isBlank() || experienceLevel.isBlank() || yearsOfExperience.isBlank() ||
-                primaryRole.isBlank() || skills.isBlank() || location.isBlank()) {
+                primaryRole.isBlank() || location.isBlank()) {
                 _uiState.value = UiState.Error("Please fill in all required fields")
                 delay(2000)
                 _uiState.value = UiState.Idle
                 return@launch
             }
             
-            // Simulate network request to save to Firestore
-            // TODO: Implement actual Firestore saving here
-            delay(1500)
+            // Save to local DataStore mock repository
+            val profile = UserProfileModel(
+                name = name,
+                targetRole = primaryRole,
+                experienceLevel = experienceLevel,
+                yearsExperience = yearsOfExperience,
+                location = location,
+                workPreference = workPreference,
+                currentCtc = currentCtc,
+                expectedCtc = expectedCtc,
+                noticePeriod = noticePeriod
+            )
+            
+            profileRepository.saveProfile(profile)
+            
+            // Simulate slight delay for effect
+            delay(1000)
             
             _uiState.value = UiState.Success(Unit)
         }

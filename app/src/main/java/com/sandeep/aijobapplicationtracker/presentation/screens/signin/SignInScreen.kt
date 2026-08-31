@@ -79,7 +79,7 @@ fun SignInScreen(
         SignInContent(
             modifier = Modifier.padding(paddingValues),
             uiState = uiState,
-            onSignInClick = { _, _ -> onNavigateToHome() },
+            onSignInClick = { email, pass -> viewModel.signIn(email, pass) },
             onGoogleSignInClick = { viewModel.signInWithGoogle() }
         )
     }

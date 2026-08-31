@@ -35,6 +35,11 @@ fun AppNavGraph() {
         composable(Screen.Splash.route) {
             SplashScreen(
                 onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
+                onNavigateToSignIn = {
                     navController.navigate(Screen.SignIn.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }

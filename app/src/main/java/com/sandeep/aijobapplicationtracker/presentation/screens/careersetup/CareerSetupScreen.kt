@@ -75,6 +75,9 @@ fun CareerSetupScreen(
     var yearsExp by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     var workPreference by remember { mutableStateOf("remote") }
+    var currentCtc by remember { mutableStateOf("") }
+    var expectedCtc by remember { mutableStateOf("") }
+    var noticePeriod by remember { mutableStateOf("") }
     
     val aiExtractedSkills = listOf("Kotlin", "Jetpack Compose", "Firebase")
 
@@ -163,7 +166,20 @@ fun CareerSetupScreen(
             ) {
                 AppButton(
                     text = stringResource(id = R.string.continue_to_dashboard),
-                    onClick = { onNavigateToHome() },
+                    onClick = {
+                        viewModel.saveProfile(
+                            name = fullName,
+                            experienceLevel = experienceLevel,
+                            yearsOfExperience = yearsExp,
+                            primaryRole = targetRole,
+                            skills = aiExtractedSkills.joinToString(","),
+                            location = location,
+                            currentCtc = currentCtc,
+                            expectedCtc = expectedCtc,
+                            noticePeriod = noticePeriod,
+                            workPreference = workPreference
+                        )
+                    },
                     isLoading = uiState is UiState.Loading
                 )
             }
@@ -333,6 +349,34 @@ fun CareerSetupScreen(
                         tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
                     )
                 }
+            )
+
+            // Optional CTC and Notice Period Fields
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                CustomTextField(
+                    modifier = Modifier.weight(1f),
+                    label = stringResource(id = R.string.current_ctc_label),
+                    value = currentCtc,
+                    onValueChange = { currentCtc = it },
+                    placeholder = stringResource(id = R.string.current_ctc_placeholder)
+                )
+                CustomTextField(
+                    modifier = Modifier.weight(1f),
+                    label = stringResource(id = R.string.expected_ctc_label),
+                    value = expectedCtc,
+                    onValueChange = { expectedCtc = it },
+                    placeholder = stringResource(id = R.string.expected_ctc_placeholder)
+                )
+            }
+            
+            CustomTextField(
+                label = stringResource(id = R.string.notice_period_label),
+                value = noticePeriod,
+                onValueChange = { noticePeriod = it },
+                placeholder = stringResource(id = R.string.notice_period_placeholder)
             )
 
             // Work Preference Segmented
