@@ -46,6 +46,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sandeep.aijobapplicationtracker.R
+import com.sandeep.aijobapplicationtracker.utils.UiState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -53,6 +61,8 @@ fun AiInterviewPrepScreen(
     onNavigateBack: () -> Unit,
     viewModel: AiInterviewPrepViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -93,67 +103,109 @@ fun AiInterviewPrepScreen(
                         )
                     }
                 },
-                actions = {
-                    IconButton(onClick = { /* TODO */ }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More",
-                            tint = Color(0xFF464555)
-                        )
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
         bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                    .padding(horizontal = 20.dp, vertical = 16.dp)
-                    .padding(bottom = 16.dp) // extra padding for safe area
-            ) {
+            if (uiState is UiState.Success) {
+                val isGenerating by viewModel.isGeneratingMore.collectAsState()
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                        .clickable { viewModel.generateMoreQuestions() },
-                    contentAlignment = Alignment.Center
+                        .background(Color.White)
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                        .padding(horizontal = 20.dp, vertical = 16.dp)
+                        .padding(bottom = 16.dp) // extra padding for safe area
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Star, // Re-using standard icon
-                            contentDescription = "Generate",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Generate More Questions",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            fontSize = 16.sp
-                        )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .clickable(enabled = !isGenerating) { viewModel.generateMoreQuestions() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isGenerating) {
+                            androidx.compose.material3.CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Star, // Re-using standard icon
+                                    contentDescription = "Generate",
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Generate More Questions",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    fontSize = 16.sp
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-        ) {
-            Spacer(modifier = Modifier.height(8.dp))
+        when (val state = uiState) {
+            is UiState.Loading -> {
+                com.sandeep.aijobapplicationtracker.presentation.components.LoadingView()
+            }
+            is UiState.Error -> {
+                com.sandeep.aijobapplicationtracker.presentation.components.EmptyStateView(
+                    title = "Error",
+                    subtitle = state.message
+                )
+            }
+            is UiState.Idle -> {}
+            is UiState.Success -> {
+                AiInterviewPrepContent(
+                    data = state.data,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+            is UiState.Empty -> {}
+        }
+    }
+}
 
-            // Hero Card
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AiInterviewPrepContent(
+    data: InterviewPlan,
+    modifier: Modifier = Modifier
+) {
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    
+    // We expect new questions to be appended. If size increases, scroll to the first new item.
+    // The items in likelyQuestions start at index 6 in the LazyColumn.
+    androidx.compose.runtime.LaunchedEffect(data.likelyQuestions.size) {
+        if (data.likelyQuestions.size > 2) {
+            val firstNewIndex = data.likelyQuestions.size - 5
+            if (firstNewIndex >= 0) {
+                listState.animateScrollToItem(6 + firstNewIndex)
+            }
+        }
+    }
+
+    androidx.compose.foundation.lazy.LazyColumn(
+        state = listState,
+        modifier = modifier.fillMaxSize(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 20.dp)
+    ) {
+        item { Spacer(modifier = Modifier.height(8.dp)) }
+
+        // Hero Card
+        item {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -188,13 +240,13 @@ fun AiInterviewPrepScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Column {
                                 Text(
-                                    text = "Senior Android Engineer",
+                                    text = data.role,
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = "Google",
+                                    text = data.company,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -216,7 +268,7 @@ fun AiInterviewPrepScreen(
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = "Technical",
+                                    text = "AI Prepared",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Medium
@@ -224,146 +276,92 @@ fun AiInterviewPrepScreen(
                             }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = "Event",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Tomorrow • 11:00 AM",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.background)
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-                            .padding(8.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Countdown",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.DateRange, // Schedule icon
-                                    contentDescription = "Time",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "18 hours remaining",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                        }
-                    }
                 }
             }
+        }
 
-            Spacer(modifier = Modifier.height(24.dp))
+        item { Spacer(modifier = Modifier.height(24.dp)) }
 
-            // High Priority Topics
-            Text(
-                text = "🔥 High Priority Topics",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                listOf("Kotlin Coroutines", "Jetpack Compose", "System Design").forEach { topic ->
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White)
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = topic,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Likely Questions
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        // High Priority Topics
+        item {
+            Column {
                 Text(
-                    text = "Likely Questions",
+                    text = "🔥 Focus Areas",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = "AI",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(18.dp)
-                )
+                Spacer(modifier = Modifier.height(16.dp))
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    data.focusAreas.forEach { area ->
+                        val color = if (area.priority.contains("High", true)) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.White)
+                                .border(1.dp, color.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "${area.topic} (${area.priority})",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                QuestionCard(
-                    tag = "Concurrency",
-                    tagColor = MaterialTheme.colorScheme.primary,
-                    tagBgColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                    question = "\"Explain how you would handle race conditions in a complex Coroutine flow with shared mutable state.\""
-                )
-                QuestionCard(
-                    tag = "Offline-first",
-                    tagColor = Color(0xFF004C76), // tertiary
-                    tagBgColor = Color(0xFF004C76).copy(alpha = 0.1f),
-                    question = "\"Design an offline-first architecture for a messaging app. How do you resolve conflicts?\""
-                )
-                QuestionCard(
-                    tag = "Recomposition",
-                    tagColor = Color(0xFF00687A), // secondary
-                    tagBgColor = Color(0xFF00687A).copy(alpha = 0.1f),
-                    question = "\"How do you profile and optimize excessive recomposition in Jetpack Compose?\""
-                )
+        }
+
+        item { Spacer(modifier = Modifier.height(24.dp)) }
+
+        // Likely Questions & Answers Header
+        item {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Likely Questions & Answers",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "AI",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
             }
+        }
+        
+        // Items 6 to (6 + size)
+        itemsIndexed(data.likelyQuestions) { index, qa ->
+            QuestionCard(
+                tag = "Technical",
+                tagColor = MaterialTheme.colorScheme.primary,
+                tagBgColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                question = qa.question,
+                answer = qa.answerHint
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
-            Spacer(modifier = Modifier.height(24.dp))
+        item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            // AI Tip Card
+        // AI Tip Card
+        item {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 16.dp, bottomEnd = 16.dp))
                     .background(Color(0xFFEEF2FF))
-                    .border(1.dp, Color(0xFFEEF2FF)) // just for structure, left border is below
+                    .border(1.dp, Color(0xFFEEF2FF))
             ) {
                 Row(modifier = Modifier.height(androidx.compose.foundation.layout.IntrinsicSize.Min)) {
                     Box(
@@ -375,7 +373,7 @@ fun AiInterviewPrepScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                imageVector = Icons.Default.Star, // Psychology
+                                imageVector = Icons.Default.Star,
                                 contentDescription = "Tip",
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(18.dp)
@@ -390,40 +388,41 @@ fun AiInterviewPrepScreen(
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "\"When answering behavioral questions, use the STAR method and focus on measurable impact. Google values data-driven decisions.\"",
+                            text = "\"${data.strategyTip}\"",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Behavioral Questions
-            Text(
-                text = "Behavioral Questions",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                BehavioralCard(
-                    lineColor = Color(0xFF004C76), // tertiary
-                    question = "\"Tell me about a time you caused a critical issue in production.\"",
-                    tip = "Focus on accountability & learning"
-                )
-                BehavioralCard(
-                    lineColor = Color(0xFFBA1A1A).copy(alpha = 0.7f), // error
-                    question = "\"Describe a significant technical disagreement with a senior engineer.\"",
-                    tip = "Focus on communication & compromise"
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
         }
+
+        item { Spacer(modifier = Modifier.height(24.dp)) }
+
+        // Behavioral Questions Header
+        item {
+            Column {
+                Text(
+                    text = "Behavioral Questions",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+
+        // Behavioral Questions list
+        items(data.behavioralQuestions) { qa ->
+            BehavioralCard(
+                lineColor = Color(0xFF004C76),
+                question = qa.question,
+                tip = qa.answerHint
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        item { Spacer(modifier = Modifier.height(32.dp)) }
     }
 }
 
@@ -432,51 +431,76 @@ private fun QuestionCard(
     tag: String,
     tagColor: Color,
     tagBgColor: Color,
-    question: String
+    question: String,
+    answer: String
 ) {
+    var expanded by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White)
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-            .clickable { /* expand */ }
+            .clickable { expanded = !expanded }
             .padding(16.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize()
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(tagBgColor)
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
-                ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(tagBgColor)
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = tag,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = tagColor,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = tag,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = tagColor,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 10.sp
+                        text = question,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        lineHeight = 20.sp
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = question,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    lineHeight = 20.sp
+                Icon(
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowDown, // In a real app we'd flip this (KeyboardArrowUp)
+                    contentDescription = "Expand",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = "Expand",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (expanded && answer.isNotBlank()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFFF8FAFC))
+                        .padding(12.dp)
+                ) {
+                    Text(
+                        text = answer,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }

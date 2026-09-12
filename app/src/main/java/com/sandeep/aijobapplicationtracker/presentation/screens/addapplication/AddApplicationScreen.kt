@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
@@ -70,6 +71,46 @@ fun AddApplicationScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    var company by remember { mutableStateOf("") }
+    var jobTitle by remember { mutableStateOf("") }
+    var jobUrl by remember { mutableStateOf("") }
+    var location by remember { mutableStateOf("") }
+    var workMode by remember { mutableStateOf("") }
+    var source by remember { mutableStateOf("") }
+    var status by remember { mutableStateOf("Saved for later") }
+    var dateApplied by remember { mutableStateOf("") }
+    var salary by remember { mutableStateOf("") }
+    var recruiter by remember { mutableStateOf("") }
+    var noticePeriod by remember { mutableStateOf("") }
+    var jobDescription by remember { mutableStateOf("") }
+    var notes by remember { mutableStateOf("") }
+    var matchScore by remember { mutableStateOf(0) }
+
+    val latestExtractedData by viewModel.latestExtractedData.collectAsState()
+
+    LaunchedEffect(latestExtractedData) {
+        latestExtractedData?.let { data ->
+            company = data.company
+            jobTitle = data.role
+            location = data.location
+            workMode = data.workMode
+            salary = data.salaryRange
+            noticePeriod = data.noticePeriod
+            jobDescription = data.jobDescription
+            jobUrl = data.jobUrl
+            source = data.source
+            recruiter = data.recruiter
+            if (data.dateApplied.isNotBlank()) dateApplied = data.dateApplied
+            matchScore = data.matchScore
+            // For MVP, we can append skills into notes or job description, 
+            // since we don't have a direct field for "Required Skills" yet.
+            if (data.skills.isNotEmpty()) {
+                notes = "AI Extracted Skills:\n${data.skills.joinToString(", ")}\n\n" + notes
+            }
+            viewModel.clearExtractedData()
+        }
+    }
+
     LaunchedEffect(uiState) {
         if (uiState is UiState.Success) {
             onNavigateBack()
@@ -113,7 +154,22 @@ fun AddApplicationScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(
                         onClick = {
-                            viewModel.saveApplication("Company", "Title", "URL", "Remote", "Saved", "Notes")
+                            viewModel.saveApplication(
+                                company = company,
+                                jobTitle = jobTitle,
+                                jobUrl = jobUrl,
+                                location = location,
+                                workMode = workMode,
+                                source = source,
+                                status = status,
+                                dateApplied = dateApplied,
+                                salary = salary,
+                                recruiter = recruiter,
+                                noticePeriod = noticePeriod,
+                                jobDescription = jobDescription,
+                                notes = notes,
+                                matchScore = matchScore
+                            )
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -139,31 +195,44 @@ fun AddApplicationScreen(
     ) { paddingValues ->
         AddApplicationContent(
             modifier = Modifier.padding(paddingValues),
-            onAnalyzeClick = onNavigateToAnalyzer
+            onAnalyzeClick = onNavigateToAnalyzer,
+            company = company, onCompanyChange = { company = it },
+            jobTitle = jobTitle, onJobTitleChange = { jobTitle = it },
+            jobUrl = jobUrl, onJobUrlChange = { jobUrl = it },
+            location = location, onLocationChange = { location = it },
+            workMode = workMode, onWorkModeChange = { workMode = it },
+            source = source, onSourceChange = { source = it },
+            status = status, onStatusChange = { status = it },
+            dateApplied = dateApplied, onDateAppliedChange = { dateApplied = it },
+            salary = salary, onSalaryChange = { salary = it },
+            recruiter = recruiter, onRecruiterChange = { recruiter = it },
+            noticePeriod = noticePeriod, onNoticePeriodChange = { noticePeriod = it },
+            jobDescription = jobDescription, onJobDescriptionChange = { jobDescription = it },
+            notes = notes, onNotesChange = { notes = it }
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddApplicationContent(
     modifier: Modifier = Modifier,
-    onAnalyzeClick: () -> Unit
+    onAnalyzeClick: () -> Unit,
+    company: String, onCompanyChange: (String) -> Unit,
+    jobTitle: String, onJobTitleChange: (String) -> Unit,
+    jobUrl: String, onJobUrlChange: (String) -> Unit,
+    location: String, onLocationChange: (String) -> Unit,
+    workMode: String, onWorkModeChange: (String) -> Unit,
+    source: String, onSourceChange: (String) -> Unit,
+    status: String, onStatusChange: (String) -> Unit,
+    dateApplied: String, onDateAppliedChange: (String) -> Unit,
+    salary: String, onSalaryChange: (String) -> Unit,
+    recruiter: String, onRecruiterChange: (String) -> Unit,
+    noticePeriod: String, onNoticePeriodChange: (String) -> Unit,
+    jobDescription: String, onJobDescriptionChange: (String) -> Unit,
+    notes: String, onNotesChange: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
-
-    var company by remember { mutableStateOf("") }
-    var jobTitle by remember { mutableStateOf("") }
-    var jobUrl by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
-    var workMode by remember { mutableStateOf("") }
-    var source by remember { mutableStateOf("") }
-    var status by remember { mutableStateOf("Saved for later") }
-    var dateApplied by remember { mutableStateOf("") }
-    var salary by remember { mutableStateOf("") }
-    var recruiter by remember { mutableStateOf("") }
-    var noticePeriod by remember { mutableStateOf("") }
-    var jobDescription by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -238,35 +307,67 @@ private fun AddApplicationContent(
         Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
             // Basic Details
             FormSection(title = "Basic Details") {
-                FormInput(label = "Company Name *", value = company, onValueChange = { company = it }, placeholder = "e.g. Acme Corp")
-                FormInput(label = "Job Title *", value = jobTitle, onValueChange = { jobTitle = it }, placeholder = "e.g. Senior Product Designer")
-                FormInput(label = "Job URL", value = jobUrl, onValueChange = { jobUrl = it }, placeholder = "https://")
+                FormInput(label = "Company Name *", value = company, onValueChange = onCompanyChange, placeholder = "e.g. Acme Corp")
+                FormInput(label = "Job Title *", value = jobTitle, onValueChange = onJobTitleChange, placeholder = "e.g. Senior Product Designer")
+                FormInput(label = "Job URL", value = jobUrl, onValueChange = onJobUrlChange, placeholder = "https://")
             }
 
             // Location & Logistics
             FormSection(title = "Location & Logistics") {
-                FormInput(label = "Location", value = location, onValueChange = { location = it }, placeholder = "City, State or Country")
-                FormInput(label = "Work Mode", value = workMode, onValueChange = { workMode = it }, placeholder = "Select mode")
-                FormInput(label = "Source", value = source, onValueChange = { source = it }, placeholder = "Where did you find this?")
+                FormInput(label = "Location", value = location, onValueChange = onLocationChange, placeholder = "City, State or Country")
+                FormInput(label = "Work Mode", value = workMode, onValueChange = onWorkModeChange, placeholder = "Select mode")
+                FormInput(label = "Source", value = source, onValueChange = onSourceChange, placeholder = "Where did you find this?")
             }
 
             // Application Status & Details
             FormSection(title = "Application Status & Details") {
-                FormInput(label = "Status", value = status, onValueChange = { status = it }, placeholder = "Saved for later")
-                FormInput(label = "Date Applied", value = dateApplied, onValueChange = { dateApplied = it }, placeholder = "DD/MM/YYYY")
-                FormInput(label = "Salary Range / CTC", value = salary, onValueChange = { salary = it }, placeholder = "e.g. $120k - $150k")
+                FormInput(label = "Status", value = status, onValueChange = onStatusChange, placeholder = "Saved for later")
+                var showDatePicker by remember { mutableStateOf(false) }
+                FormInput(
+                    label = "Date Applied", 
+                    value = dateApplied, 
+                    onValueChange = onDateAppliedChange, 
+                    placeholder = "DD/MM/YYYY",
+                    readOnly = true,
+                    onClick = { showDatePicker = true },
+                    trailingIcon = {
+                        Icon(Icons.Default.DateRange, contentDescription = "Select Date")
+                    }
+                )
+                
+                if (showDatePicker) {
+                    val datePickerState = androidx.compose.material3.rememberDatePickerState()
+                    androidx.compose.material3.DatePickerDialog(
+                        onDismissRequest = { showDatePicker = false },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    val formattedDate = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(java.util.Date(millis))
+                                    onDateAppliedChange(formattedDate)
+                                }
+                                showDatePicker = false
+                            }) { Text("OK") }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                        }
+                    ) {
+                        androidx.compose.material3.DatePicker(state = datePickerState)
+                    }
+                }
+                FormInput(label = "Salary Range / CTC", value = salary, onValueChange = onSalaryChange, placeholder = "e.g. $120k - $150k")
             }
 
             // Additional Context
             FormSection(title = "Additional Context") {
-                FormInput(label = "Recruiter Info / Contact", value = recruiter, onValueChange = { recruiter = it }, placeholder = "Name or Email")
-                FormInput(label = "Notice Period Required", value = noticePeriod, onValueChange = { noticePeriod = it }, placeholder = "e.g. 30 Days")
+                FormInput(label = "Recruiter Info / Contact", value = recruiter, onValueChange = onRecruiterChange, placeholder = "Name or Email")
+                FormInput(label = "Notice Period Required", value = noticePeriod, onValueChange = onNoticePeriodChange, placeholder = "e.g. 30 Days")
                 
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("Job Description", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
                     OutlinedTextField(
                         value = jobDescription,
-                        onValueChange = { jobDescription = it },
+                        onValueChange = onJobDescriptionChange,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(100.dp),
@@ -285,7 +386,7 @@ private fun AddApplicationContent(
                     Text("Personal Notes", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
                     OutlinedTextField(
                         value = notes,
-                        onValueChange = { notes = it },
+                        onValueChange = onNotesChange,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(80.dp),
@@ -322,22 +423,44 @@ private fun FormSection(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun FormInput(label: String, value: String, onValueChange: (String) -> Unit, placeholder: String) {
+private fun FormInput(
+    label: String, 
+    value: String, 
+    onValueChange: (String) -> Unit, 
+    placeholder: String,
+    readOnly: Boolean = false,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    onClick: (() -> Unit)? = null
+) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(placeholder, color = Color(0xFF777587), fontSize = 14.sp) },
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = Color(0xFFF2F4F6), // surface-container-low
-                focusedContainerColor = Color.White,
-                unfocusedBorderColor = Color(0xFFC7C4D8), // outline-variant
-                focusedBorderColor = Color(0xFF3525CD) // primary
-            ),
-            shape = RoundedCornerShape(12.dp),
-            singleLine = true
-        )
+        
+        Box(modifier = Modifier.fillMaxWidth()) {
+            OutlinedTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text(placeholder, color = Color(0xFF777587), fontSize = 14.sp) },
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedContainerColor = Color(0xFFF2F4F6), // surface-container-low
+                    focusedContainerColor = Color.White,
+                    unfocusedBorderColor = Color(0xFFC7C4D8), // outline-variant
+                    focusedBorderColor = Color(0xFF3525CD) // primary
+                ),
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true,
+                readOnly = readOnly,
+                trailingIcon = trailingIcon
+            )
+            
+            if (onClick != null) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(Color.Transparent)
+                        .clickable(onClick = onClick)
+                )
+            }
+        }
     }
 }

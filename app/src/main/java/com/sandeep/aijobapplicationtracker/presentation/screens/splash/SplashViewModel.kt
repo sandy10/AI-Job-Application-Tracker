@@ -12,16 +12,20 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import com.sandeep.aijobapplicationtracker.domain.repository.AuthRepository
 
+import com.sandeep.aijobapplicationtracker.domain.repository.ProfileRepository
+
 /**
  * ViewModel for Splash Screen.
  */
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val profileRepository: ProfileRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<UiState<Boolean>>(UiState.Idle)
-    val uiState: StateFlow<UiState<Boolean>> = _uiState
+    // Pair of <IsLoggedIn, IsProfileComplete>
+    private val _uiState = MutableStateFlow<UiState<Pair<Boolean, Boolean>>>(UiState.Idle)
+    val uiState: StateFlow<UiState<Pair<Boolean, Boolean>>> = _uiState
 
     init {
         startSplashDelay()
@@ -36,7 +40,15 @@ class SplashViewModel @Inject constructor(
             
             // Check auth state
             val isLoggedIn = authRepository.isLoggedIn().first()
-            _uiState.value = UiState.Success(isLoggedIn)
+            
+            if (isLoggedIn) {
+                // If logged in, check if profile has been completed (i.e. targetRole is not blank)
+                val profile = profileRepository.getProfile().first()
+                val isComplete = profile?.targetRole?.isNotBlank() == true
+                _uiState.value = UiState.Success(Pair(isLoggedIn, isComplete))
+            } else {
+                _uiState.value = UiState.Success(Pair(false, false))
+            }
         }
     }
 }

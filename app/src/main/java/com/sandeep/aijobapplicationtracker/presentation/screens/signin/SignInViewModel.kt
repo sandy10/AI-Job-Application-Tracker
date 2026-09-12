@@ -12,6 +12,10 @@ import javax.inject.Inject
 
 import com.sandeep.aijobapplicationtracker.domain.repository.AuthRepository
 
+/**
+ * ViewModel for the Sign In screen.
+ * Handles email/password login and Google Sign-In via Credential Manager.
+ */
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val authRepository: AuthRepository
@@ -19,6 +23,9 @@ class SignInViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val uiState: StateFlow<UiState<Unit>> = _uiState
 
+    /**
+     * Signs in with email and password using Firebase Auth.
+     */
     fun signIn(email: String, pass: String) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
@@ -29,26 +36,48 @@ class SignInViewModel @Inject constructor(
                 _uiState.value = UiState.Success(Unit)
             } else {
                 _uiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "Sign in failed")
-                // Reset to idle after error to allow user to try again
+                // Reset to idle after error so the user can try again
                 delay(2000)
                 _uiState.value = UiState.Idle
             }
         }
     }
-    
-    fun signInWithGoogle() {
+
+    /**
+     * Called by the UI after the Credential Manager returns a Google ID token.
+     * Exchanges the token for a Firebase credential and signs in.
+     */
+    fun signInWithGoogleIdToken(idToken: String) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            
-            val result = authRepository.loginWithGoogle()
-            
+
+            val result = authRepository.signInWithGoogleIdToken(idToken)
+
             if (result.isSuccess) {
                 _uiState.value = UiState.Success(Unit)
             } else {
-                _uiState.value = UiState.Error("Google Sign In failed")
+                _uiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "Google Sign In failed")
                 delay(2000)
                 _uiState.value = UiState.Idle
             }
         }
+    }
+
+    /**
+     * Called when Google Sign-In fails at the UI layer (e.g. user cancelled).
+     */
+    fun onGoogleSignInFailed(errorMessage: String) {
+        viewModelScope.launch {
+            _uiState.value = UiState.Error(errorMessage)
+            delay(2000)
+            _uiState.value = UiState.Idle
+        }
+    }
+
+    /**
+     * Sets loading state when Google Sign-In is initiated.
+     */
+    fun setLoading() {
+        _uiState.value = UiState.Loading
     }
 }

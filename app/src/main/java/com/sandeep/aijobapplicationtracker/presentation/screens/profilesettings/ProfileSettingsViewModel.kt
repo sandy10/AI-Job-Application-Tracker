@@ -2,51 +2,68 @@ package com.sandeep.aijobapplicationtracker.presentation.screens.profilesettings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sandeep.aijobapplicationtracker.domain.model.UserProfileModel
+import com.sandeep.aijobapplicationtracker.domain.repository.AuthRepository
+import com.sandeep.aijobapplicationtracker.domain.repository.ProfileRepository
 import com.sandeep.aijobapplicationtracker.utils.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
-import com.sandeep.aijobapplicationtracker.domain.repository.AuthRepository
 
-data class UserProfile(
-    val name: String,
-    val role: String,
-    val email: String
-)
-
+/**
+ * ViewModel for the Profile Settings screen.
+ * Loads real user profile data from Firestore via [ProfileRepository].
+ */
 @HiltViewModel
 class ProfileSettingsViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val profileRepository: ProfileRepository
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow<UiState<UserProfile>>(UiState.Loading)
-    val uiState: StateFlow<UiState<UserProfile>> = _uiState
+
+    private val _uiState = MutableStateFlow<UiState<UserProfileModel>>(UiState.Loading)
+    val uiState: StateFlow<UiState<UserProfileModel>> = _uiState
 
     init {
         loadProfile()
     }
 
+    /**
+     * Subscribes to the Firestore profile flow so the UI
+     * always reflects the latest saved profile data.
+     */
     private fun loadProfile() {
         viewModelScope.launch {
-            _uiState.value = UiState.Loading
-            delay(1000)
-            
-            _uiState.value = UiState.Success(
-                UserProfile(
-                    name = "Sandeep",
-                    role = "Senior Android Developer",
-                    email = "sandeep@example.com"
-                )
-            )
+            profileRepository.getProfile().collect { profile ->
+                if (profile != null && profile.name.isNotBlank()) {
+                    _uiState.value = UiState.Success(profile)
+                } else {
+                    Timber.w("Profile is null or empty")
+                    _uiState.value = UiState.Success(
+                        UserProfileModel(
+                            name = authRepository.getCurrentUserName() ?: "User",
+                            targetRole = "",
+                            experienceLevel = "",
+                            yearsExperience = "",
+                            location = "",
+                            workPreference = ""
+                        )
+                    )
+                }
+            }
         }
     }
 
+    /**
+     * Signs the user out and emits [UiState.Empty] to trigger
+     * navigation back to the Sign In screen.
+     */
     fun logout() {
         viewModelScope.launch {
             authRepository.logout()
-            _uiState.value = UiState.Empty // using empty state to trigger navigation to SignIn
+            _uiState.value = UiState.Empty
         }
     }
 }

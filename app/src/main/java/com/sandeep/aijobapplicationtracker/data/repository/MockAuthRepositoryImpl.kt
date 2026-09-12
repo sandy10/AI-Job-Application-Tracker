@@ -58,4 +58,16 @@ class MockAuthRepositoryImpl @Inject constructor(
             preferences[PreferencesKeys.IS_LOGGED_IN] = false
         }
     }
+
+    override fun getCurrentUserName(): String? {
+        return "Mock User"
+    }
+
+    override suspend fun signInWithGoogleIdToken(idToken: String): Result<Unit> {
+        // Mock implementation — not used when Firebase is active
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IS_LOGGED_IN] = true
+        }
+        return Result.success(Unit)
+    }
 }

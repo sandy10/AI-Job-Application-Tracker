@@ -20,12 +20,15 @@ class CareerSetupViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val uiState: StateFlow<UiState<Unit>> = _uiState
 
+    // Expose the profile flow directly to the UI
+    val userProfile = profileRepository.getProfile()
+
     fun saveProfile(
         name: String,
         experienceLevel: String,
         yearsOfExperience: String,
         primaryRole: String,
-        skills: String,
+        skills: List<String>,
         location: String,
         currentCtc: String,
         expectedCtc: String,
@@ -44,7 +47,7 @@ class CareerSetupViewModel @Inject constructor(
                 return@launch
             }
             
-            // Save to local DataStore mock repository
+            // Save to Firestore repository
             val profile = UserProfileModel(
                 name = name,
                 targetRole = primaryRole,
@@ -54,7 +57,8 @@ class CareerSetupViewModel @Inject constructor(
                 workPreference = workPreference,
                 currentCtc = currentCtc,
                 expectedCtc = expectedCtc,
-                noticePeriod = noticePeriod
+                noticePeriod = noticePeriod,
+                skills = skills
             )
             
             profileRepository.saveProfile(profile)

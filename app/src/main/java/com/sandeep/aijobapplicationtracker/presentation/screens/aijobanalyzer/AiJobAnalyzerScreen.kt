@@ -61,9 +61,11 @@ fun AiJobAnalyzerScreen(
 
     LaunchedEffect(uiState) {
         if (uiState is UiState.Success) {
+            viewModel.resetState()
             onNavigateToResult()
         } else if (uiState is UiState.Error) {
             snackbarHostState.showSnackbar((uiState as UiState.Error).message)
+            viewModel.resetState()
         }
     }
 
@@ -203,11 +205,21 @@ private fun AiJobAnalyzerContent(
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF4F46E5)
             ),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(12.dp),
+            enabled = !isLoading && jobDescription.isNotBlank()
         ) {
-            Icon(Icons.Default.Star, contentDescription = "AI", modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Analyze with AI", fontSize = 16.sp)
+            if (isLoading) {
+                androidx.compose.material3.CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text("Analyzing...", fontSize = 16.sp)
+            } else {
+                Icon(Icons.Default.Star, contentDescription = "AI", modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Analyze with AI", fontSize = 16.sp)
+            }
         }
         
         Spacer(modifier = Modifier.height(16.dp))

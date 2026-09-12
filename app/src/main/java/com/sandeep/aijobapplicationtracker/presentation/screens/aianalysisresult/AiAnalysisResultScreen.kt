@@ -39,8 +39,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.sandeep.aijobapplicationtracker.domain.model.ExtractedJobData
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -193,8 +195,8 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
                             Icon(Icons.Default.Check, contentDescription = "Check", tint = Color.White, modifier = Modifier.size(16.dp))
                         }
                         Column {
-                            Text(data.role.ifEmpty { "Senior Android Engineer" }, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
-                            Text(data.company.ifEmpty { "Google" }, fontSize = 14.sp, color = Color(0xFF464555))
+                            Text(data.role.ifEmpty { "Unknown Role" }, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                            Text(data.company.ifEmpty { "Unknown Company" }, fontSize = 14.sp, color = Color(0xFF464555))
                         }
                     }
                     Icon(Icons.Default.Star, contentDescription = "AI", tint = Color(0xFF00687A), modifier = Modifier.size(24.dp))
@@ -229,7 +231,7 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
                     DetailCard(
                         icon = Icons.Default.Star, // placeholder for work_history
                         label = "Experience",
-                        value = data.experience.ifEmpty { "7+ years" },
+                        value = data.experience.ifEmpty { "Not specified" },
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -240,13 +242,13 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
                     DetailCard(
                         icon = Icons.Default.LocationOn,
                         label = "Location",
-                        value = data.location.ifEmpty { "Bangalore" },
+                        value = data.location.ifEmpty { "Not specified" },
                         modifier = Modifier.weight(1f)
                     )
                     DetailCard(
                         icon = Icons.Default.Star, // fallback from Computer
-                        label = "Work Mode",
-                        value = "Hybrid",
+                        label = "Seniority",
+                        value = data.seniority.ifEmpty { "Not specified" },
                         modifier = Modifier.weight(1f)
                     )
                 }

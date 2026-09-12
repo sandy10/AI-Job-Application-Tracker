@@ -12,5 +12,6 @@ data class UserProfileModel(
     val workPreference: String,
     val currentCtc: String = "",
     val expectedCtc: String = "",
-    val noticePeriod: String = ""
+    val noticePeriod: String = "",
+    val skills: List<String> = emptyList()
 )

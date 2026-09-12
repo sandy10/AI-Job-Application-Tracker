@@ -63,9 +63,12 @@ import com.sandeep.aijobapplicationtracker.utils.UiState
 @Composable
 fun AiResumeMatchScreen(
     onNavigateBack: () -> Unit,
+    onPrepareInterviewClick: (String) -> Unit,
+    onViewJobDetailsClick: (String) -> Unit,
     viewModel: AiResumeMatchViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val jobId = viewModel.jobId
 
     Scaffold(
         containerColor = Color(0xFFF8FAFC),
@@ -102,7 +105,11 @@ fun AiResumeMatchScreen(
         ) {
             when (val s = uiState) {
                 is UiState.Idle, is UiState.Loading -> LoadingView()
-                is UiState.Success -> AiResumeMatchContent(data = s.data)
+                is UiState.Success -> AiResumeMatchContent(
+                    data = s.data,
+                    onPrepareInterviewClick = { onPrepareInterviewClick(jobId) },
+                    onViewJobDetailsClick = { onViewJobDetailsClick(jobId) }
+                )
                 is UiState.Empty -> EmptyStateView("No Data", "Unable to load match data.")
                 is UiState.Error -> EmptyStateView("Error", s.message)
             }
@@ -124,7 +131,7 @@ fun AiResumeMatchScreen(
                                 .height(52.dp)
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(Color(0xFF3525CD))
-                                .clickable { },
+                                .clickable { onPrepareInterviewClick(jobId) },
                             contentAlignment = Alignment.Center
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -140,7 +147,7 @@ fun AiResumeMatchScreen(
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(Color.Transparent)
                                 .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(12.dp))
-                                .clickable { onNavigateBack() },
+                                .clickable { onViewJobDetailsClick(jobId) },
                             contentAlignment = Alignment.Center
                         ) {
                             Text("View Job Details", fontSize = 14.sp, color = Color(0xFF191C1E))
@@ -154,7 +161,11 @@ fun AiResumeMatchScreen(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun AiResumeMatchContent(data: ResumeMatchResult) {
+private fun AiResumeMatchContent(
+    data: ResumeMatchResult,
+    onPrepareInterviewClick: () -> Unit,
+    onViewJobDetailsClick: () -> Unit
+) {
     val scrollState = rememberScrollState()
     
     var animationPlayed by remember { mutableStateOf(false) }
@@ -175,7 +186,7 @@ private fun AiResumeMatchContent(data: ResumeMatchResult) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Senior Android Engineer",
+                text = data.jobTitle.ifBlank { "Senior Android Engineer" },
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF191C1E),
@@ -184,7 +195,7 @@ private fun AiResumeMatchContent(data: ResumeMatchResult) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Outlined.LocationOn, contentDescription = null, tint = Color(0xFF464555), modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Google", fontSize = 14.sp, color = Color(0xFF464555))
+                Text(data.company.ifBlank { "Google" }, fontSize = 14.sp, color = Color(0xFF464555))
             }
         }
 

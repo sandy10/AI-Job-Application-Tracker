@@ -77,6 +77,28 @@ fun AddInterviewScreen(
         }
     }
 
+    var date by remember { mutableStateOf("") }
+    var time by remember { mutableStateOf("") }
+    var meetingUrl by remember { mutableStateOf("") }
+    var interviewer by remember { mutableStateOf("") }
+    var notes by remember { mutableStateOf("") }
+    var remindMe by remember { mutableStateOf(true) }
+    var interviewRound by remember { mutableStateOf("1st Round") }
+    var interviewType by remember { mutableStateOf("Technical") }
+    var reminderTime by remember { mutableStateOf("1 day before") }
+    
+    val generatedSummary by viewModel.generatedSummary.collectAsState()
+    val isGeneratingSummary by viewModel.isGeneratingSummary.collectAsState()
+    
+    val companyName by viewModel.companyName.collectAsState()
+    val jobTitle by viewModel.jobTitle.collectAsState()
+
+    LaunchedEffect(generatedSummary) {
+        if (generatedSummary.isNotBlank()) {
+            notes = generatedSummary
+        }
+    }
+
     Scaffold(
         containerColor = Color(0xFFF8FAFC),
         topBar = {
@@ -106,14 +128,24 @@ fun AddInterviewScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             AddInterviewContent(
-                modifier = Modifier.padding(paddingValues),
-                uiState = uiState,
-                onSaveClick = viewModel::saveInterview
+                modifier = Modifier,
+                date = date, onDateChange = { date = it },
+                time = time, onTimeChange = { time = it },
+                meetingUrl = meetingUrl, onMeetingUrlChange = { meetingUrl = it },
+                interviewer = interviewer, onInterviewerChange = { interviewer = it },
+                notes = notes, onNotesChange = { notes = it },
+                remindMe = remindMe, onRemindMeChange = { remindMe = it },
+                interviewRound = interviewRound, onInterviewRoundChange = { interviewRound = it },
+                interviewType = interviewType, onInterviewTypeChange = { interviewType = it },
+                reminderTime = reminderTime, onReminderTimeChange = { reminderTime = it },
+                isGeneratingSummary = isGeneratingSummary,
+                onGenerateAiSummaryClick = { viewModel.generateAiSummary(interviewType) },
+                companyName = companyName,
+                jobTitle = jobTitle
             )
             
-            // Bottom Sticky Area
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -128,7 +160,7 @@ fun AddInterviewScreen(
                         .height(52.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0xFF4F46E5))
-                        .clickable { viewModel.saveInterview("1", "Technical", "2026-09-01", "meet", "Interviewer") },
+                        .clickable { viewModel.saveInterview(interviewRound, interviewType, "$date $time", meetingUrl, interviewer, notes, remindMe, reminderTime) },
                     contentAlignment = Alignment.Center
                 ) {
                     Text("Save Interview", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
@@ -141,17 +173,22 @@ fun AddInterviewScreen(
 @Composable
 private fun AddInterviewContent(
     modifier: Modifier = Modifier,
-    uiState: UiState<Unit>,
-    onSaveClick: (String, String, String, String, String) -> Unit
+    date: String, onDateChange: (String) -> Unit,
+    time: String, onTimeChange: (String) -> Unit,
+    meetingUrl: String, onMeetingUrlChange: (String) -> Unit,
+    interviewer: String, onInterviewerChange: (String) -> Unit,
+    notes: String, onNotesChange: (String) -> Unit,
+    remindMe: Boolean, onRemindMeChange: (Boolean) -> Unit,
+    interviewRound: String, onInterviewRoundChange: (String) -> Unit,
+    interviewType: String, onInterviewTypeChange: (String) -> Unit,
+    reminderTime: String, onReminderTimeChange: (String) -> Unit,
+    isGeneratingSummary: Boolean,
+    onGenerateAiSummaryClick: () -> Unit,
+    companyName: String,
+    jobTitle: String
 ) {
     val scrollState = rememberScrollState()
-
-    var date by remember { mutableStateOf("") }
-    var time by remember { mutableStateOf("") }
-    var meetingUrl by remember { mutableStateOf("") }
-    var interviewer by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
-    var remindMe by remember { mutableStateOf(true) }
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Column(
         modifier = modifier
@@ -178,13 +215,22 @@ private fun AddInterviewContent(
                     .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                // Placeholder for Google logo
+                // Placeholder for logo
                 Box(modifier = Modifier.size(24.dp).background(Color.LightGray, CircleShape))
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
-                Text("Senior Android Engineer", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
-                Text("Google", fontSize = 14.sp, color = Color(0xFF464555))
+                Text(
+                    text = jobTitle.ifBlank { "Senior Android Engineer" }, 
+                    fontSize = 18.sp, 
+                    fontWeight = FontWeight.SemiBold, 
+                    color = Color(0xFF191C1E)
+                )
+                Text(
+                    text = companyName.ifBlank { "Google" }, 
+                    fontSize = 14.sp, 
+                    color = Color(0xFF464555)
+                )
             }
         }
 
@@ -195,12 +241,20 @@ private fun AddInterviewContent(
             Column(modifier = Modifier.weight(1f)) {
                 Text("Interview Round", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
                 Spacer(modifier = Modifier.height(4.dp))
-                DropdownField(value = "1st Round")
+                DropdownField(
+                    value = interviewRound,
+                    options = listOf("1st Round", "2nd Round", "3rd Round", "Final Round", "HR Round"),
+                    onValueChange = onInterviewRoundChange
+                )
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text("Interview Type", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
                 Spacer(modifier = Modifier.height(4.dp))
-                DropdownField(value = "Technical")
+                DropdownField(
+                    value = interviewType,
+                    options = listOf("Technical", "Behavioral", "System Design", "Managerial", "Other"),
+                    onValueChange = onInterviewTypeChange
+                )
             }
         }
 
@@ -210,12 +264,46 @@ private fun AddInterviewContent(
             Column(modifier = Modifier.weight(1f)) {
                 Text("Date", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
                 Spacer(modifier = Modifier.height(4.dp))
-                CustomTextField(value = date, onValueChange = { date = it }, placeholder = "YYYY-MM-DD")
+                CustomTextField(
+                    value = date,
+                    onValueChange = onDateChange,
+                    placeholder = "YYYY-MM-DD",
+                    onClick = {
+                        val calendar = java.util.Calendar.getInstance()
+                        android.app.DatePickerDialog(
+                            context,
+                            { _, year, month, dayOfMonth ->
+                                onDateChange("$year-${(month + 1).toString().padStart(2, '0')}-${dayOfMonth.toString().padStart(2, '0')}")
+                            },
+                            calendar.get(java.util.Calendar.YEAR),
+                            calendar.get(java.util.Calendar.MONTH),
+                            calendar.get(java.util.Calendar.DAY_OF_MONTH)
+                        ).show()
+                    }
+                )
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text("Time", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
                 Spacer(modifier = Modifier.height(4.dp))
-                CustomTextField(value = time, onValueChange = { time = it }, placeholder = "HH:MM")
+                CustomTextField(
+                    value = time,
+                    onValueChange = onTimeChange,
+                    placeholder = "HH:MM",
+                    onClick = {
+                        val calendar = java.util.Calendar.getInstance()
+                        android.app.TimePickerDialog(
+                            context,
+                            { _, hourOfDay, minute ->
+                                val amPm = if (hourOfDay >= 12) "PM" else "AM"
+                                val hour = if (hourOfDay % 12 == 0) 12 else hourOfDay % 12
+                                onTimeChange("${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} $amPm")
+                            },
+                            calendar.get(java.util.Calendar.HOUR_OF_DAY),
+                            calendar.get(java.util.Calendar.MINUTE),
+                            false
+                        ).show()
+                    }
+                )
             }
         }
 
@@ -224,7 +312,7 @@ private fun AddInterviewContent(
         Column {
             Text("Meeting URL", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
             Spacer(modifier = Modifier.height(4.dp))
-            CustomTextField(value = meetingUrl, onValueChange = { meetingUrl = it }, icon = Icons.Default.Share, placeholder = "https://meet.google.com/...")
+            CustomTextField(value = meetingUrl, onValueChange = onMeetingUrlChange, icon = Icons.Default.Share, placeholder = "https://meet.google.com/...")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -232,7 +320,7 @@ private fun AddInterviewContent(
         Column {
             Text("Interviewer Name (Optional)", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
             Spacer(modifier = Modifier.height(4.dp))
-            CustomTextField(value = interviewer, onValueChange = { interviewer = it }, icon = Icons.Default.Person, placeholder = "e.g., Jane Doe")
+            CustomTextField(value = interviewer, onValueChange = onInterviewerChange, icon = Icons.Default.Person, placeholder = "e.g., Jane Doe")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -244,17 +332,30 @@ private fun AddInterviewContent(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFE2DFFF).copy(alpha = 0.3f))
-                        .border(1.dp, Color(0xFF3525CD), RoundedCornerShape(12.dp)) // Emulated left border by just doing full border
+                        .background(Color(0xFFE2DFFF).copy(alpha = if (isGeneratingSummary) 0.1f else 0.3f))
+                        .border(1.dp, Color(0xFF3525CD), RoundedCornerShape(12.dp))
+                        .clickable(enabled = !isGeneratingSummary) {
+                            onGenerateAiSummaryClick()
+                        }
                         .padding(horizontal = 8.dp, vertical = 2.dp)
                 ) {
-                    Icon(Icons.Outlined.Star, contentDescription = null, tint = Color(0xFF3525CD), modifier = Modifier.size(12.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("AI summary available", fontSize = 10.sp, color = Color(0xFF3525CD))
+                    if (isGeneratingSummary) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            color = Color(0xFF3525CD),
+                            strokeWidth = 1.dp,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Generating...", fontSize = 10.sp, color = Color(0xFF3525CD))
+                    } else {
+                        Icon(Icons.Outlined.Star, contentDescription = null, tint = Color(0xFF3525CD), modifier = Modifier.size(12.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("AI summary available", fontSize = 10.sp, color = Color(0xFF3525CD))
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
-            CustomTextField(value = notes, onValueChange = { notes = it }, placeholder = "Topics to prep, questions to ask...", singleLine = false, modifier = Modifier.height(80.dp))
+            CustomTextField(value = notes, onValueChange = onNotesChange, placeholder = "Topics to prep, questions to ask...", singleLine = false, modifier = Modifier.height(80.dp))
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -280,18 +381,37 @@ private fun AddInterviewContent(
                 }
                 Switch(
                     checked = remindMe,
-                    onCheckedChange = { remindMe = it },
+                    onCheckedChange = onRemindMeChange,
                     colors = SwitchDefaults.colors(checkedTrackColor = Color(0xFF4F46E5))
                 )
             }
             if (remindMe) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Row(
-                    modifier = Modifier.padding(start = 36.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("1 day before", fontSize = 14.sp, color = Color(0xFF191C1E))
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF464555), modifier = Modifier.size(16.dp))
+                var reminderExpanded by remember { mutableStateOf(false) }
+                Box(modifier = Modifier.padding(start = 36.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .clickable { reminderExpanded = true }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(reminderTime, fontSize = 14.sp, color = Color(0xFF191C1E))
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF464555), modifier = Modifier.size(16.dp))
+                    }
+                    androidx.compose.material3.DropdownMenu(
+                        expanded = reminderExpanded,
+                        onDismissRequest = { reminderExpanded = false }
+                    ) {
+                        listOf("15 minutes before", "1 hour before", "1 day before", "2 days before").forEach { option ->
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    onReminderTimeChange(option)
+                                    reminderExpanded = false
+                                }
+                            )
+                        }
+                    }
                 }
                 Box(modifier = Modifier.padding(start = 36.dp, top = 4.dp).height(1.dp).fillMaxWidth().background(Color(0xFFE2E8F0)))
             }
@@ -300,18 +420,40 @@ private fun AddInterviewContent(
 }
 
 @Composable
-private fun DropdownField(value: String) {
+private fun DropdownField(
+    value: String,
+    options: List<String>,
+    onValueChange: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(Color(0xFFF1F5F9))
             .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
+            .clickable { expanded = true }
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(value, fontSize = 14.sp, color = Color(0xFF191C1E))
             Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF464555))
+        }
+
+        androidx.compose.material3.DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { option ->
+                androidx.compose.material3.DropdownMenuItem(
+                    text = { Text(option, fontSize = 14.sp, color = Color(0xFF191C1E)) },
+                    onClick = {
+                        onValueChange(option)
+                        expanded = false
+                    }
+                )
+            }
         }
     }
 }
@@ -323,7 +465,8 @@ private fun CustomTextField(
     placeholder: String = "",
     icon: ImageVector? = null,
     singleLine: Boolean = true,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     Box(
         modifier = modifier
@@ -331,6 +474,7 @@ private fun CustomTextField(
             .clip(RoundedCornerShape(12.dp))
             .background(Color(0xFFF1F5F9))
             .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         contentAlignment = if (singleLine) Alignment.CenterStart else Alignment.TopStart
     ) {
@@ -345,8 +489,9 @@ private fun CustomTextField(
                 }
                 BasicTextField(
                     value = value,
-                    onValueChange = onValueChange,
+                    onValueChange = { if (onClick == null) onValueChange(it) },
                     singleLine = singleLine,
+                    enabled = onClick == null,
                     textStyle = TextStyle(fontSize = 14.sp, color = Color(0xFF191C1E)),
                     cursorBrush = SolidColor(Color(0xFF3525CD)),
                     modifier = Modifier.fillMaxWidth()

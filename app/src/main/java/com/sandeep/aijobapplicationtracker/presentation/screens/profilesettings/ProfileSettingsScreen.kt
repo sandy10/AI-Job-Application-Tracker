@@ -1,12 +1,13 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.profilesettings
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,43 +27,40 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import com.sandeep.aijobapplicationtracker.R
+import com.sandeep.aijobapplicationtracker.domain.model.UserProfileModel
 import com.sandeep.aijobapplicationtracker.presentation.components.AppBottomBar
 import com.sandeep.aijobapplicationtracker.presentation.components.BottomNavItem
+import com.sandeep.aijobapplicationtracker.presentation.components.LoadingView
 import com.sandeep.aijobapplicationtracker.presentation.navigation.Screen
-
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.LaunchedEffect
 import com.sandeep.aijobapplicationtracker.utils.UiState
+import androidx.compose.material.icons.automirrored.filled.List
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -71,11 +69,13 @@ fun ProfileSettingsScreen(
     onNavigateToApplications: () -> Unit = {},
     onNavigateToAssistant: () -> Unit = {},
     onNavigateToResumes: () -> Unit = {},
+    onNavigateToEditProfile: () -> Unit = {},
     onLogout: () -> Unit = {},
     viewModel: ProfileSettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    // When the ViewModel emits Empty state (after logout), navigate to SignIn
     LaunchedEffect(uiState) {
         if (uiState is UiState.Empty) {
             onLogout()
@@ -84,7 +84,7 @@ fun ProfileSettingsScreen(
 
     val bottomNavItems = listOf(
         BottomNavItem("Home", Icons.Filled.Home, Screen.Home.route),
-        BottomNavItem("Jobs", Icons.Filled.List, Screen.ApplicationsList.route),
+        BottomNavItem("Jobs", Icons.AutoMirrored.Filled.List, Screen.ApplicationsList.route),
         BottomNavItem("AI Prep", Icons.Filled.Star, Screen.AiAssistant.route),
         BottomNavItem("Profile", Icons.Filled.Person, Screen.ProfileSettings.route)
     )
@@ -95,19 +95,18 @@ fun ProfileSettingsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Profile",
+                        text = stringResource(id = R.string.profile_title),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.fillMaxWidth(),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        textAlign = TextAlign.Center
                     )
                 },
                 navigationIcon = {
-                    Spacer(modifier = Modifier.width(48.dp)) // To balance the settings icon
+                    Spacer(modifier = Modifier.width(48.dp))
                 },
                 actions = {
-                    // Empty space to balance navigationIcon (which has Spacer)
                     Spacer(modifier = Modifier.width(48.dp))
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -129,59 +128,102 @@ fun ProfileSettingsScreen(
             )
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
         ) {
-            Column(
+            when (val s = uiState) {
+                is UiState.Loading, is UiState.Idle -> LoadingView()
+                is UiState.Success -> ProfileContent(
+                    profile = s.data,
+                    onNavigateToResumes = onNavigateToResumes,
+                    onNavigateToEditProfile = onNavigateToEditProfile,
+                    onLogout = { viewModel.logout() }
+                )
+                is UiState.Error, is UiState.Empty -> {
+                    // Empty handled by LaunchedEffect above
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Main profile content, driven entirely by the [UserProfileModel] from Firestore.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ProfileContent(
+    profile: UserProfileModel,
+    onNavigateToResumes: () -> Unit,
+    onNavigateToEditProfile: () -> Unit,
+    onLogout: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 12.dp)
+        ) {
+            // ── Profile Card ──
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+                    .padding(16.dp)
             ) {
-                // Profile Card
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
-                        .padding(16.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Avatar Placeholder
-                        Box(
-                            modifier = Modifier
-                                .size(72.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
-                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Avatar with user's initials
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        // Show initials from name
+                        val initials = profile.name
+                            .split(" ")
+                            .take(2)
+                            .mapNotNull { it.firstOrNull()?.uppercase() }
+                            .joinToString("")
+                            .ifEmpty { "U" }
+                        Text(
+                            text = initials,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        // Real name from Firestore
+                        Text(
+                            text = profile.name.ifBlank { stringResource(id = R.string.user_fallback_name) },
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1
+                        )
+                        // Real target role from Firestore
+                        if (profile.targetRole.isNotBlank()) {
                             Text(
-                                text = "Alex Johnson",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1
-                            )
-                            Text(
-                                text = "Senior Android Developer",
+                                text = profile.targetRole,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
+                        }
+                        // Real location from Firestore
+                        if (profile.location.isNotBlank()) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.padding(top = 4.dp)
@@ -194,74 +236,92 @@ fun ProfileSettingsScreen(
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = "Bangalore",
+                                    text = profile.location,
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
                     }
-                    // Edit button
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                            .clickable { /* TODO */ },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit Profile",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
                 }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Career Overview
-                SectionTitle("Career Overview")
+                // Edit button
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+                        .align(Alignment.TopEnd)
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .clickable { onNavigateToEditProfile() },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column {
-                        ListItem(
-                            icon = Icons.Default.Star,
-                            iconTint = MaterialTheme.colorScheme.primary,
-                            iconBg = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
-                            title = "Experience Level",
-                            value = "Senior (5-8 Yrs)"
-                        )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                        ListItem(
-                            icon = Icons.Default.DateRange,
-                            iconTint = MaterialTheme.colorScheme.primary,
-                            iconBg = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
-                            title = "Total Experience",
-                            value = "6.5 Years"
-                        )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                        ListItem(
-                            icon = Icons.Default.Build,
-                            iconTint = MaterialTheme.colorScheme.primary,
-                            iconBg = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
-                            title = "Target Role",
-                            value = "Lead Android Eng"
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = stringResource(id = R.string.edit_profile),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
+            }
 
-                Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-                // Top Skills
-                SectionTitle("Top Skills")
+            // ── Career Overview ──
+            SectionTitle(stringResource(id = R.string.career_overview))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+            ) {
+                Column {
+                    // Experience level — show real data or "Not set"
+                    val expLevelDisplay = if (profile.experienceLevel.isNotBlank() && profile.yearsExperience.isNotBlank()) {
+                        "${profile.experienceLevel} (${profile.yearsExperience} Yrs)"
+                    } else if (profile.experienceLevel.isNotBlank()) {
+                        profile.experienceLevel
+                    } else {
+                        stringResource(id = R.string.not_set)
+                    }
+                    ProfileListItem(
+                        icon = Icons.Default.Star,
+                        iconTint = MaterialTheme.colorScheme.primary,
+                        iconBg = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
+                        title = stringResource(id = R.string.experience_level_label),
+                        value = expLevelDisplay
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+
+                    // Total Experience
+                    ProfileListItem(
+                        icon = Icons.Default.DateRange,
+                        iconTint = MaterialTheme.colorScheme.primary,
+                        iconBg = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
+                        title = stringResource(id = R.string.total_experience),
+                        value = if (profile.yearsExperience.isNotBlank()) {
+                            "${profile.yearsExperience} Years"
+                        } else {
+                            stringResource(id = R.string.not_set)
+                        }
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+
+                    // Target Role
+                    ProfileListItem(
+                        icon = Icons.Default.Build,
+                        iconTint = MaterialTheme.colorScheme.primary,
+                        iconBg = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
+                        title = stringResource(id = R.string.target_role_label),
+                        value = profile.targetRole.ifBlank { stringResource(id = R.string.not_set) }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ── Top Skills ──
+            if (profile.skills.isNotEmpty()) {
+                SectionTitle(stringResource(id = R.string.top_skills))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -270,18 +330,21 @@ fun ProfileSettingsScreen(
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
                         .padding(16.dp)
                 ) {
-                    val skills = listOf("Kotlin", "Jetpack Compose", "KMP", "Firebase")
-                    androidx.compose.foundation.layout.FlowRow(
+                    FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        skills.forEach { skill ->
+                        profile.skills.forEach { skill ->
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(16.dp))
                                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                                    .border(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                        RoundedCornerShape(16.dp)
+                                    )
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
                                 Text(
@@ -291,154 +354,135 @@ fun ProfileSettingsScreen(
                                 )
                             }
                         }
-                        // Add skill button
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(16.dp))
-                                .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp))
-                                .clickable { /* TODO */ }
-                                .padding(horizontal = 12.dp, vertical = 6.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = "Add Skill",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "Add Skill",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
                     }
                 }
-
                 Spacer(modifier = Modifier.height(24.dp))
+            }
 
-                // Job Preferences
-                SectionTitle("Job Preferences")
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
-                ) {
-                    Column {
-                        ListItem(
-                            icon = Icons.Default.Home,
-                            iconTint = Color(0xFF004C76), // tertiary
-                            iconBg = Color(0xFF00659A).copy(alpha = 0.1f),
-                            title = "Work Model",
-                            value = "Hybrid, Remote"
-                        )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                        ListItem(
-                            icon = Icons.Default.Star,
-                            iconTint = Color(0xFF004C76),
-                            iconBg = Color(0xFF00659A).copy(alpha = 0.1f),
-                            title = "Expected CTC",
-                            value = "₹45 - 55 LPA"
-                        )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                        ListItem(
-                            icon = Icons.Default.DateRange,
-                            iconTint = Color(0xFF004C76),
-                            iconBg = Color(0xFF00659A).copy(alpha = 0.1f),
-                            title = "Notice Period",
-                            value = "30 Days"
-                        )
-                    }
+            // ── Job Preferences ──
+            SectionTitle(stringResource(id = R.string.job_preferences))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+            ) {
+                Column {
+                    // Work Model
+                    ProfileListItem(
+                        icon = Icons.Default.Home,
+                        iconTint = Color(0xFF004C76),
+                        iconBg = Color(0xFF00659A).copy(alpha = 0.1f),
+                        title = stringResource(id = R.string.work_preference_label),
+                        value = profile.workPreference
+                            .replaceFirstChar { it.uppercase() }
+                            .ifBlank { stringResource(id = R.string.not_set) }
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+
+                    // Expected CTC
+                    ProfileListItem(
+                        icon = Icons.Default.Star,
+                        iconTint = Color(0xFF004C76),
+                        iconBg = Color(0xFF00659A).copy(alpha = 0.1f),
+                        title = stringResource(id = R.string.expected_ctc_label),
+                        value = profile.expectedCtc.ifBlank { stringResource(id = R.string.not_set) }
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+
+                    // Notice Period
+                    ProfileListItem(
+                        icon = Icons.Default.DateRange,
+                        iconTint = Color(0xFF004C76),
+                        iconBg = Color(0xFF00659A).copy(alpha = 0.1f),
+                        title = stringResource(id = R.string.notice_period_label),
+                        value = profile.noticePeriod.ifBlank { stringResource(id = R.string.not_set) }
+                    )
                 }
+            }
 
-                Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-                // My Resumes
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
-                        .clickable { onNavigateToResumes() }
-                        .padding(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(Color(0xFFEEF2FF))
-                                    .border(width = 2.dp, color = MaterialTheme.colorScheme.primary), // Left border imitation
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.List,
-                                    contentDescription = "Resumes",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column {
-                                Text(
-                                    text = "My Resumes",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = "3 versions uploaded",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Log Out
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.error.copy(alpha = 0.1f))
-                        .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
-                        .clickable { viewModel.logout() },
-                    contentAlignment = Alignment.Center
+            // ── My Resumes ──
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+                    .clickable { onNavigateToResumes() }
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Using Exit icon for Logout if possible, otherwise standard icon
-                        Icon(
-                            imageVector = Icons.Default.ExitToApp,
-                            contentDescription = "Logout",
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Log Out",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.error,
-                            fontSize = 16.sp
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFFEEF2FF)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.List,
+                                contentDescription = stringResource(id = R.string.my_resumes),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = stringResource(id = R.string.my_resumes),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(id = R.string.manage_resumes),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(80.dp))
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ── Log Out ──
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.error.copy(alpha = 0.1f))
+                    .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                    .clickable { onLogout() },
+                contentAlignment = Alignment.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.ExitToApp,
+                        contentDescription = stringResource(id = R.string.logout),
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(id = R.string.logout),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(80.dp))
         }
     }
 }
@@ -455,8 +499,11 @@ private fun SectionTitle(title: String) {
     )
 }
 
+/**
+ * Reusable list item row for the profile sections.
+ */
 @Composable
-private fun ListItem(
+private fun ProfileListItem(
     icon: ImageVector,
     iconTint: Color,
     iconBg: Color,
@@ -466,7 +513,6 @@ private fun ListItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* TODO */ }
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically

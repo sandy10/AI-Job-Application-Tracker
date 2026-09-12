@@ -10,17 +10,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class ExtractedJobData(
-    val company: String,
-    val role: String,
-    val location: String,
-    val experience: String,
-    val seniority: String,
-    val skills: List<String>
-)
+import com.sandeep.aijobapplicationtracker.domain.model.ExtractedJobData
+
+import com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepository
 
 @HiltViewModel
-class AiAnalysisResultViewModel @Inject constructor() : ViewModel() {
+class AiAnalysisResultViewModel @Inject constructor(
+    private val repository: AiAnalyzerRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<ExtractedJobData>>(UiState.Loading)
     val uiState: StateFlow<UiState<ExtractedJobData>> = _uiState
 
@@ -30,21 +27,13 @@ class AiAnalysisResultViewModel @Inject constructor() : ViewModel() {
 
     private fun loadExtractedData() {
         viewModelScope.launch {
-            _uiState.value = UiState.Loading
-            
-            // Mocking the data passed from previous screen's AI extraction
-            delay(1000)
-            
-            _uiState.value = UiState.Success(
-                ExtractedJobData(
-                    company = "XYZ Corporation",
-                    role = "Senior Android Engineer",
-                    location = "Bangalore",
-                    experience = "6+ years",
-                    seniority = "Senior",
-                    skills = listOf("Kotlin", "Jetpack Compose", "Coroutines", "MVVM")
-                )
-            )
+            repository.latestExtractedData.collect { data ->
+                if (data != null) {
+                    _uiState.value = UiState.Success(data)
+                } else {
+                    _uiState.value = UiState.Error("No data found")
+                }
+            }
         }
     }
 

@@ -161,6 +161,7 @@
     <string name="generate_more_questions_button">Generate More Questions</string>
 
     <!-- Profile & Settings Screen -->
+    <string name="profile_title">Profile</string>
     <string name="profile_settings_title">Profile</string>
     <string name="career_profile_label">Career Profile</string>
     <string name="profile_skills_label">Skills</string>
@@ -168,4 +169,14 @@
     <string name="theme_label">Theme Settings</string>
     <string name="logout_button">Logout</string>
     <string name="version_label">Version 1.0 (MVP)</string>
+    <string name="user_fallback_name">User</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="career_overview">Career Overview</string>
+    <string name="not_set">Not set</string>
+    <string name="total_experience">Total Experience</string>
+    <string name="top_skills">Top Skills</string>
+    <string name="job_preferences">Job Preferences</string>
+    <string name="my_resumes">My Resumes</string>
+    <string name="manage_resumes">Manage your resume versions</string>
+    <string name="logout">Log Out</string>
 </resources>

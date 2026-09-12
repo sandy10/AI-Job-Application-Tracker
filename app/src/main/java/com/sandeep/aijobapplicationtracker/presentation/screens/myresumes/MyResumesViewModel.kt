@@ -2,25 +2,25 @@ package com.sandeep.aijobapplicationtracker.presentation.screens.myresumes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sandeep.aijobapplicationtracker.domain.model.ResumeModel
+import com.sandeep.aijobapplicationtracker.domain.repository.ResumeRepository
 import com.sandeep.aijobapplicationtracker.utils.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.UUID
 import javax.inject.Inject
 
-data class Resume(
-    val id: String,
-    val fileName: String,
-    val isPrimary: Boolean,
-    val uploadedAt: String
-)
-
 @HiltViewModel
-class MyResumesViewModel @Inject constructor() : ViewModel() {
-    private val _uiState = MutableStateFlow<UiState<List<Resume>>>(UiState.Loading)
-    val uiState: StateFlow<UiState<List<Resume>>> = _uiState
+class MyResumesViewModel @Inject constructor(
+    private val resumeRepository: ResumeRepository
+) : ViewModel() {
+    private val _uiState = MutableStateFlow<UiState<List<ResumeModel>>>(UiState.Loading)
+    val uiState: StateFlow<UiState<List<ResumeModel>>> = _uiState
 
     init {
         fetchResumes()
@@ -28,44 +28,35 @@ class MyResumesViewModel @Inject constructor() : ViewModel() {
 
     private fun fetchResumes() {
         viewModelScope.launch {
-            _uiState.value = UiState.Loading
-            delay(1000)
-            
-            val mockResumes = listOf(
-                Resume("1", "Android_Senior.pdf", true, "10 Aug 2026"),
-                Resume("2", "KMP_Developer.pdf", false, "15 Aug 2026"),
-                Resume("3", "Android_Lead.pdf", false, "20 Aug 2026")
-            )
-            
-            _uiState.value = UiState.Success(mockResumes)
+            resumeRepository.getResumes().collect { resumes ->
+                _uiState.value = UiState.Success(resumes)
+            }
         }
     }
 
     fun setPrimary(resumeId: String) {
-        val currentState = _uiState.value
-        if (currentState is UiState.Success) {
-            val updatedList = currentState.data.map { 
-                it.copy(isPrimary = it.id == resumeId)
-            }
-            _uiState.value = UiState.Success(updatedList)
+        viewModelScope.launch {
+            resumeRepository.setPrimaryResume(resumeId)
         }
     }
 
-    fun uploadResume() {
-        // Mock upload behavior
+    fun uploadResume(fileUriString: String, fileName: String, sizeBytes: Long) {
         viewModelScope.launch {
-            val currentState = _uiState.value
-            if (currentState is UiState.Success) {
-                _uiState.value = UiState.Loading
-                delay(1500)
-                val newList = currentState.data.toMutableList()
-                newList.add(0, Resume(
-                    id = System.currentTimeMillis().toString(),
-                    fileName = "New_Resume.pdf",
-                    isPrimary = false,
-                    uploadedAt = "Just now"
-                ))
-                _uiState.value = UiState.Success(newList)
+            _uiState.value = UiState.Loading
+            try {
+                resumeRepository.uploadResume(fileUriString, fileName, sizeBytes)
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Failed to upload resume")
+            }
+        }
+    }
+
+    fun deleteResume(resumeId: String) {
+        viewModelScope.launch {
+            try {
+                resumeRepository.deleteResume(resumeId)
+            } catch (e: Exception) {
+                // Ignore or show error
             }
         }
     }

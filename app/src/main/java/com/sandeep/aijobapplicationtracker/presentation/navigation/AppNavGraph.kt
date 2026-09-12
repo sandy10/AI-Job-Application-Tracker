@@ -39,6 +39,11 @@ fun AppNavGraph() {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 },
+                onNavigateToCareerSetup = {
+                    navController.navigate(Screen.CareerSetup.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
                 onNavigateToSignIn = {
                     navController.navigate(Screen.SignIn.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
@@ -72,6 +77,7 @@ fun AppNavGraph() {
         
         composable(Screen.Home.route) {
             HomeScreen(
+                onNavigateToApplicationDetail = { jobId -> navController.navigate(Screen.ApplicationDetail.createRoute(jobId)) },
                 onNavigateToApplications = { navController.navigate(Screen.ApplicationsList.route) },
                 onNavigateToProfile = { navController.navigate(Screen.ProfileSettings.route) },
                 onNavigateToAssistant = { navController.navigate(Screen.AiAssistant.route) }
@@ -100,7 +106,9 @@ fun AppNavGraph() {
             ApplicationDetailScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToAddInterview = { navController.navigate(Screen.AddInterview.createRoute(jobId)) },
-                onNavigateToResumeMatch = { navController.navigate(Screen.AiResumeMatch.createRoute(jobId)) }
+                onNavigateToResumeMatch = { navController.navigate(Screen.AiResumeMatch.createRoute(jobId)) },
+                onNavigateToAssistant = { navController.navigate(Screen.AiAssistant.route) },
+                onNavigateToAiInterviewPrep = { navController.navigate(Screen.AiInterviewPrep.createRoute(jobId)) }
             )
         }
         
@@ -119,10 +127,12 @@ fun AppNavGraph() {
         
         composable(Screen.AiAnalysisResult.route) {
             AiAnalysisResultScreen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = { 
+                    navController.popBackStack()
+                },
                 onNavigateToHome = {
-                    navController.navigate(Screen.ApplicationsList.route) {
-                        popUpTo(Screen.ApplicationsList.route) { inclusive = true }
+                    navController.navigate(Screen.AddApplication.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
                     }
                 }
             )
@@ -136,7 +146,14 @@ fun AppNavGraph() {
         
         composable(Screen.AiResumeMatch.route) {
             AiResumeMatchScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onPrepareInterviewClick = { jobId -> navController.navigate(Screen.AiInterviewPrep.createRoute(jobId)) },
+                onViewJobDetailsClick = { jobId -> 
+                    // To avoid stacking same screen if they came from details, just pop
+                    // Or explicit navigation: navController.navigate(Screen.ApplicationDetail.createRoute(jobId))
+                    // Simplest is just pop back stack assuming they came from details
+                    navController.popBackStack() 
+                }
             )
         }
         
@@ -158,6 +175,7 @@ fun AppNavGraph() {
         composable(Screen.ProfileSettings.route) {
             ProfileSettingsScreen(
                 onNavigateToResumes = { navController.navigate(Screen.MyResumes.route) },
+                onNavigateToEditProfile = { navController.navigate(Screen.CareerSetup.route) },
                 onLogout = {
                     navController.navigate(Screen.SignIn.route) {
                         popUpTo(0) { inclusive = true }

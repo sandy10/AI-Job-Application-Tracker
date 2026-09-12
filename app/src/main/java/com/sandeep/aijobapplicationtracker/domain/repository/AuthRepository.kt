@@ -13,14 +13,25 @@ interface AuthRepository {
     fun isLoggedIn(): Flow<Boolean>
 
     /**
-     * Simulate a login request.
+     * Sign in with email and password.
      */
     suspend fun login(email: String, password: String): Result<Unit>
 
     /**
-     * Simulate a Google sign-in request.
+     * Sign in with a Google ID token obtained from Credential Manager.
      */
     suspend fun loginWithGoogle(): Result<Unit>
+
+    /**
+     * Sign in with a Google ID token credential.
+     * This is the real Google Sign-In flow using Firebase Auth.
+     */
+    suspend fun signInWithGoogleIdToken(idToken: String): Result<Unit>
+
+    /**
+     * Returns the current user's display name from Firebase Auth, or null.
+     */
+    fun getCurrentUserName(): String?
 
     /**
      * Sign out the current user.

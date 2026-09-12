@@ -1,5 +1,6 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.signin
 
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,14 +49,26 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.sandeep.aijobapplicationtracker.R
 import com.sandeep.aijobapplicationtracker.presentation.components.AppButton
 import com.sandeep.aijobapplicationtracker.presentation.components.AppCard
 import com.sandeep.aijobapplicationtracker.presentation.components.AppSecondaryButton
 import com.sandeep.aijobapplicationtracker.presentation.components.AppTextField
 import com.sandeep.aijobapplicationtracker.utils.UiState
+import kotlinx.coroutines.launch
+import timber.log.Timber
+
+/**
+ * The web client ID from google-services.json (client_type = 3).
+ * This is used by Credential Manager to request a Google ID token.
+ */
+private const val WEB_CLIENT_ID = "294862957055-2mq0uqjqjbgdnb7dv9699eef5me8nj0o.apps.googleusercontent.com"
 
 @Composable
 fun SignInScreen(
@@ -63,7 +77,10 @@ fun SignInScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
+    // Navigate on successful sign-in
     LaunchedEffect(uiState) {
         if (uiState is UiState.Success) {
             onNavigateToHome()
@@ -80,7 +97,49 @@ fun SignInScreen(
             modifier = Modifier.padding(paddingValues),
             uiState = uiState,
             onSignInClick = { email, pass -> viewModel.signIn(email, pass) },
-            onGoogleSignInClick = { viewModel.signInWithGoogle() }
+            onGoogleSignInClick = {
+                // Launch Google Sign-In using Credential Manager
+                coroutineScope.launch {
+                    viewModel.setLoading()
+                    try {
+                        val credentialManager = CredentialManager.create(context)
+
+                        // Build the Google ID option requesting an ID token
+                        val googleIdOption = GetGoogleIdOption.Builder()
+                            .setFilterByAuthorizedAccounts(false)
+                            .setServerClientId(WEB_CLIENT_ID)
+                            .build()
+
+                        // Build the credential request
+                        val request = GetCredentialRequest.Builder()
+                            .addCredentialOption(googleIdOption)
+                            .build()
+
+                        // Show the account picker and get the credential
+                        val result = credentialManager.getCredential(
+                            request = request,
+                            context = context as Activity
+                        )
+
+                        // Extract the Google ID token from the credential
+                        val googleIdTokenCredential = GoogleIdTokenCredential
+                            .createFrom(result.credential.data)
+                        val idToken = googleIdTokenCredential.idToken
+
+                        Timber.d("Google ID token obtained successfully")
+
+                        // Pass the token to the ViewModel for Firebase sign-in
+                        viewModel.signInWithGoogleIdToken(idToken)
+
+                    } catch (e: GetCredentialCancellationException) {
+                        Timber.d("Google Sign-In cancelled by user")
+                        viewModel.onGoogleSignInFailed("Sign-in cancelled")
+                    } catch (e: Exception) {
+                        Timber.e(e, "Google Sign-In failed")
+                        viewModel.onGoogleSignInFailed(e.message ?: "Google Sign-In failed")
+                    }
+                }
+            }
         )
     }
 }
@@ -94,8 +153,15 @@ private fun SignInContent(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var loadingSource by remember { mutableStateOf<String?>(null) }
     
     val isLoading = uiState is UiState.Loading
+
+    LaunchedEffect(isLoading) {
+        if (!isLoading) {
+            loadingSource = null
+        }
+    }
 
     Column(
         modifier = modifier
@@ -182,8 +248,11 @@ private fun SignInContent(
 
                 AppSecondaryButton(
                     text = stringResource(id = R.string.continue_with_google),
-                    onClick = onGoogleSignInClick,
-                    isLoading = isLoading
+                    onClick = {
+                        loadingSource = "google"
+                        onGoogleSignInClick()
+                    },
+                    isLoading = isLoading && loadingSource == "google"
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -236,8 +305,11 @@ private fun SignInContent(
 
                 AppButton(
                     text = stringResource(id = R.string.sign_in_button),
-                    onClick = { onSignInClick(email, password) },
-                    isLoading = isLoading
+                    onClick = {
+                        loadingSource = "email"
+                        onSignInClick(email, password)
+                    },
+                    isLoading = isLoading && loadingSource == "email"
                 )
             }
         }

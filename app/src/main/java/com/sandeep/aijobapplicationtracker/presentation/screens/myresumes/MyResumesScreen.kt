@@ -35,6 +35,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,9 +48,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.sandeep.aijobapplicationtracker.domain.model.ResumeModel
 import com.sandeep.aijobapplicationtracker.presentation.components.EmptyStateView
 import com.sandeep.aijobapplicationtracker.presentation.components.LoadingView
 import com.sandeep.aijobapplicationtracker.utils.UiState
+
+import android.net.Uri
+import android.provider.OpenableColumns
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,6 +67,38 @@ fun MyResumesScreen(
     viewModel: MyResumesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let {
+            context.contentResolver.query(it, null, null, null, null)?.use { cursor ->
+                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                if (cursor.moveToFirst() && nameIndex != -1 && sizeIndex != -1) {
+                    val fileName = cursor.getString(nameIndex)
+                    val sizeBytes = cursor.getLong(sizeIndex)
+                    
+                    val sizeInMb = sizeBytes / (1024.0 * 1024.0)
+                    if (sizeInMb > 5.0) {
+                        Toast.makeText(context, "Resume must be less than 5 MB", Toast.LENGTH_SHORT).show()
+                        return@let
+                    }
+
+                    val lowerName = fileName.lowercase()
+                    if (!lowerName.endsWith(".pdf") && !lowerName.endsWith(".doc") && !lowerName.endsWith(".docx")) {
+                        Toast.makeText(context, "Only PDF and Word documents are allowed", Toast.LENGTH_SHORT).show()
+                        return@let
+                    }
+
+                    viewModel.uploadResume(it.toString(), fileName, sizeBytes)
+                } else {
+                    Toast.makeText(context, "Failed to read file", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     Scaffold(
         containerColor = Color(0xFFF7F9FB),
@@ -132,7 +173,15 @@ fun MyResumesScreen(
                                 items(s.data) { resume ->
                                     ResumeCard(
                                         resume = resume,
-                                        onSetPrimary = { viewModel.setPrimary(resume.id) }
+                                        onSetPrimary = { viewModel.setPrimary(resume.id) },
+                                        onDelete = { viewModel.deleteResume(resume.id) },
+                                        onView = {
+                                            val intent = android.content.Intent(
+                                                android.content.Intent.ACTION_VIEW,
+                                                android.net.Uri.parse(resume.storageUrl)
+                                            )
+                                            context.startActivity(intent)
+                                        }
                                     )
                                 }
                             }
@@ -150,15 +199,25 @@ fun MyResumesScreen(
             }
             
             Spacer(modifier = Modifier.height(16.dp))
-            UploadArea(onUploadClick = viewModel::uploadResume)
+            UploadArea(onUploadClick = {
+                filePickerLauncher.launch(
+                    arrayOf(
+                        "application/pdf",
+                        "application/msword",
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    )
+                )
+            })
         }
     }
 }
 
 @Composable
 private fun ResumeCard(
-    resume: Resume,
-    onSetPrimary: () -> Unit
+    resume: ResumeModel,
+    onSetPrimary: () -> Unit,
+    onDelete: () -> Unit,
+    onView: () -> Unit
 ) {
     val borderColor = if (resume.isPrimary) Color.Transparent else Color(0xFFC7C4D8)
     val cardModifier = if (resume.isPrimary) {
@@ -176,7 +235,7 @@ private fun ResumeCard(
             .border(1.dp, borderColor, RoundedCornerShape(16.dp))
     }
 
-    Box(modifier = cardModifier.clickable { onSetPrimary() }) {
+    Box(modifier = cardModifier.clickable { onView() }) {
         if (resume.isPrimary) {
             Box(
                 modifier = Modifier
@@ -227,8 +286,10 @@ private fun ResumeCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                
+                val sizeMb = java.lang.String.format(java.util.Locale.US, "%.1f MB", resume.sizeBytes / (1024.0 * 1024.0))
                 Text(
-                    text = "Updated ${resume.uploadedAt} • 1.2 MB",
+                    text = "Updated ${resume.uploadedAt} • $sizeMb",
                     fontSize = 14.sp,
                     color = Color(0xFF464555),
                     maxLines = 1,
@@ -252,18 +313,51 @@ private fun ResumeCard(
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                 }
-                IconButton(
-                    onClick = { /* More options */ },
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More",
-                        tint = Color(0xFF464555),
-                        modifier = Modifier.size(20.dp)
-                    )
+                
+                var expanded by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+                Box {
+                    IconButton(
+                        onClick = { expanded = true },
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More",
+                            tint = Color(0xFF464555),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    
+                    androidx.compose.material3.DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        androidx.compose.material3.DropdownMenuItem(
+                            text = { Text("View Resume") },
+                            onClick = { 
+                                expanded = false
+                                onView()
+                            }
+                        )
+                        if (!resume.isPrimary) {
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { Text("Set as Primary") },
+                                onClick = { 
+                                    expanded = false
+                                    onSetPrimary()
+                                }
+                            )
+                        }
+                        androidx.compose.material3.DropdownMenuItem(
+                            text = { Text("Delete Resume", color = Color.Red) },
+                            onClick = { 
+                                expanded = false
+                                onDelete()
+                            }
+                        )
+                    }
                 }
             }
         }

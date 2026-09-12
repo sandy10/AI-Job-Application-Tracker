@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.sandeep.aijobapplicationtracker.domain.repository.JobApplicationRepository
+import kotlinx.coroutines.flow.combine
 
 enum class ApplicationStatus {
     ALL, SAVED, APPLIED, RECRUITER, INTERVIEW, OFFER, REJECTED
@@ -25,14 +27,14 @@ data class DetailedJobApplication(
 )
 
 @HiltViewModel
-class ApplicationsListViewModel @Inject constructor() : ViewModel() {
+class ApplicationsListViewModel @Inject constructor(
+    private val repository: JobApplicationRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<List<DetailedJobApplication>>>(UiState.Loading)
     val uiState: StateFlow<UiState<List<DetailedJobApplication>>> = _uiState
 
     private val _selectedFilter = MutableStateFlow(ApplicationStatus.ALL)
     val selectedFilter: StateFlow<ApplicationStatus> = _selectedFilter
-
-    private var allApplications = emptyList<DetailedJobApplication>()
 
     init {
         fetchApplications()
@@ -40,38 +42,53 @@ class ApplicationsListViewModel @Inject constructor() : ViewModel() {
 
     private fun fetchApplications() {
         viewModelScope.launch {
-            _uiState.value = UiState.Loading
-            // TODO: Fetch from actual repository / Firestore
-            delay(1000)
-            
-            allApplications = listOf(
-                DetailedJobApplication("1", "Google", "Senior Android Developer", "Bangalore (Hybrid)", ApplicationStatus.INTERVIEW, "24 Aug 2026", 86),
-                DetailedJobApplication("2", "ABC Technologies", "Android Lead", "Remote", ApplicationStatus.APPLIED, "20 Aug 2026", 78),
-                DetailedJobApplication("3", "Startup Inc", "Mobile Engineer", "Onsite", ApplicationStatus.SAVED, "-", 92),
-                DetailedJobApplication("4", "Tech Corp", "Android Developer", "Hybrid", ApplicationStatus.OFFER, "15 Aug 2026", 85),
-                DetailedJobApplication("5", "Old Company", "Software Engineer", "Remote", ApplicationStatus.REJECTED, "10 Aug 2026", 60)
-            )
-            
-            applyFilter(_selectedFilter.value)
+            combine(
+                repository.getApplications(),
+                _selectedFilter
+            ) { applications, filter ->
+                val detailedApps = applications.map { app ->
+                    DetailedJobApplication(
+                        id = app.id,
+                        company = app.company,
+                        role = app.jobTitle,
+                        location = app.location,
+                        status = mapStatus(app.status),
+                        dateApplied = app.dateApplied.ifBlank { "-" },
+                        matchScore = app.matchScore
+                    )
+                }
+                
+                val filteredList = if (filter == ApplicationStatus.ALL) {
+                    detailedApps
+                } else {
+                    detailedApps.filter { it.status == filter }
+                }
+                
+                if (filteredList.isEmpty()) {
+                    UiState.Empty
+                } else {
+                    UiState.Success(filteredList)
+                }
+            }.collect { state ->
+                _uiState.value = state
+            }
         }
     }
 
     fun setFilter(status: ApplicationStatus) {
         _selectedFilter.value = status
-        applyFilter(status)
     }
 
-    private fun applyFilter(status: ApplicationStatus) {
-        val filteredList = if (status == ApplicationStatus.ALL) {
-            allApplications
-        } else {
-            allApplications.filter { it.status == status }
-        }
-        
-        if (filteredList.isEmpty()) {
-            _uiState.value = UiState.Empty
-        } else {
-            _uiState.value = UiState.Success(filteredList)
+    private fun mapStatus(status: String): ApplicationStatus {
+        val s = status.uppercase()
+        return when {
+            s.contains("SAVED") -> ApplicationStatus.SAVED
+            s.contains("APPLI") -> ApplicationStatus.APPLIED
+            s.contains("RECRUITER") -> ApplicationStatus.RECRUITER
+            s.contains("INTERVIEW") -> ApplicationStatus.INTERVIEW
+            s.contains("OFFER") -> ApplicationStatus.OFFER
+            s.contains("REJECT") -> ApplicationStatus.REJECTED
+            else -> ApplicationStatus.SAVED
         }
     }
 }

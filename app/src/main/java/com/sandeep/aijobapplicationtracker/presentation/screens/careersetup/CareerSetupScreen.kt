@@ -34,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -67,6 +68,7 @@ fun CareerSetupScreen(
     viewModel: CareerSetupViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val initialProfile by viewModel.userProfile.collectAsState(initial = null)
     val snackbarHostState = remember { SnackbarHostState() }
 
     var fullName by remember { mutableStateOf("") }
@@ -79,11 +81,36 @@ fun CareerSetupScreen(
     var expectedCtc by remember { mutableStateOf("") }
     var noticePeriod by remember { mutableStateOf("") }
     
-    val aiExtractedSkills = listOf("Kotlin", "Jetpack Compose", "Firebase")
+    var skillsList by remember { mutableStateOf(listOf<String>()) }
+    var newSkill by remember { mutableStateOf("") }
+    var expDropdownExpanded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(initialProfile) {
+        initialProfile?.let { profile ->
+            if (fullName.isBlank()) fullName = profile.name
+            if (targetRole.isBlank()) targetRole = profile.targetRole
+            if (experienceLevel.isBlank()) experienceLevel = profile.experienceLevel
+            if (yearsExp.isBlank()) yearsExp = profile.yearsExperience
+            if (location.isBlank()) location = profile.location
+            if (profile.workPreference.isNotBlank()) workPreference = profile.workPreference
+            if (currentCtc.isBlank()) currentCtc = profile.currentCtc
+            if (expectedCtc.isBlank()) expectedCtc = profile.expectedCtc
+            if (noticePeriod.isBlank()) noticePeriod = profile.noticePeriod
+            if (skillsList.isEmpty() && profile.skills.isNotEmpty()) skillsList = profile.skills
+        }
+    }
+
+    val isEditMode = remember(initialProfile) {
+        initialProfile?.targetRole?.isNotBlank() == true
+    }
 
     LaunchedEffect(uiState) {
         if (uiState is UiState.Success) {
-            onNavigateToHome()
+            if (isEditMode) {
+                onBackClick() // Pop back to Profile Screen
+            } else {
+                onNavigateToHome()
+            }
         } else if (uiState is UiState.Error) {
             snackbarHostState.showSnackbar((uiState as UiState.Error).message)
         }
@@ -110,50 +137,54 @@ fun CareerSetupScreen(
                     )
                 }
                 
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(
-                    text = stringResource(id = R.string.step_1_of_1),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 1.sp
-                )
-                
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                // Progress Bar
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                ) {
+                if (!isEditMode) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Text(
+                        text = stringResource(id = R.string.step_1_of_1),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 1.sp
+                    )
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+                    
+                    // Progress Bar
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(4.dp)
-                            .background(MaterialTheme.colorScheme.primary)
-                    )
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(4.dp)
+                                .background(MaterialTheme.colorScheme.primary)
+                        )
+                    }
                 }
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 Text(
-                    text = stringResource(id = R.string.career_setup_title),
+                    text = if (isEditMode) "Edit Profile" else stringResource(id = R.string.career_setup_title),
                     style = MaterialTheme.typography.headlineLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
                 
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                Text(
-                    text = stringResource(id = R.string.career_setup_subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                if (!isEditMode) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    
+                    Text(
+                        text = stringResource(id = R.string.career_setup_subtitle),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         },
         bottomBar = {
@@ -165,14 +196,14 @@ fun CareerSetupScreen(
                     .padding(bottom = 16.dp)
             ) {
                 AppButton(
-                    text = stringResource(id = R.string.continue_to_dashboard),
+                    text = if (isEditMode) "Update profile" else stringResource(id = R.string.continue_to_dashboard),
                     onClick = {
                         viewModel.saveProfile(
                             name = fullName,
                             experienceLevel = experienceLevel,
                             yearsOfExperience = yearsExp,
                             primaryRole = targetRole,
-                            skills = aiExtractedSkills.joinToString(","),
+                            skills = skillsList,
                             location = location,
                             currentCtc = currentCtc,
                             expectedCtc = expectedCtc,
@@ -222,20 +253,40 @@ fun CareerSetupScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                CustomTextField(
-                    modifier = Modifier.weight(1f),
-                    label = stringResource(id = R.string.experience_level_label),
-                    value = experienceLevel,
-                    onValueChange = { experienceLevel = it },
-                    placeholder = stringResource(id = R.string.experience_level_placeholder),
-                    trailingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.outline
-                        )
+                val expOptions = listOf("Student", "Fresher", "Mid-level", "Senior", "Lead")
+                
+                androidx.compose.material3.ExposedDropdownMenuBox(
+                    expanded = expDropdownExpanded,
+                    onExpandedChange = { expDropdownExpanded = !expDropdownExpanded },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    CustomTextField(
+                        modifier = Modifier.menuAnchor(),
+                        label = stringResource(id = R.string.experience_level_label),
+                        value = experienceLevel,
+                        onValueChange = {}, // Read-only
+                        placeholder = stringResource(id = R.string.experience_level_placeholder),
+                        readOnly = true,
+                        trailingIcon = {
+                            androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon(expanded = expDropdownExpanded)
+                        }
+                    )
+                    
+                    ExposedDropdownMenu(
+                        expanded = expDropdownExpanded,
+                        onDismissRequest = { expDropdownExpanded = false }
+                    ) {
+                        expOptions.forEach { selectionOption ->
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { Text(selectionOption) },
+                                onClick = {
+                                    experienceLevel = selectionOption
+                                    expDropdownExpanded = false
+                                }
+                            )
+                        }
                     }
-                )
+                }
                 CustomTextField(
                     modifier = Modifier.weight(1f),
                     label = stringResource(id = R.string.years_experience_label),
@@ -292,7 +343,7 @@ fun CareerSetupScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        aiExtractedSkills.forEach { skill ->
+                        skillsList.forEach { skill ->
                             Row(
                                 modifier = Modifier
                                     .background(Color(0xFFEEF2FF), CircleShape)
@@ -312,25 +363,35 @@ fun CareerSetupScreen(
                                     tint = Color(0xFF4F46E5),
                                     modifier = Modifier
                                         .size(14.dp)
-                                        .clickable { /* Remove skill */ }
+                                        .clickable { skillsList = skillsList - skill }
                                 )
                             }
                         }
-
-                        // Add Button
-                        Box(
-                            modifier = Modifier
-                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), CircleShape)
-                                .clickable { /* Add skill */ }
-                                .padding(horizontal = 12.dp, vertical = 6.dp),
-                            contentAlignment = Alignment.Center
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = newSkill,
+                            onValueChange = { newSkill = it },
+                            modifier = Modifier.weight(1f),
+                            placeholder = { Text("e.g. Jetpack Compose") },
+                            singleLine = true
+                        )
+                        Button(
+                            onClick = { 
+                                if (newSkill.isNotBlank() && !skillsList.contains(newSkill.trim())) {
+                                    skillsList = skillsList + newSkill.trim()
+                                    newSkill = ""
+                                }
+                            }
                         ) {
-                            Text(
-                                text = stringResource(id = R.string.add_skill_button),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.labelMedium
-                            )
+                            Text(stringResource(id = R.string.add_skill_button))
                         }
                     }
                 }
@@ -451,7 +512,9 @@ private fun CustomTextField(
     onValueChange: (String) -> Unit,
     placeholder: String,
     leadingIcon: @Composable (() -> Unit)? = null,
-    trailingIcon: @Composable (() -> Unit)? = null
+    trailingIcon: @Composable (() -> Unit)? = null,
+    readOnly: Boolean = false,
+    enabled: Boolean = true
 ) {
     Column(
         modifier = modifier,
@@ -466,6 +529,8 @@ private fun CustomTextField(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
+            readOnly = readOnly,
+            enabled = enabled,
             placeholder = { 
                 Text(
                     text = placeholder,

@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
@@ -38,9 +39,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,6 +68,7 @@ import com.sandeep.aijobapplicationtracker.utils.UiState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    onNavigateToApplicationDetail: (String) -> Unit = {},
     onNavigateToApplications: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToAssistant: () -> Unit = {},
@@ -110,7 +116,11 @@ fun HomeScreen(
         ) {
             when (val s = state) {
                 is UiState.Idle, is UiState.Loading -> LoadingView()
-                is UiState.Success -> HomeContent(data = s.data)
+                is UiState.Success -> HomeContent(
+                    data = s.data,
+                    onNavigateToApplicationDetail = onNavigateToApplicationDetail,
+                    onDeleteApplication = { viewModel.deleteApplication(it) }
+                )
                 is UiState.Empty -> EmptyStateView(
                     title = stringResource(id = R.string.no_data_title),
                     subtitle = stringResource(id = R.string.no_data_desc)
@@ -126,7 +136,36 @@ fun HomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeContent(data: HomeData) {
+private fun HomeContent(
+    data: HomeData,
+    onNavigateToApplicationDetail: (String) -> Unit,
+    onDeleteApplication: (String) -> Unit
+) {
+    var applicationToDelete by remember { mutableStateOf<String?>(null) }
+
+    if (applicationToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { applicationToDelete = null },
+            title = { Text("Delete Application") },
+            text = { Text("Are you sure you want to delete this application?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        applicationToDelete?.let { onDeleteApplication(it) }
+                        applicationToDelete = null
+                    }
+                ) {
+                    Text("Yes", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { applicationToDelete = null }) {
+                    Text("No")
+                }
+            }
+        )
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize(),
@@ -158,17 +197,11 @@ private fun HomeContent(data: HomeData) {
                         )
                     }
                     IconButton(onClick = { /* TODO: Notifications */ }) {
-                        BadgedBox(
-                            badge = {
-                                Badge { Text("3") }
-                            }
-                        ) {
-                            Icon(
-                                Icons.Filled.Notifications,
-                                contentDescription = "Notifications",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
+                        Icon(
+                            Icons.Filled.Notifications,
+                            contentDescription = "Notifications",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
             }
@@ -203,7 +236,10 @@ private fun HomeContent(data: HomeData) {
                 }
             }
             items(data.needsAttentionItems) { item ->
-                NeedsAttentionCard(item)
+                NeedsAttentionCard(
+                    item = item,
+                    onNavigateToDetail = onNavigateToApplicationDetail
+                )
             }
         }
 
@@ -220,7 +256,11 @@ private fun HomeContent(data: HomeData) {
                 )
             }
             items(data.recentApplications) { app ->
-                RecentApplicationCard(app)
+                RecentApplicationCard(
+                    app = app,
+                    onClick = { onNavigateToApplicationDetail(app.id) },
+                    onDelete = { applicationToDelete = app.id }
+                )
             }
         }
     }
@@ -282,7 +322,10 @@ private fun StatCard(count: Int, label: String, modifier: Modifier = Modifier, c
 }
 
 @Composable
-private fun NeedsAttentionCard(item: AttentionItem) {
+private fun NeedsAttentionCard(
+    item: AttentionItem,
+    onNavigateToDetail: (String) -> Unit
+) {
     val (iconColor, icon) = when (item.type) {
         AttentionType.URGENT -> MaterialTheme.colorScheme.error to Icons.Filled.Warning
         AttentionType.UPCOMING -> Color(0xFFF59E0B) to Icons.Filled.Info // Amber
@@ -292,7 +335,8 @@ private fun NeedsAttentionCard(item: AttentionItem) {
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 6.dp)
+            .padding(horizontal = 20.dp, vertical = 6.dp),
+        onClick = { onNavigateToDetail(item.id) }
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -332,7 +376,7 @@ private fun NeedsAttentionCard(item: AttentionItem) {
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { /* TODO */ },
+                onClick = { onNavigateToDetail(item.id) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -356,11 +400,12 @@ private fun NeedsAttentionCard(item: AttentionItem) {
 }
 
 @Composable
-private fun RecentApplicationCard(app: JobApplicationItem) {
+private fun RecentApplicationCard(app: JobApplicationItem, onClick: () -> Unit, onDelete: () -> Unit) {
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 6.dp)
+            .padding(horizontal = 20.dp, vertical = 6.dp),
+        onClick = onClick
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -377,6 +422,18 @@ private fun RecentApplicationCard(app: JobApplicationItem) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                Spacer(modifier = Modifier.width(8.dp))
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "Delete Application",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
                 Spacer(modifier = Modifier.width(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
