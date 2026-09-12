@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "294862957055",
+    "project_id": "qwiklabs-gcp-01-30b30057af11",
+    "storage_bucket": "qwiklabs-gcp-01-30b30057af11.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:294862957055:android:56cf637b56bea8009f9fca",
+        "android_client_info": {
+          "package_name": "com.sandeep.aijobapplicationtracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "294862957055-miu935pkvri4403g32nf7b6hp8182e50.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sandeep.aijobapplicationtracker",
+            "certificate_hash": "91b47b7496e27a7fbcb5a4e30696199645a7eaa9"
+          }
+        },
+        {
+          "client_id": "294862957055-2mq0uqjqjbgdnb7dv9699eef5me8nj0o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxbQfZ2Z-DoNK-ekAZ1ghJtcue8RQqe6A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "294862957055-2mq0uqjqjbgdnb7dv9699eef5me8nj0o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
