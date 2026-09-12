@@ -129,4 +129,14 @@ class ApplicationDetailViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteApplication() {
+        viewModelScope.launch {
+            try {
+                repository.deleteApplication(jobId)
+            } catch (e: Exception) {
+                // Ignore for now
+            }
+        }
+    }
 }

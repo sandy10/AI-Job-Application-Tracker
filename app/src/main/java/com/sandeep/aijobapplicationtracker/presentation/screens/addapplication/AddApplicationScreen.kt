@@ -64,6 +64,7 @@ import com.sandeep.aijobapplicationtracker.utils.UiState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddApplicationScreen(
+    jobId: String? = null,
     onNavigateBack: () -> Unit,
     onNavigateToAnalyzer: () -> Unit = {},
     viewModel: AddApplicationViewModel = hiltViewModel()
@@ -85,6 +86,28 @@ fun AddApplicationScreen(
     var jobDescription by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
     var matchScore by remember { mutableStateOf(0) }
+
+    LaunchedEffect(jobId) {
+        if (jobId != null) {
+            val app = viewModel.getApplicationDirectly(jobId)
+            if (app != null) {
+                company = app.company
+                jobTitle = app.jobTitle
+                jobUrl = app.jobUrl
+                location = app.location
+                workMode = app.workMode
+                source = app.source
+                status = app.status
+                dateApplied = app.dateApplied
+                salary = app.salary
+                recruiter = app.recruiter
+                noticePeriod = app.noticePeriod
+                jobDescription = app.jobDescription
+                notes = app.notes
+                matchScore = app.matchScore
+            }
+        }
+    }
 
     val latestExtractedData by viewModel.latestExtractedData.collectAsState()
 
@@ -125,7 +148,7 @@ fun AddApplicationScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        text = "Add Application",
+                        text = if (jobId != null) "Edit Application" else "Add Application",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF191C1E)
@@ -155,6 +178,7 @@ fun AddApplicationScreen(
                     Button(
                         onClick = {
                             viewModel.saveApplication(
+                                existingId = jobId,
                                 company = company,
                                 jobTitle = jobTitle,
                                 jobUrl = jobUrl,

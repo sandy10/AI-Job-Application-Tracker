@@ -7,6 +7,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,7 +33,14 @@ class AddApplicationViewModel @Inject constructor(
         aiAnalyzerRepository.clearExtractedData()
     }
 
+    fun getApplication(id: String) = repository.getApplications().map { list -> list.find { app -> app.id == id } }
+
+    suspend fun getApplicationDirectly(id: String): JobApplicationModel? {
+        return repository.getApplications().first().find { it.id == id }
+    }
+
     fun saveApplication(
+        existingId: String? = null,
         company: String,
         jobTitle: String,
         jobUrl: String,
@@ -58,7 +67,7 @@ class AddApplicationViewModel @Inject constructor(
             }
             
             val app = JobApplicationModel(
-                id = UUID.randomUUID().toString(),
+                id = existingId ?: UUID.randomUUID().toString(),
                 company = company,
                 jobTitle = jobTitle,
                 jobUrl = jobUrl,

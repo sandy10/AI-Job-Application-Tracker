@@ -100,6 +100,15 @@ fun AppNavGraph() {
                 onNavigateToAnalyzer = { navController.navigate(Screen.AiJobAnalyzer.route) }
             )
         }
+
+        composable(Screen.EditApplication.route) { backStackEntry ->
+            val jobId = backStackEntry.arguments?.getString("jobId")
+            AddApplicationScreen(
+                jobId = jobId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToAnalyzer = { navController.navigate(Screen.AiJobAnalyzer.route) }
+            )
+        }
         
         composable(Screen.ApplicationDetail.route) { backStackEntry ->
             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
@@ -108,7 +117,8 @@ fun AppNavGraph() {
                 onNavigateToAddInterview = { navController.navigate(Screen.AddInterview.createRoute(jobId)) },
                 onNavigateToResumeMatch = { navController.navigate(Screen.AiResumeMatch.createRoute(jobId)) },
                 onNavigateToAssistant = { navController.navigate(Screen.AiAssistant.route) },
-                onNavigateToAiInterviewPrep = { navController.navigate(Screen.AiInterviewPrep.createRoute(jobId)) }
+                onNavigateToAiInterviewPrep = { navController.navigate(Screen.AiInterviewPrep.createRoute(jobId)) },
+                onNavigateToEdit = { navController.navigate(Screen.EditApplication.createRoute(jobId)) }
             )
         }
         

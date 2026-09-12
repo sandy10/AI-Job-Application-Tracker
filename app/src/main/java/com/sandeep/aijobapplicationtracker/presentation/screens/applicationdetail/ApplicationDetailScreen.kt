@@ -30,11 +30,13 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -65,12 +67,14 @@ fun ApplicationDetailScreen(
     onNavigateToResumeMatch: () -> Unit,
     onNavigateToAssistant: () -> Unit,
     onNavigateToAiInterviewPrep: () -> Unit,
+    onNavigateToEdit: () -> Unit = {},
     viewModel: ApplicationDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = androidx.compose.ui.platform.LocalContext.current
     var topMenuExpanded by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     var bottomMenuExpanded by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var showDeleteDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 
     Scaffold(
         containerColor = Color(0xFFF7F9FB), // bg-background
@@ -83,22 +87,18 @@ fun ApplicationDetailScreen(
                     }
                 },
                 actions = {
-                    Box {
-                        IconButton(onClick = { topMenuExpanded = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "More", tint = Color(0xFF464555))
+                    IconButton(onClick = {
+                        val shareIntent = android.content.Intent().apply {
+                            action = android.content.Intent.ACTION_SEND
+                            type = "text/plain"
+                            val role = if (uiState is UiState.Success) (uiState as UiState.Success).data.role else ""
+                            val comp = if (uiState is UiState.Success) (uiState as UiState.Success).data.company else ""
+                            val stat = if (uiState is UiState.Success) (uiState as UiState.Success).data.status else ""
+                            putExtra(android.content.Intent.EXTRA_TEXT, "Check out this job application:\n\nRole: $role\nCompany: $comp\nStatus: $stat")
                         }
-                        androidx.compose.material3.DropdownMenu(
-                            expanded = topMenuExpanded,
-                            onDismissRequest = { topMenuExpanded = false }
-                        ) {
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { Text("Share Application") },
-                                onClick = { 
-                                    topMenuExpanded = false
-                                    android.widget.Toast.makeText(context, "Share coming soon", android.widget.Toast.LENGTH_SHORT).show()
-                                }
-                            )
-                        }
+                        context.startActivity(android.content.Intent.createChooser(shareIntent, "Share Application"))
+                    }) {
+                        Icon(Icons.Default.Share, contentDescription = "Share", tint = Color(0xFF464555))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -119,9 +119,7 @@ fun ApplicationDetailScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Button(
-                        onClick = {
-                            android.widget.Toast.makeText(context, "Edit Application coming soon", android.widget.Toast.LENGTH_SHORT).show()
-                        },
+                        onClick = onNavigateToEdit,
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
@@ -157,7 +155,7 @@ fun ApplicationDetailScreen(
                                 text = { Text("Delete Application") },
                                 onClick = { 
                                     bottomMenuExpanded = false
-                                    android.widget.Toast.makeText(context, "Delete coming soon", android.widget.Toast.LENGTH_SHORT).show()
+                                    showDeleteDialog = true
                                 }
                             )
                         }
@@ -166,6 +164,30 @@ fun ApplicationDetailScreen(
             }
         }
     ) { paddingValues ->
+        if (showDeleteDialog) {
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text("Delete Application") },
+                text = { Text("Are you sure you want to delete this application?") },
+                confirmButton = {
+                    androidx.compose.material3.TextButton(
+                        onClick = {
+                            showDeleteDialog = false
+                            viewModel.deleteApplication()
+                            onNavigateBack()
+                        }
+                    ) {
+                        Text("Yes", color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    androidx.compose.material3.TextButton(onClick = { showDeleteDialog = false }) {
+                        Text("No")
+                    }
+                }
+            )
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()

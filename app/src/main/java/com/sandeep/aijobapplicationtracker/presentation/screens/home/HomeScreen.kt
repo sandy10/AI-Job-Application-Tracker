@@ -118,8 +118,7 @@ fun HomeScreen(
                 is UiState.Idle, is UiState.Loading -> LoadingView()
                 is UiState.Success -> HomeContent(
                     data = s.data,
-                    onNavigateToApplicationDetail = onNavigateToApplicationDetail,
-                    onDeleteApplication = { viewModel.deleteApplication(it) }
+                    onNavigateToApplicationDetail = onNavigateToApplicationDetail
                 )
                 is UiState.Empty -> EmptyStateView(
                     title = stringResource(id = R.string.no_data_title),
@@ -138,33 +137,9 @@ fun HomeScreen(
 @Composable
 private fun HomeContent(
     data: HomeData,
-    onNavigateToApplicationDetail: (String) -> Unit,
-    onDeleteApplication: (String) -> Unit
+    onNavigateToApplicationDetail: (String) -> Unit
 ) {
-    var applicationToDelete by remember { mutableStateOf<String?>(null) }
 
-    if (applicationToDelete != null) {
-        AlertDialog(
-            onDismissRequest = { applicationToDelete = null },
-            title = { Text("Delete Application") },
-            text = { Text("Are you sure you want to delete this application?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        applicationToDelete?.let { onDeleteApplication(it) }
-                        applicationToDelete = null
-                    }
-                ) {
-                    Text("Yes", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { applicationToDelete = null }) {
-                    Text("No")
-                }
-            }
-        )
-    }
 
     LazyColumn(
         modifier = Modifier
@@ -258,8 +233,7 @@ private fun HomeContent(
             items(data.recentApplications) { app ->
                 RecentApplicationCard(
                     app = app,
-                    onClick = { onNavigateToApplicationDetail(app.id) },
-                    onDelete = { applicationToDelete = app.id }
+                    onClick = { onNavigateToApplicationDetail(app.id) }
                 )
             }
         }
@@ -400,7 +374,7 @@ private fun NeedsAttentionCard(
 }
 
 @Composable
-private fun RecentApplicationCard(app: JobApplicationItem, onClick: () -> Unit, onDelete: () -> Unit) {
+private fun RecentApplicationCard(app: JobApplicationItem, onClick: () -> Unit) {
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -422,18 +396,6 @@ private fun RecentApplicationCard(app: JobApplicationItem, onClick: () -> Unit, 
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                IconButton(
-                    onClick = onDelete,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = "Delete Application",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
                 Spacer(modifier = Modifier.width(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
