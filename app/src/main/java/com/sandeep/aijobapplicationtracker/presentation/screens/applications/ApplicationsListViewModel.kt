@@ -16,6 +16,8 @@ enum class ApplicationStatus {
     ALL, SAVED, APPLIED, RECRUITER, INTERVIEW, OFFER, REJECTED
 }
 
+enum class SortOption { RECENTLY_ADDED, MATCH_SCORE }
+
 data class DetailedJobApplication(
     val id: String,
     val company: String,
@@ -23,7 +25,9 @@ data class DetailedJobApplication(
     val location: String,
     val status: ApplicationStatus,
     val dateApplied: String,
-    val matchScore: Int
+    val matchScore: Int,
+    val timestamp: Long,
+    val workMode: String
 )
 
 @HiltViewModel
@@ -36,6 +40,12 @@ class ApplicationsListViewModel @Inject constructor(
     private val _selectedFilter = MutableStateFlow(ApplicationStatus.ALL)
     val selectedFilter: StateFlow<ApplicationStatus> = _selectedFilter
 
+    private val _selectedSortOption = MutableStateFlow(SortOption.RECENTLY_ADDED)
+    val selectedSortOption: StateFlow<SortOption> = _selectedSortOption
+
+    private val _selectedWorkMode = MutableStateFlow("All")
+    val selectedWorkMode: StateFlow<String> = _selectedWorkMode
+
     init {
         fetchApplications()
     }
@@ -44,8 +54,10 @@ class ApplicationsListViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 repository.getApplications(),
-                _selectedFilter
-            ) { applications, filter ->
+                _selectedFilter,
+                _selectedSortOption,
+                _selectedWorkMode
+            ) { applications, filter, sort, workMode ->
                 val detailedApps = applications.map { app ->
                     DetailedJobApplication(
                         id = app.id,
@@ -54,14 +66,25 @@ class ApplicationsListViewModel @Inject constructor(
                         location = app.location,
                         status = mapStatus(app.status),
                         dateApplied = app.dateApplied.ifBlank { "-" },
-                        matchScore = app.matchScore
+                        matchScore = app.matchScore,
+                        timestamp = app.timestamp,
+                        workMode = app.workMode
                     )
                 }
                 
-                val filteredList = if (filter == ApplicationStatus.ALL) {
+                var filteredList = if (filter == ApplicationStatus.ALL) {
                     detailedApps
                 } else {
                     detailedApps.filter { it.status == filter }
+                }
+                
+                if (workMode != "All") {
+                    filteredList = filteredList.filter { it.workMode.contains(workMode, ignoreCase = true) }
+                }
+                
+                filteredList = when(sort) {
+                    SortOption.RECENTLY_ADDED -> filteredList.sortedByDescending { it.timestamp }
+                    SortOption.MATCH_SCORE -> filteredList.sortedByDescending { it.matchScore }
                 }
                 
                 if (filteredList.isEmpty()) {
@@ -77,6 +100,14 @@ class ApplicationsListViewModel @Inject constructor(
 
     fun setFilter(status: ApplicationStatus) {
         _selectedFilter.value = status
+    }
+    
+    fun setSortOption(option: SortOption) {
+        _selectedSortOption.value = option
+    }
+    
+    fun setWorkMode(mode: String) {
+        _selectedWorkMode.value = mode
     }
 
     private fun mapStatus(status: String): ApplicationStatus {

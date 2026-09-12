@@ -228,6 +228,7 @@ private fun ApplicationDetailContent(
     var showNoteDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     val scrollState = rememberScrollState()
     val context = androidx.compose.ui.platform.LocalContext.current
+    val isActionEnabled = data.status.name != "REJECTED" && data.status.name != "OFFER"
 
     Column(
         modifier = Modifier
@@ -299,7 +300,7 @@ private fun ApplicationDetailContent(
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color(0xFFEEF2FF)) // indigo-50
                         .border(1.dp, Color(0xFF4F46E5).copy(alpha = 0.2f), RoundedCornerShape(16.dp))
-                        .clickable { onNavigateToResumeMatch() }
+                        .clickable(enabled = isActionEnabled) { onNavigateToResumeMatch() }
                         .padding(horizontal = 12.dp, vertical = 4.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -349,6 +350,7 @@ private fun ApplicationDetailContent(
                     )
                     Button(
                         onClick = { onNavigateToAiInterviewPrep() },
+                        enabled = isActionEnabled,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp),
@@ -398,7 +400,7 @@ private fun ApplicationDetailContent(
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color.White.copy(alpha = 0.8f))
                     .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(12.dp))
-                    .clickable { 
+                    .clickable(enabled = isActionEnabled) { 
                         onNavigateToResumeMatch()
                     }
                     .padding(16.dp)
@@ -450,7 +452,7 @@ private fun ApplicationDetailContent(
                         modifier = Modifier
                             .clip(RoundedCornerShape(16.dp))
                             .border(1.dp, Color(0xFF3525CD).copy(alpha = 0.2f), RoundedCornerShape(16.dp))
-                            .clickable { onNavigateToResumeMatch() }
+                            .clickable(enabled = isActionEnabled) { onNavigateToResumeMatch() }
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text("View Analysis", fontSize = 12.sp, color = Color(0xFF3525CD), fontWeight = FontWeight.Medium)
@@ -467,7 +469,7 @@ private fun ApplicationDetailContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Interviews", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { 
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable(enabled = isActionEnabled) { 
                     onNavigateToAddInterview()
                 }) {
                     Icon(Icons.Default.Add, contentDescription = "Add", tint = Color(0xFF3525CD), modifier = Modifier.size(16.dp))

@@ -72,6 +72,9 @@ fun ApplicationsListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val selectedFilter by viewModel.selectedFilter.collectAsState()
+    val selectedSortOption by viewModel.selectedSortOption.collectAsState()
+    val selectedWorkMode by viewModel.selectedWorkMode.collectAsState()
+    var showFilterSheet by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
 
     val bottomNavItems = listOf(
@@ -108,6 +111,46 @@ fun ApplicationsListScreen(
             }
         }
     ) { paddingValues ->
+        if (showFilterSheet) {
+            androidx.compose.material3.ModalBottomSheet(
+                onDismissRequest = { showFilterSheet = false }
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                        .padding(bottom = 32.dp)
+                ) {
+                    Text("Sort By", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF191C1E))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        androidx.compose.material3.FilterChip(
+                            selected = selectedSortOption == SortOption.RECENTLY_ADDED,
+                            onClick = { viewModel.setSortOption(SortOption.RECENTLY_ADDED) },
+                            label = { Text("Recently Added") }
+                        )
+                        androidx.compose.material3.FilterChip(
+                            selected = selectedSortOption == SortOption.MATCH_SCORE,
+                            onClick = { viewModel.setSortOption(SortOption.MATCH_SCORE) },
+                            label = { Text("Match Score") }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text("Work Mode", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF191C1E))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("All", "Remote", "Hybrid", "Onsite").forEach { mode ->
+                            androidx.compose.material3.FilterChip(
+                                selected = selectedWorkMode == mode,
+                                onClick = { viewModel.setWorkMode(mode) },
+                                label = { Text(mode) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -133,7 +176,7 @@ fun ApplicationsListScreen(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(RoundedCornerShape(20.dp))
-                        .clickable { /* filter action */ },
+                        .clickable { showFilterSheet = true },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
