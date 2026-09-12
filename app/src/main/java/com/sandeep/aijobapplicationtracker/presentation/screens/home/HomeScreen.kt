@@ -157,6 +157,7 @@ private fun HomeContent(
                         val hour =
                             java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
                         val greeting = when {
+                            hour < 5 -> "Good night"
                             hour < 12 -> "Good morning"
                             hour < 16 -> "Good afternoon"
                             hour < 21 -> "Good evening"
@@ -192,30 +193,15 @@ private fun HomeContent(
 
         if (data.needsAttentionItems.isNotEmpty()) {
             item {
-                Row(
+                Text(
+                    text = stringResource(id = R.string.needs_attention),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
-                        .fillMaxWidth()
                         .padding(horizontal = 20.dp)
-                        .padding(top = 24.dp, bottom = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.needs_attention),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = stringResource(id = R.string.view_all),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier
-                            .clickable { onNavigateToApplications() }
-                            .padding(4.dp)
-                    )
-                }
+                        .padding(top = 24.dp, bottom = 12.dp)
+                )
             }
             items(data.needsAttentionItems) { item ->
                 NeedsAttentionCard(
