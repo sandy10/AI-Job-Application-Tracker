@@ -1,5 +1,6 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -118,7 +119,8 @@ fun HomeScreen(
                 is UiState.Idle, is UiState.Loading -> LoadingView()
                 is UiState.Success -> HomeContent(
                     data = s.data,
-                    onNavigateToApplicationDetail = onNavigateToApplicationDetail
+                    onNavigateToApplicationDetail = onNavigateToApplicationDetail,
+                    onNavigateToApplications = onNavigateToApplications
                 )
                 is UiState.Empty -> EmptyStateView(
                     title = stringResource(id = R.string.no_data_title),
@@ -137,7 +139,8 @@ fun HomeScreen(
 @Composable
 private fun HomeContent(
     data: HomeData,
-    onNavigateToApplicationDetail: (String) -> Unit
+    onNavigateToApplicationDetail: (String) -> Unit,
+    onNavigateToApplications: () -> Unit
 ) {
 
 
@@ -206,7 +209,8 @@ private fun HomeContent(
                         text = stringResource(id = R.string.view_all),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.clickable { onNavigateToApplications() }.padding(4.dp)
                     )
                 }
             }
@@ -220,15 +224,28 @@ private fun HomeContent(
 
         if (data.recentApplications.isNotEmpty()) {
             item {
-                Text(
-                    text = stringResource(id = R.string.recent_applications),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
+                Row(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(horizontal = 20.dp)
-                        .padding(top = 24.dp, bottom = 12.dp)
-                )
+                        .padding(top = 24.dp, bottom = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.recent_applications),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = stringResource(id = R.string.view_all),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.clickable { onNavigateToApplications() }.padding(4.dp)
+                    )
+                }
             }
             items(data.recentApplications) { app ->
                 RecentApplicationCard(
