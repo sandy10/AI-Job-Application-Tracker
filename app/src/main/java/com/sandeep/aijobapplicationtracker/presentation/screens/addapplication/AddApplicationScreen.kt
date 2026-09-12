@@ -345,7 +345,36 @@ private fun AddApplicationContent(
 
             // Application Status & Details
             FormSection(title = "Application Status & Details") {
-                FormInput(label = "Status", value = status, onValueChange = onStatusChange, placeholder = "Saved for later")
+                var statusExpanded by remember { mutableStateOf(false) }
+                val statusOptions = listOf("Saved for later", "Applied", "Recruiter Contact", "Interviewing", "Offer Received", "Rejected")
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    FormInput(
+                        label = "Status", 
+                        value = status, 
+                        onValueChange = {}, 
+                        placeholder = "Saved for later",
+                        readOnly = true,
+                        onClick = { statusExpanded = true },
+                        trailingIcon = {
+                            Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Select Status")
+                        }
+                    )
+                    androidx.compose.material3.DropdownMenu(
+                        expanded = statusExpanded,
+                        onDismissRequest = { statusExpanded = false }
+                    ) {
+                        statusOptions.forEach { option ->
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    onStatusChange(option)
+                                    statusExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
                 var showDatePicker by remember { mutableStateOf(false) }
                 FormInput(
                     label = "Date Applied", 
