@@ -1,7 +1,7 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.home
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,16 +19,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,14 +36,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,7 +47,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sandeep.aijobapplicationtracker.R
 import com.sandeep.aijobapplicationtracker.presentation.components.AppBottomBar
@@ -122,10 +113,12 @@ fun HomeScreen(
                     onNavigateToApplicationDetail = onNavigateToApplicationDetail,
                     onNavigateToApplications = onNavigateToApplications
                 )
+
                 is UiState.Empty -> EmptyStateView(
                     title = stringResource(id = R.string.no_data_title),
                     subtitle = stringResource(id = R.string.no_data_desc)
                 )
+
                 is UiState.Error -> EmptyStateView(
                     title = stringResource(id = R.string.error_title),
                     subtitle = s.message.ifEmpty { stringResource(id = R.string.unknown_error) }
@@ -161,8 +154,16 @@ private fun HomeContent(
                     verticalAlignment = Alignment.Top
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
+                        val hour =
+                            java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+                        val greeting = when {
+                            hour < 12 -> "Good morning"
+                            hour < 16 -> "Good afternoon"
+                            hour < 21 -> "Good evening"
+                            else -> "Good night"
+                        }
                         Text(
-                            text = stringResource(id = R.string.greeting, data.userName),
+                            text = "$greeting, ${data.userName} \uD83D\uDC4B",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -210,7 +211,9 @@ private fun HomeContent(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.clickable { onNavigateToApplications() }.padding(4.dp)
+                        modifier = Modifier
+                            .clickable { onNavigateToApplications() }
+                            .padding(4.dp)
                     )
                 }
             }
@@ -243,7 +246,9 @@ private fun HomeContent(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.clickable { onNavigateToApplications() }.padding(4.dp)
+                        modifier = Modifier
+                            .clickable { onNavigateToApplications() }
+                            .padding(4.dp)
                     )
                 }
             }
@@ -268,18 +273,30 @@ private fun DashboardStatsSection(data: HomeData) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            StatCard(count = data.totalApplications, label = "Applications", modifier = Modifier.weight(1f))
-            StatCard(count = data.totalInterviews, label = "Interviews", modifier = Modifier.weight(1f))
+            StatCard(
+                count = data.totalApplications,
+                label = "Applications",
+                modifier = Modifier.weight(1f)
+            )
+            StatCard(
+                count = data.totalInterviews,
+                label = "Interviews",
+                modifier = Modifier.weight(1f)
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            StatCard(count = data.totalFollowUps, label = "Follow-ups", modifier = Modifier.weight(1f))
             StatCard(
-                count = data.totalOffers, 
-                label = "Offer", 
+                count = data.totalFollowUps,
+                label = "Follow-ups",
+                modifier = Modifier.weight(1f)
+            )
+            StatCard(
+                count = data.totalOffers,
+                label = "Offer",
                 modifier = Modifier.weight(1f),
                 countColor = Color(0xFF16A34A)
             )
@@ -288,7 +305,12 @@ private fun DashboardStatsSection(data: HomeData) {
 }
 
 @Composable
-private fun StatCard(count: Int, label: String, modifier: Modifier = Modifier, countColor: Color = MaterialTheme.colorScheme.onSurface) {
+private fun StatCard(
+    count: Int,
+    label: String,
+    modifier: Modifier = Modifier,
+    countColor: Color = MaterialTheme.colorScheme.onSurface
+) {
     AppCard(modifier = modifier.height(100.dp)) {
         Column(
             modifier = Modifier
