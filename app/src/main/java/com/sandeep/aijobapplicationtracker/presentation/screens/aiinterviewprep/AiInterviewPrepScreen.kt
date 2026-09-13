@@ -43,6 +43,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.alpha
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sandeep.aijobapplicationtracker.R
@@ -158,7 +170,7 @@ fun AiInterviewPrepScreen(
     ) { paddingValues ->
         when (val state = uiState) {
             is UiState.Loading -> {
-                com.sandeep.aijobapplicationtracker.presentation.components.LoadingView()
+                InterviewPrepScanningView()
             }
             is UiState.Error -> {
                 com.sandeep.aijobapplicationtracker.presentation.components.EmptyStateView(
@@ -549,6 +561,98 @@ private fun BehavioralCard(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun InterviewPrepScanningView() {
+    var currentPhaseIndex by remember { mutableIntStateOf(0) }
+    val phases = listOf(
+        "Preparing interview with JD...",
+        "Matching with JD skills...",
+        "Generating accurate questions based on JD...",
+        "Wait, we will give you exact Q&A according to JD..."
+    )
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        while (true) {
+            delay(2000)
+            currentPhaseIndex = (currentPhaseIndex + 1) % phases.size
+        }
+    }
+
+    val infiniteTransition = rememberInfiniteTransition()
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 0.5f,
+        targetValue = 2.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "Pulse Scale"
+    )
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "Pulse Alpha"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Pulse animation container
+            Box(
+                modifier = Modifier.size(150.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                // Expanding, fading circle
+                Box(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .scale(pulseScale)
+                        .alpha(pulseAlpha)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                )
+                // Center Icon
+                Box(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "JD AI",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = phases[currentPhaseIndex],
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 32.dp)
+            )
         }
     }
 }
