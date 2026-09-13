@@ -175,7 +175,8 @@ fun AppNavGraph() {
                 onNavigateToAiChat = { navController.navigate(Screen.AiChat.route) },
                 onNavigateToHome = { navController.navigate(Screen.Home.route) },
                 onNavigateToApplications = { navController.navigate(Screen.ApplicationsList.route) },
-                onNavigateToProfile = { navController.navigate(Screen.ProfileSettings.route) }
+                onNavigateToProfile = { navController.navigate(Screen.ProfileSettings.route) },
+                onNavigateToApplicationDetail = { jobId -> navController.navigate(Screen.ApplicationDetail.createRoute(jobId)) }
             )
         }
         

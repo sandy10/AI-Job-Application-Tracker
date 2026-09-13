@@ -57,6 +57,7 @@ fun AiAssistantScreen(
     onNavigateToHome: () -> Unit = {},
     onNavigateToApplications: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToApplicationDetail: (String) -> Unit = {},
     viewModel: AiAssistantViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -250,103 +251,88 @@ fun AiAssistantScreen(
                         text = "View all",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primaryContainer,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.clickable { onNavigateToApplications() }
                     )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = "TODAY",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Medium
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Action Card: Follow Up
-                ActionCard(
-                    title = "Follow Up Email",
-                    subtitle = "ABC Tech • Senior Designer role",
-                    tagText = "URGENT",
-                    tagColor = Color(0xFFBA1A1A), // error
-                    tagBgColor = Color(0xFFFFDAD6), // error-container
-                    lineColor = Color(0xFFBA1A1A)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(top = 12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "AI",
-                            tint = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier.size(16.dp)
-                        )
+                when (uiState) {
+                    is UiState.Loading -> {
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            androidx.compose.material3.CircularProgressIndicator()
+                        }
+                    }
+                    is UiState.Success -> {
+                        val actions = (uiState as UiState.Success<List<NextActionItem>>).data
+                        
+                        if (actions.isEmpty()) {
+                            Text(
+                                text = "No pending actions right now. Good job!",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        } else {
+                            actions.forEach { action ->
+                                ActionCard(
+                                    modifier = Modifier.clickable { onNavigateToApplicationDetail(action.jobId) },
+                                    title = action.title,
+                                    subtitle = "${action.company} — ${action.description}",
+                                    tagText = if (action.actionType == ActionType.FOLLOW_UP) "ACTION" else "PREP",
+                                    tagColor = if (action.actionType == ActionType.FOLLOW_UP) Color(0xFFBA1A1A) else Color(0xFF92400E),
+                                    tagBgColor = if (action.actionType == ActionType.FOLLOW_UP) Color(0xFFFFDAD6) else Color(0xFFFEF3C7),
+                                    lineColor = if (action.actionType == ActionType.FOLLOW_UP) Color(0xFFBA1A1A) else Color(0xFFF59E0B)
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .padding(top = 12.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(if (action.actionType == ActionType.FOLLOW_UP) Color(0xFFFFDAD6).copy(alpha=0.3f) else MaterialTheme.colorScheme.surfaceVariant)
+                                            .clickable {
+                                                if (action.actionType == ActionType.PREPARE_INTERVIEW) {
+                                                    onNavigateToPrep(action.jobId)
+                                                } else if (action.actionType == ActionType.FOLLOW_UP) {
+                                                    onNavigateToAiChat()
+                                                }
+                                            }
+                                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Star,
+                                            contentDescription = "AI",
+                                            tint = MaterialTheme.colorScheme.primaryContainer,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Text(
+                                            text = if (action.actionType == ActionType.FOLLOW_UP) "Generate with AI" else "Prepare with AI",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.primaryContainer
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(12.dp))
+                            }
+                        }
+                    }
+                    is UiState.Empty -> {
                         Text(
-                            text = "Draft ready to review",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primaryContainer
+                            text = "No pending actions right now. Good job!",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Action Card: Prepare Interview
-                ActionCard(
-                    title = "Prepare Interview",
-                    subtitle = "Google • UX Engineer (Round 2)",
-                    tagText = "TOMORROW",
-                    tagColor = Color(0xFF92400E),
-                    tagBgColor = Color(0xFFFEF3C7),
-                    lineColor = Color(0xFFF59E0B)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 12.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.List,
-                            contentDescription = "Notes",
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(16.dp)
-                        )
+                    is UiState.Error -> {
                         Text(
-                            text = "Review Notes",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            text = (uiState as UiState.Error).message,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
                         )
                     }
+                    else -> {}
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "THIS WEEK",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Medium
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Action Card: Complete Application
-                ActionCard(
-                    title = "Complete Application",
-                    subtitle = "Microsoft • Product Designer",
-                    tagText = "DUE FRI",
-                    tagColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    tagBgColor = MaterialTheme.colorScheme.surfaceVariant,
-                    lineColor = MaterialTheme.colorScheme.primaryContainer
-                )
                 
                 Spacer(modifier = Modifier.height(80.dp))
             }
@@ -407,6 +393,7 @@ private fun AiToolCard(
 
 @Composable
 private fun ActionCard(
+    modifier: Modifier = Modifier,
     title: String,
     subtitle: String,
     tagText: String,
@@ -416,7 +403,7 @@ private fun ActionCard(
     content: @Composable () -> Unit = {}
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White)
