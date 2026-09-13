@@ -52,12 +52,15 @@ import com.sandeep.aijobapplicationtracker.utils.UiState
 @Composable
 fun AiAssistantScreen(
     onNavigateToPrep: (String) -> Unit,
+    onNavigateToJobAnalyzer: () -> Unit,
+    onNavigateToResumeMatch: (String) -> Unit,
     onNavigateToHome: () -> Unit = {},
     onNavigateToApplications: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     viewModel: AiAssistantViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val latestJobId by viewModel.latestJobId.collectAsState()
 
     val bottomNavItems = listOf(
         BottomNavItem("Home", Icons.Filled.Home, Screen.Home.route),
@@ -135,7 +138,8 @@ fun AiAssistantScreen(
                         subtitle = "Match criteria",
                         iconBgColor = Color(0xFFEEF2FF),
                         iconTintColor = MaterialTheme.colorScheme.primaryContainer,
-                        hoverColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+                        hoverColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
+                        onClick = onNavigateToJobAnalyzer
                     )
                     // Resume Match
                     AiToolCard(
@@ -144,7 +148,8 @@ fun AiAssistantScreen(
                         subtitle = "Optimize CV",
                         iconBgColor = Color(0xFFCFFAFE),
                         iconTintColor = MaterialTheme.colorScheme.secondary,
-                        hoverColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
+                        hoverColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                        onClick = { latestJobId?.let { onNavigateToResumeMatch(it) } }
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -155,7 +160,7 @@ fun AiAssistantScreen(
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.White)
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-                        .clickable { onNavigateToPrep("mock_id") }
+                        .clickable { latestJobId?.let { onNavigateToPrep(it) } }
                         .padding(16.dp)
                 ) {
                     Row(
@@ -356,13 +361,15 @@ private fun AiToolCard(
     subtitle: String,
     iconBgColor: Color,
     iconTintColor: Color,
-    hoverColor: Color
+    hoverColor: Color,
+    onClick: () -> Unit = {}
 ) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White)
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+            .clickable { onClick() }
             .padding(16.dp)
     ) {
         Column {

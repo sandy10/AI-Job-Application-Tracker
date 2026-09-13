@@ -122,10 +122,10 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor() : AiAnalyzerRepositor
                     { "topic": "Kotlin Coroutines", "priority": "High priority" }
                   ],
                   "likelyQuestions": [
-                    { "question": "Explain structured concurrency.", "answerHint": "Brief hint on how to answer." }
+                    { "question": "Explain structured concurrency.", "answerHint": "A highly accurate, detailed, and technically proper answer. Use structured bullet points. If applicable, include a simple ASCII diagram to explain the concept." }
                   ],
                   "behavioralQuestions": [
-                    { "question": "Tell me about a time...", "answerHint": "Use STAR method..." }
+                    { "question": "Tell me about a time...", "answerHint": "Detailed advice using the STAR method..." }
                   ]
                 }
             """.trimIndent()
@@ -208,8 +208,8 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor() : AiAnalyzerRepositor
                 
                 Return ONLY a valid JSON array of objects, with no markdown formatting or backticks:
                 [
-                  { "question": "Question 1?", "answerHint": "Hint 1" },
-                  { "question": "Question 2?", "answerHint": "Hint 2" }
+                  { "question": "Question 1?", "answerHint": "A highly accurate, detailed, and technically proper answer. Use structured bullet points. If applicable, include a simple ASCII diagram." },
+                  { "question": "Question 2?", "answerHint": "A highly accurate, detailed, and technically proper answer. Use structured bullet points. If applicable, include a simple ASCII diagram." }
                 ]
             """.trimIndent()
 

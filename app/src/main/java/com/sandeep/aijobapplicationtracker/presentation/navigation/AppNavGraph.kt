@@ -170,6 +170,8 @@ fun AppNavGraph() {
         composable(Screen.AiAssistant.route) {
             AiAssistantScreen(
                 onNavigateToPrep = { jobId -> navController.navigate(Screen.AiInterviewPrep.createRoute(jobId)) },
+                onNavigateToJobAnalyzer = { navController.navigate(Screen.AiJobAnalyzer.route) },
+                onNavigateToResumeMatch = { navController.navigate(Screen.AiResumeMatch.createRoute("mock_id")) },
                 onNavigateToHome = { navController.navigate(Screen.Home.route) },
                 onNavigateToApplications = { navController.navigate(Screen.ApplicationsList.route) },
                 onNavigateToProfile = { navController.navigate(Screen.ProfileSettings.route) }

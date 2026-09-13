@@ -7,8 +7,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.sandeep.aijobapplicationtracker.domain.repository.JobApplicationRepository
 
 enum class ActionType {
     FOLLOW_UP, PREPARE_INTERVIEW
@@ -24,9 +27,15 @@ data class NextActionItem(
 )
 
 @HiltViewModel
-class AiAssistantViewModel @Inject constructor() : ViewModel() {
+class AiAssistantViewModel @Inject constructor(
+    private val jobRepository: JobApplicationRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<List<NextActionItem>>>(UiState.Loading)
     val uiState: StateFlow<UiState<List<NextActionItem>>> = _uiState
+
+    val latestJobId: StateFlow<String?> = jobRepository.getApplications()
+        .map { apps -> apps.firstOrNull()?.id }
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), null)
 
     init {
         fetchNextActions()
