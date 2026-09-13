@@ -44,28 +44,43 @@ class AiAssistantViewModel @Inject constructor(
     private fun fetchNextActions() {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            delay(1000)
             
-            val mockActions = listOf(
-                NextActionItem(
-                    id = "1",
-                    company = "ABC Technologies",
-                    title = "Follow-up Required",
-                    description = "Applied 7 days ago. No response recorded. Recommended: Send recruiter follow-up.",
-                    actionType = ActionType.FOLLOW_UP,
-                    jobId = "job_123"
-                ),
-                NextActionItem(
-                    id = "2",
-                    company = "Google",
-                    title = "Interview Tomorrow",
-                    description = "Recommended: Prepare Android System Design.",
-                    actionType = ActionType.PREPARE_INTERVIEW,
-                    jobId = "job_456"
-                )
-            )
-            
-            _uiState.value = UiState.Success(mockActions)
+            jobRepository.getApplications().collect { applications ->
+                val dynamicActions = mutableListOf<NextActionItem>()
+                
+                applications.forEach { app ->
+                    val status = app.status.lowercase()
+                    if (status == "applied") {
+                        dynamicActions.add(
+                            NextActionItem(
+                                id = app.id + "_followup",
+                                company = app.company,
+                                title = "Follow-up Recommended",
+                                description = "You applied to ${app.jobTitle}. Consider sending a follow-up if you haven't heard back.",
+                                actionType = ActionType.FOLLOW_UP,
+                                jobId = app.id
+                            )
+                        )
+                    } else if (status == "interview") {
+                        dynamicActions.add(
+                            NextActionItem(
+                                id = app.id + "_prep",
+                                company = app.company,
+                                title = "Interview Prep",
+                                description = "Recommended: Prepare for your upcoming ${app.jobTitle} interview.",
+                                actionType = ActionType.PREPARE_INTERVIEW,
+                                jobId = app.id
+                            )
+                        )
+                    }
+                }
+                
+                if (dynamicActions.isEmpty()) {
+                    _uiState.value = UiState.Empty
+                } else {
+                    _uiState.value = UiState.Success(dynamicActions.take(5))
+                }
+            }
         }
     }
 }
