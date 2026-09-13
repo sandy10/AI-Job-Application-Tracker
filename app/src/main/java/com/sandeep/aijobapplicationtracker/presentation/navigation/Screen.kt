@@ -35,6 +35,8 @@ sealed class Screen(val route: String) {
         fun createRoute(jobId: String) = "ai_interview_prep/$jobId"
     }
     
+    object AiChat : Screen("ai_chat")
+    
     object ProfileSettings : Screen("profile_settings")
     // TODO: Add your screens here
 }

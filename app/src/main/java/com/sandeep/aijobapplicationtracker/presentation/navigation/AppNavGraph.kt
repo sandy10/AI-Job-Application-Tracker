@@ -18,6 +18,7 @@ import com.sandeep.aijobapplicationtracker.presentation.screens.aianalysisresult
 import com.sandeep.aijobapplicationtracker.presentation.screens.myresumes.MyResumesScreen
 import com.sandeep.aijobapplicationtracker.presentation.screens.airesumematch.AiResumeMatchScreen
 import com.sandeep.aijobapplicationtracker.presentation.screens.aiassistant.AiAssistantScreen
+import com.sandeep.aijobapplicationtracker.presentation.screens.aichat.AiChatScreen
 import com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep.AiInterviewPrepScreen
 import com.sandeep.aijobapplicationtracker.presentation.screens.profilesettings.ProfileSettingsScreen
 
@@ -171,7 +172,7 @@ fun AppNavGraph() {
             AiAssistantScreen(
                 onNavigateToPrep = { jobId -> navController.navigate(Screen.AiInterviewPrep.createRoute(jobId)) },
                 onNavigateToJobAnalyzer = { navController.navigate(Screen.AiJobAnalyzer.route) },
-                onNavigateToResumeMatch = { jobId -> navController.navigate(Screen.AiResumeMatch.createRoute(jobId)) },
+                onNavigateToAiChat = { navController.navigate(Screen.AiChat.route) },
                 onNavigateToHome = { navController.navigate(Screen.Home.route) },
                 onNavigateToApplications = { navController.navigate(Screen.ApplicationsList.route) },
                 onNavigateToProfile = { navController.navigate(Screen.ProfileSettings.route) }
@@ -180,6 +181,12 @@ fun AppNavGraph() {
         
         composable(Screen.AiInterviewPrep.route) {
             AiInterviewPrepScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        
+        composable(Screen.AiChat.route) {
+            AiChatScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

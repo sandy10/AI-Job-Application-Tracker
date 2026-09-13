@@ -310,6 +310,18 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor() : AiAnalyzerRepositor
         }
     }
 
+    override suspend fun sendChatMessage(prompt: String): Result<String> {
+        return try {
+            val response = generativeModel.generateContent(
+                "You are an expert technical interviewer and AI career assistant. Provide accurate, logical, and concise answers to the user's interview questions. Be encouraging but highly technical.\n\n$prompt"
+            )
+            val answer = response.text ?: throw Exception("Empty response from AI")
+            Result.success(answer)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override fun clearExtractedData() {
         _latestExtractedData.value = null
     }

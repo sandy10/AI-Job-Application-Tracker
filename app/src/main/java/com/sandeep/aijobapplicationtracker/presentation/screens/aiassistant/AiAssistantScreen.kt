@@ -53,7 +53,7 @@ import com.sandeep.aijobapplicationtracker.utils.UiState
 fun AiAssistantScreen(
     onNavigateToPrep: (String) -> Unit,
     onNavigateToJobAnalyzer: () -> Unit,
-    onNavigateToResumeMatch: (String) -> Unit,
+    onNavigateToAiChat: () -> Unit,
     onNavigateToHome: () -> Unit = {},
     onNavigateToApplications: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
@@ -141,15 +141,15 @@ fun AiAssistantScreen(
                         hoverColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
                         onClick = onNavigateToJobAnalyzer
                     )
-                    // Resume Match
+                    // AI Chat
                     AiToolCard(
                         modifier = Modifier.weight(1f),
-                        title = "Resume Match",
-                        subtitle = "Optimize CV",
+                        title = "AI Chat",
+                        subtitle = "Interactive Prep",
                         iconBgColor = Color(0xFFCFFAFE),
                         iconTintColor = MaterialTheme.colorScheme.secondary,
                         hoverColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
-                        onClick = { latestJobId?.let { onNavigateToResumeMatch(it) } }
+                        onClick = onNavigateToAiChat
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
