@@ -3,6 +3,11 @@ package com.sandeep.aijobapplicationtracker.presentation.screens.airesumematch
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,6 +33,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.Star
@@ -43,9 +49,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -104,7 +112,7 @@ fun AiResumeMatchScreen(
                 .padding(paddingValues)
         ) {
             when (val s = uiState) {
-                is UiState.Idle, is UiState.Loading -> LoadingView()
+                is UiState.Idle, is UiState.Loading -> ResumeScanningView()
                 is UiState.Success -> AiResumeMatchContent(
                     data = s.data,
                     onPrepareInterviewClick = { onPrepareInterviewClick(jobId) },
@@ -396,6 +404,87 @@ private fun AiResumeMatchContent(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ResumeScanningView() {
+    var currentPhaseIndex by remember { mutableIntStateOf(0) }
+    val phases = listOf(
+        "Reading resume file...",
+        "Extracting skills & keywords...",
+        "Evaluating work experience...",
+        "Calculating match score..."
+    )
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(1500)
+            currentPhaseIndex = (currentPhaseIndex + 1) % phases.size
+        }
+    }
+
+    val infiniteTransition = rememberInfiniteTransition()
+    val scanPosition by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "Scan Animation"
+    )
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFEEF2FF))
+                    .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.List,
+                    contentDescription = "Resume Document",
+                    tint = Color(0xFF3525CD),
+                    modifier = Modifier.size(64.dp)
+                )
+
+                // Scanner line
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val yPos = size.height * scanPosition
+                    drawLine(
+                        color = Color(0xFF16A34A).copy(alpha = 0.7f),
+                        start = androidx.compose.ui.geometry.Offset(0f, yPos),
+                        end = androidx.compose.ui.geometry.Offset(size.width, yPos),
+                        strokeWidth = 4.dp.toPx()
+                    )
+                    // Scanner glow effect
+                    drawRect(
+                        color = Color(0xFF16A34A).copy(alpha = 0.2f),
+                        topLeft = androidx.compose.ui.geometry.Offset(0f, yPos - 10.dp.toPx()),
+                        size = androidx.compose.ui.geometry.Size(size.width, 20.dp.toPx())
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = phases[currentPhaseIndex],
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF3525CD)
+            )
         }
     }
 }
