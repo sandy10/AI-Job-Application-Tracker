@@ -17,12 +17,15 @@ import com.sandeep.aijobapplicationtracker.domain.model.JobApplicationModel
 import java.util.UUID
 
 import com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepository
+import com.sandeep.aijobapplicationtracker.domain.repository.ResumeRepository
 import com.sandeep.aijobapplicationtracker.domain.model.ExtractedJobData
+import kotlinx.coroutines.flow.firstOrNull
 
 @HiltViewModel
 class AddApplicationViewModel @Inject constructor(
     private val repository: JobApplicationRepository,
-    private val aiAnalyzerRepository: AiAnalyzerRepository
+    private val aiAnalyzerRepository: AiAnalyzerRepository,
+    private val resumeRepository: ResumeRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val uiState: StateFlow<UiState<Unit>> = _uiState
@@ -66,6 +69,11 @@ class AddApplicationViewModel @Inject constructor(
                 return@launch
             }
             
+            val existingApp = existingId?.let { getApplicationDirectly(it) }
+            val resumes = resumeRepository.getResumes().firstOrNull() ?: emptyList()
+            val primaryResumeId = resumes.find { it.isPrimary }?.id ?: resumes.firstOrNull()?.id ?: ""
+            val resumeIdToSave = existingApp?.selectedResumeId?.takeIf { it.isNotBlank() } ?: primaryResumeId
+            
             val app = JobApplicationModel(
                 id = existingId ?: UUID.randomUUID().toString(),
                 company = company,
@@ -82,7 +90,9 @@ class AddApplicationViewModel @Inject constructor(
                 jobDescription = jobDescription,
                 notes = notes,
                 matchScore = matchScore,
-                timestamp = System.currentTimeMillis()
+                selectedResumeId = resumeIdToSave,
+                timestamp = existingApp?.timestamp ?: System.currentTimeMillis(),
+                interviews = existingApp?.interviews ?: emptyList()
             )
             
             repository.saveApplication(app)

@@ -98,7 +98,9 @@ class MockJobApplicationRepositoryImpl @Inject constructor(
                         jobDescription = obj.optString("jobDescription", ""),
                         notes = obj.optString("notes", ""),
                         matchScore = obj.optInt("matchScore", 0),
-                        timestamp = obj.optLong("timestamp", 0L),
+                        selectedResumeId = obj.optString("selectedResumeId", ""),
+                        aiInterviewPlanJson = obj.optString("aiInterviewPlanJson", ""),
+                        timestamp = obj.optLong("timestamp", System.currentTimeMillis()),
                         interviews = interviewsList
                     )
                 )
@@ -129,6 +131,8 @@ class MockJobApplicationRepositoryImpl @Inject constructor(
                     put("jobDescription", app.jobDescription)
                     put("notes", app.notes)
                     put("matchScore", app.matchScore)
+                    put("selectedResumeId", app.selectedResumeId)
+                    put("aiInterviewPlanJson", app.aiInterviewPlanJson)
                     put("timestamp", app.timestamp)
 
                     val interviewsArray = JSONArray()

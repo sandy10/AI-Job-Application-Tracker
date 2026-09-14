@@ -308,6 +308,7 @@ private fun ApplicationDetailContent(
                         Spacer(modifier = Modifier.width(4.dp))
                         val scoreText = when {
                             data.resumeUsed == "No Resume Uploaded" -> "Upload Resume to Match"
+                            data.isMatchScoreOutdated -> "Analyze to match score"
                             data.matchScore == 0 -> "Calculate Match"
                             else -> "${data.matchScore}% Match"
                         }
@@ -438,6 +439,7 @@ private fun ApplicationDetailContent(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = if (data.resumeUsed == "No Resume Uploaded") "Update Resume to Match"
+                                    else if (data.isMatchScoreOutdated) "Analyze to match score"
                                     else if (data.matchScore > 0) "${data.matchScore}% Match based on Job Description"
                                     else "Calculate Match",
                                     fontSize = 12.sp,

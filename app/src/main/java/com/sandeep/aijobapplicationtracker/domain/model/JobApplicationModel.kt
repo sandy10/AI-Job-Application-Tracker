@@ -25,6 +25,8 @@ data class JobApplicationModel(
     val jobDescription: String,
     val notes: String,
     val matchScore: Int = 0,
+    val selectedResumeId: String = "",
+    val aiInterviewPlanJson: String = "",
     val timestamp: Long,
     val interviews: List<InterviewModel> = emptyList()
 )

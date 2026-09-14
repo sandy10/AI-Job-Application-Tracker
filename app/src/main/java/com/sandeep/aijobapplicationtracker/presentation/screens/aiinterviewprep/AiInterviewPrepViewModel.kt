@@ -29,7 +29,105 @@ data class InterviewPlan(
     val focusAreas: List<FocusArea>,
     val likelyQuestions: List<QuestionAnswer>,
     val behavioralQuestions: List<QuestionAnswer>
-)
+) {
+    fun toJsonString(): String {
+        val obj = org.json.JSONObject()
+        obj.put("company", company)
+        obj.put("role", role)
+        obj.put("strategyTip", strategyTip)
+
+        val faArray = org.json.JSONArray()
+        focusAreas.forEach {
+            val faObj = org.json.JSONObject()
+            faObj.put("topic", it.topic)
+            faObj.put("priority", it.priority)
+            faArray.put(faObj)
+        }
+        obj.put("focusAreas", faArray)
+
+        val lqArray = org.json.JSONArray()
+        likelyQuestions.forEach {
+            val lqObj = org.json.JSONObject()
+            lqObj.put("question", it.question)
+            lqObj.put("answerHint", it.answerHint)
+            lqArray.put(lqObj)
+        }
+        obj.put("likelyQuestions", lqArray)
+
+        val bqArray = org.json.JSONArray()
+        behavioralQuestions.forEach {
+            val bqObj = org.json.JSONObject()
+            bqObj.put("question", it.question)
+            bqObj.put("answerHint", it.answerHint)
+            bqArray.put(bqObj)
+        }
+        obj.put("behavioralQuestions", bqArray)
+
+        return obj.toString()
+    }
+
+    companion object {
+        fun fromJsonString(json: String): InterviewPlan? {
+            if (json.isBlank()) return null
+            try {
+                val obj = org.json.JSONObject(json)
+                
+                val focusAreas = mutableListOf<FocusArea>()
+                val faArray = obj.optJSONArray("focusAreas")
+                if (faArray != null) {
+                    for (i in 0 until faArray.length()) {
+                        val faObj = faArray.getJSONObject(i)
+                        focusAreas.add(
+                            FocusArea(
+                                topic = faObj.optString("topic", ""),
+                                priority = faObj.optString("priority", "")
+                            )
+                        )
+                    }
+                }
+
+                val likelyQuestions = mutableListOf<QuestionAnswer>()
+                val lqArray = obj.optJSONArray("likelyQuestions")
+                if (lqArray != null) {
+                    for (i in 0 until lqArray.length()) {
+                        val lqObj = lqArray.getJSONObject(i)
+                        likelyQuestions.add(
+                            QuestionAnswer(
+                                question = lqObj.optString("question", ""),
+                                answerHint = lqObj.optString("answerHint", "")
+                            )
+                        )
+                    }
+                }
+
+                val behavioralQuestions = mutableListOf<QuestionAnswer>()
+                val bqArray = obj.optJSONArray("behavioralQuestions")
+                if (bqArray != null) {
+                    for (i in 0 until bqArray.length()) {
+                        val bqObj = bqArray.getJSONObject(i)
+                        behavioralQuestions.add(
+                            QuestionAnswer(
+                                question = bqObj.optString("question", ""),
+                                answerHint = bqObj.optString("answerHint", "")
+                            )
+                        )
+                    }
+                }
+
+                return InterviewPlan(
+                    company = obj.optString("company", ""),
+                    role = obj.optString("role", ""),
+                    strategyTip = obj.optString("strategyTip", ""),
+                    focusAreas = focusAreas,
+                    likelyQuestions = likelyQuestions,
+                    behavioralQuestions = behavioralQuestions
+                )
+            } catch (e: Exception) {
+                return null
+            }
+        }
+    }
+}
 
 @HiltViewModel
 class AiInterviewPrepViewModel @Inject constructor(
@@ -50,7 +148,7 @@ class AiInterviewPrepViewModel @Inject constructor(
     private val _isGeneratingMore = MutableStateFlow(false)
     val isGeneratingMore: StateFlow<Boolean> = _isGeneratingMore
 
-    private fun generatePrepPlan() {
+    fun generatePrepPlan(forceRegenerate: Boolean = false) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
@@ -58,6 +156,14 @@ class AiInterviewPrepViewModel @Inject constructor(
                 val app = apps.find { it.id == jobId }
                 
                 if (app != null) {
+                    if (!forceRegenerate && app.aiInterviewPlanJson.isNotBlank()) {
+                        val cachedPlan = InterviewPlan.fromJsonString(app.aiInterviewPlanJson)
+                        if (cachedPlan != null) {
+                            _uiState.value = UiState.Success(cachedPlan)
+                            return@launch
+                        }
+                    }
+
                     val result = aiRepository.generateInterviewPlan(
                         jobDescription = app.jobDescription,
                         role = app.jobTitle,
@@ -65,7 +171,12 @@ class AiInterviewPrepViewModel @Inject constructor(
                     )
                     
                     if (result.isSuccess) {
-                        _uiState.value = UiState.Success(result.getOrNull()!!)
+                        val plan = result.getOrNull()!!
+                        _uiState.value = UiState.Success(plan)
+                        
+                        // Save back to repository
+                        val updatedApp = app.copy(aiInterviewPlanJson = plan.toJsonString())
+                        jobRepository.saveApplication(updatedApp)
                     } else {
                         _uiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "Failed to generate plan.")
                     }

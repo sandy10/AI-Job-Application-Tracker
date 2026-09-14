@@ -114,7 +114,7 @@ private fun AiJobAnalyzerContent(
 ) {
     val isLoading = uiState is UiState.Loading
     var jobDescription by remember { mutableStateOf("") }
-    val maxChars = 5000
+    val maxChars = 50000
 
     Column(
         modifier = modifier

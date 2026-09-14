@@ -135,6 +135,8 @@ private fun com.google.firebase.firestore.DocumentSnapshot.toJobApplicationModel
             jobDescription = getString("jobDescription") ?: "",
             notes = getString("notes") ?: "",
             matchScore = (getLong("matchScore") ?: 0L).toInt(),
+            selectedResumeId = getString("selectedResumeId") ?: "",
+            aiInterviewPlanJson = getString("aiInterviewPlanJson") ?: "",
             timestamp = getLong("timestamp") ?: System.currentTimeMillis(),
             interviews = interviewsList
         )
@@ -160,6 +162,8 @@ private fun JobApplicationModel.toFirestoreMap(): Map<String, Any> = mapOf(
     "jobDescription" to jobDescription,
     "notes" to notes,
     "matchScore" to matchScore,
+    "selectedResumeId" to selectedResumeId,
+    "aiInterviewPlanJson" to aiInterviewPlanJson,
     "timestamp" to timestamp,
     "interviews" to interviews.map { interview ->
         mapOf(

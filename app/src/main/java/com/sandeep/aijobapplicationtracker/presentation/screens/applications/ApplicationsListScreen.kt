@@ -416,11 +416,17 @@ private fun DetailedApplicationCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                val relativeTime = android.text.format.DateUtils.getRelativeTimeSpanString(
+                    app.timestamp,
+                    System.currentTimeMillis(),
+                    android.text.format.DateUtils.MINUTE_IN_MILLIS
+                ).toString().lowercase(java.util.Locale.getDefault())
+
                 val (icon, text, color) = when(app.status) {
-                    ApplicationStatus.INTERVIEW -> Triple(Icons.Default.Star, "Interview tomorrow • 11:00 AM", Color(0xFFD97706))
-                    ApplicationStatus.APPLIED -> Triple(Icons.Default.Info, "Applied 4 days ago", Color(0xFF464555))
-                    ApplicationStatus.SAVED -> Triple(Icons.Default.Info, "Saved yesterday", Color(0xFF464555))
-                    else -> Triple(Icons.Default.Info, "Updated recently", Color(0xFF464555))
+                    ApplicationStatus.INTERVIEW -> Triple(Icons.Default.Star, "Interview scheduled", Color(0xFFD97706))
+                    ApplicationStatus.APPLIED -> Triple(Icons.Default.Info, "Applied $relativeTime", Color(0xFF464555))
+                    ApplicationStatus.SAVED -> Triple(Icons.Default.Info, "Saved $relativeTime", Color(0xFF464555))
+                    else -> Triple(Icons.Default.Info, "Updated $relativeTime", Color(0xFF464555))
                 }
                 Icon(
                     imageVector = icon,

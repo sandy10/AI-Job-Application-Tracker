@@ -49,8 +49,11 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor() : AiAnalyzerRepositor
                   "recruiter": "Recruiter Name/Email if present, otherwise empty string",
                   "dateApplied": "Date if explicitly mentioned, otherwise empty string",
                   "skills": ["Skill 1", "Skill 2"],
-                  "matchScore": 85
+                  "matchScore": 72
                 }
+                
+                IMPORTANT INSTRUCTION FOR matchScore:
+                The matchScore MUST be an integer between 0 and 100. Critically evaluate how well the Job Description matches the User Profile Context (skills, experience, target role). Be realistic and vary the score based on actual keyword matches and experience alignment. Do not just return 95.
                 
                 Job Description:
                 $text

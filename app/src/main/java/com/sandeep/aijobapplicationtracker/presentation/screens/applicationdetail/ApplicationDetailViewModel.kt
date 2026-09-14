@@ -35,6 +35,7 @@ data class JobDetailData(
     val status: ApplicationStatus,
     val dateApplied: String,
     val matchScore: Int,
+    val isMatchScoreOutdated: Boolean = false,
     val nextAction: NextAction?,
     val jobDescriptionSnippet: String,
     val resumeUsed: String,
@@ -78,6 +79,7 @@ class ApplicationDetailViewModel @Inject constructor(
                         status = mapStatus(app.status),
                         dateApplied = app.dateApplied.ifBlank { "-" },
                         matchScore = app.matchScore,
+                        isMatchScoreOutdated = primaryResume != null && app.selectedResumeId.isNotBlank() && app.selectedResumeId != primaryResume.id,
                         nextAction = NextAction(
                             title = "AI Interview Preparation",
                             description = "Generate a custom interview plan based on the job description and your profile.",

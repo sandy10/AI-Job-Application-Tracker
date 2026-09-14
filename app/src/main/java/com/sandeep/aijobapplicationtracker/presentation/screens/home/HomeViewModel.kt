@@ -29,7 +29,10 @@ data class JobApplicationItem(
     val role: String,
     val company: String,
     val status: String,
-    val matchScore: Int
+    val matchScore: Int,
+    val location: String,
+    val workMode: String,
+    val timestamp: Long
 )
 
 data class HomeData(
@@ -77,7 +80,10 @@ class HomeViewModel @Inject constructor(
                         role = app.jobTitle,
                         company = app.company,
                         status = app.status,
-                        matchScore = app.matchScore
+                        matchScore = app.matchScore,
+                        location = app.location,
+                        workMode = app.workMode,
+                        timestamp = app.timestamp
                     )
                 }
 

@@ -444,22 +444,47 @@ private fun RecentApplicationCard(app: JobApplicationItem, onClick: () -> Unit) 
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val locText = if (app.location.isNotBlank()) app.location else "Location unknown"
+                val workText = if (app.workMode.isNotBlank()) app.workMode else "Mode unknown"
+                val relativeTime = android.text.format.DateUtils.getRelativeTimeSpanString(
+                    app.timestamp,
+                    System.currentTimeMillis(),
+                    android.text.format.DateUtils.MINUTE_IN_MILLIS
+                ).toString()
+
                 Text(
-                    text = "Location • Hybrid",
+                    text = "$locText • $workText",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = CircleShape
-                ) {
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = app.status,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        text = relativeTime,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.SemiBold
+                        modifier = Modifier.padding(end = 8.dp)
                     )
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = CircleShape
+                    ) {
+                        val displayStatus = when (app.status) {
+                            "Saved for later" -> "Saved"
+                            "Offer Received" -> "Offer"
+                            "Recruiter Contact" -> "Recruiter"
+                            else -> app.status
+                        }
+                        Text(
+                            text = displayStatus,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
         }
