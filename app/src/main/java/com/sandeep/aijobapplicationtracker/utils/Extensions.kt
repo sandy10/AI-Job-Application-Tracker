@@ -17,6 +17,14 @@ fun Context.showToast(message: String) {
 }
 
 /**
+ * Hides the software keyboard.
+ */
+fun Context.hideKeyboard(view: android.view.View) {
+    val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+}
+
+/**
  * Modifier extensions.
  */
 fun Modifier.clickableWithRipple(onClick: () -> Unit): Modifier = composed {

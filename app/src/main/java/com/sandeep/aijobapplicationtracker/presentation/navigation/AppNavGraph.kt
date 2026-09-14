@@ -56,6 +56,11 @@ fun AppNavGraph() {
         composable(Screen.SignIn.route) {
             SignInScreen(
                 onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.SignIn.route) { inclusive = true }
+                    }
+                },
+                onNavigateToCareerSetup = {
                     navController.navigate(Screen.CareerSetup.route) {
                         popUpTo(Screen.SignIn.route) { inclusive = true }
                     }

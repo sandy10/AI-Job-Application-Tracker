@@ -11,6 +11,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 import com.sandeep.aijobapplicationtracker.domain.repository.AuthRepository
+import com.sandeep.aijobapplicationtracker.domain.repository.ProfileRepository
+import kotlinx.coroutines.flow.first
 
 /**
  * ViewModel for the Sign In screen.
@@ -18,10 +20,11 @@ import com.sandeep.aijobapplicationtracker.domain.repository.AuthRepository
  */
 @HiltViewModel
 class SignInViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val profileRepository: ProfileRepository
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
-    val uiState: StateFlow<UiState<Unit>> = _uiState
+    private val _uiState = MutableStateFlow<UiState<Boolean>>(UiState.Idle)
+    val uiState: StateFlow<UiState<Boolean>> = _uiState
 
     /**
      * Signs in with email and password using Firebase Auth.
@@ -33,12 +36,49 @@ class SignInViewModel @Inject constructor(
             val result = authRepository.login(email, pass)
             
             if (result.isSuccess) {
-                _uiState.value = UiState.Success(Unit)
+                val profile = profileRepository.getProfile().first()
+                val isComplete = profile?.targetRole?.isNotBlank() == true
+                _uiState.value = UiState.Success(isComplete)
             } else {
                 _uiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "Sign in failed")
                 // Reset to idle after error so the user can try again
                 delay(2000)
                 _uiState.value = UiState.Idle
+            }
+        }
+    }
+
+    /**
+     * Signs up with email and password using Firebase Auth.
+     */
+    fun signUp(email: String, pass: String) {
+        viewModelScope.launch {
+            _uiState.value = UiState.Loading
+            
+            val result = authRepository.signUp(email, pass)
+            
+            if (result.isSuccess) {
+                val profile = profileRepository.getProfile().first()
+                val isComplete = profile?.targetRole?.isNotBlank() == true
+                _uiState.value = UiState.Success(isComplete)
+            } else {
+                _uiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "Sign up failed")
+                delay(2000)
+                _uiState.value = UiState.Idle
+            }
+        }
+    }
+
+    /**
+     * Sends a password reset email.
+     */
+    fun resetPassword(email: String, onResult: (Boolean, String?) -> Unit) {
+        viewModelScope.launch {
+            val result = authRepository.sendPasswordResetEmail(email)
+            if (result.isSuccess) {
+                onResult(true, null)
+            } else {
+                onResult(false, result.exceptionOrNull()?.message ?: "Failed to send reset email")
             }
         }
     }
@@ -54,7 +94,9 @@ class SignInViewModel @Inject constructor(
             val result = authRepository.signInWithGoogleIdToken(idToken)
 
             if (result.isSuccess) {
-                _uiState.value = UiState.Success(Unit)
+                val profile = profileRepository.getProfile().first()
+                val isComplete = profile?.targetRole?.isNotBlank() == true
+                _uiState.value = UiState.Success(isComplete)
             } else {
                 _uiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "Google Sign In failed")
                 delay(2000)

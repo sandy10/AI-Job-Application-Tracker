@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedButton
@@ -56,7 +57,10 @@ fun AppSecondaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    textColor: androidx.compose.ui.graphics.Color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+    containerColor: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Transparent,
+    icon: (@Composable () -> Unit)? = null
 ) {
     OutlinedButton(
         onClick = onClick,
@@ -64,7 +68,11 @@ fun AppSecondaryButton(
             .fillMaxWidth()
             .height(52.dp),
         shape = RoundedCornerShape(12.dp),
-        enabled = enabled && !isLoading
+        enabled = enabled && !isLoading,
+        colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+            containerColor = containerColor,
+            contentColor = textColor
+        )
     ) {
         if (isLoading) {
             CircularProgressIndicator(
@@ -72,7 +80,16 @@ fun AppSecondaryButton(
                 color = androidx.compose.material3.MaterialTheme.colorScheme.primary
             )
         } else {
-            Text(text = text, style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
+            androidx.compose.foundation.layout.Row(
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+            ) {
+                if (icon != null) {
+                    icon()
+                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(8.dp))
+                }
+                Text(text = text, style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
+            }
         }
     }
 }

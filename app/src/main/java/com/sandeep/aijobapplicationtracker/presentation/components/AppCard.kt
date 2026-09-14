@@ -18,11 +18,12 @@ import androidx.compose.ui.unit.dp
 fun AppCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    containerColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surface,
     content: @Composable () -> Unit
 ) {
     val cardModifier = modifier.padding(8.dp)
     val shape = RoundedCornerShape(12.dp)
-    val colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    val colors = CardDefaults.cardColors(containerColor = containerColor)
     val elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
 
     if (onClick != null) {

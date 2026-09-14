@@ -47,6 +47,38 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
     }
 
     /**
+     * Signs up with email and password using Firebase Auth.
+     */
+    override suspend fun signUp(email: String, password: String): Result<Unit> {
+        return try {
+            firebaseAuth.createUserWithEmailAndPassword(email, password).await()
+            Timber.d("Firebase signup successful for: $email")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Firebase signup failed")
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Sends a password reset email using Firebase Auth.
+     */
+    override suspend fun sendPasswordResetEmail(email: String): Result<Unit> {
+        return try {
+            val methods = firebaseAuth.fetchSignInMethodsForEmail(email).await()
+            if (methods.signInMethods.isNullOrEmpty()) {
+                return Result.failure(Exception("No account found with this email"))
+            }
+            firebaseAuth.sendPasswordResetEmail(email).await()
+            Timber.d("Password reset email sent to: $email")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Password reset failed")
+            Result.failure(e)
+        }
+    }
+
+    /**
      * No-op placeholder. The actual Google Sign-In flow goes through
      * [signInWithGoogleIdToken] which receives the token from the UI layer.
      */

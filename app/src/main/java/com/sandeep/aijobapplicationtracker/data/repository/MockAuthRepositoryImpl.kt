@@ -43,6 +43,26 @@ class MockAuthRepositoryImpl @Inject constructor(
         return Result.success(Unit)
     }
 
+    override suspend fun signUp(email: String, password: String): Result<Unit> {
+        // Simulate network delay
+        delay(1500)
+        
+        if (email.isBlank() || password.isBlank()) {
+            return Result.failure(Exception("Email and password cannot be empty"))
+        }
+
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IS_LOGGED_IN] = true
+        }
+        return Result.success(Unit)
+    }
+
+    override suspend fun sendPasswordResetEmail(email: String): Result<Unit> {
+        delay(1000)
+        if (email.isBlank()) return Result.failure(Exception("Email cannot be empty"))
+        return Result.success(Unit)
+    }
+
     override suspend fun loginWithGoogle(): Result<Unit> {
         // Simulate network delay
         delay(1500)

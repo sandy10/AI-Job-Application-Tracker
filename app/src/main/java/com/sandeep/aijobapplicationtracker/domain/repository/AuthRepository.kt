@@ -18,6 +18,16 @@ interface AuthRepository {
     suspend fun login(email: String, password: String): Result<Unit>
 
     /**
+     * Sign up with email and password.
+     */
+    suspend fun signUp(email: String, password: String): Result<Unit>
+
+    /**
+     * Send password reset email.
+     */
+    suspend fun sendPasswordResetEmail(email: String): Result<Unit>
+
+    /**
      * Sign in with a Google ID token obtained from Credential Manager.
      */
     suspend fun loginWithGoogle(): Result<Unit>
