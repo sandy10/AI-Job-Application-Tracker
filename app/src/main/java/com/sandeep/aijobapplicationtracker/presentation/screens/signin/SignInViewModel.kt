@@ -21,7 +21,8 @@ import kotlinx.coroutines.flow.first
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val networkMonitor: com.sandeep.aijobapplicationtracker.utils.NetworkMonitor
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<Boolean>>(UiState.Idle)
     val uiState: StateFlow<UiState<Boolean>> = _uiState
@@ -30,6 +31,10 @@ class SignInViewModel @Inject constructor(
      * Signs in with email and password using Firebase Auth.
      */
     fun signIn(email: String, pass: String) {
+        if (!networkMonitor.isOnline()) {
+            _uiState.value = UiState.Error("No internet connection")
+            return
+        }
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             
@@ -52,6 +57,10 @@ class SignInViewModel @Inject constructor(
      * Signs up with email and password using Firebase Auth.
      */
     fun signUp(email: String, pass: String) {
+        if (!networkMonitor.isOnline()) {
+            _uiState.value = UiState.Error("No internet connection")
+            return
+        }
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             
@@ -73,6 +82,10 @@ class SignInViewModel @Inject constructor(
      * Sends a password reset email.
      */
     fun resetPassword(email: String, onResult: (Boolean, String?) -> Unit) {
+        if (!networkMonitor.isOnline()) {
+            onResult(false, "No internet connection")
+            return
+        }
         viewModelScope.launch {
             val result = authRepository.sendPasswordResetEmail(email)
             if (result.isSuccess) {
@@ -88,6 +101,10 @@ class SignInViewModel @Inject constructor(
      * Exchanges the token for a Firebase credential and signs in.
      */
     fun signInWithGoogleIdToken(idToken: String) {
+        if (!networkMonitor.isOnline()) {
+            _uiState.value = UiState.Error("No internet connection")
+            return
+        }
         viewModelScope.launch {
             _uiState.value = UiState.Loading
 

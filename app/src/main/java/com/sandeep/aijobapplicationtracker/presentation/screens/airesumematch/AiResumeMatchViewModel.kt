@@ -28,7 +28,8 @@ class AiResumeMatchViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val repository: com.sandeep.aijobapplicationtracker.domain.repository.JobApplicationRepository,
     private val profileRepository: com.sandeep.aijobapplicationtracker.domain.repository.ProfileRepository,
-    private val aiAnalyzer: com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepository
+    private val aiAnalyzer: com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepository,
+    private val networkMonitor: com.sandeep.aijobapplicationtracker.utils.NetworkMonitor
 ) : ViewModel() {
 
     val jobId: String = savedStateHandle.get<String>("jobId") ?: ""
@@ -41,6 +42,10 @@ class AiResumeMatchViewModel @Inject constructor(
     }
 
     private fun analyzeMatch() {
+        if (!networkMonitor.isOnline()) {
+            _uiState.value = UiState.Error("No internet connection")
+            return
+        }
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {

@@ -133,7 +133,8 @@ data class InterviewPlan(
 class AiInterviewPrepViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val jobRepository: com.sandeep.aijobapplicationtracker.domain.repository.JobApplicationRepository,
-    private val aiRepository: com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepository
+    private val aiRepository: com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepository,
+    private val networkMonitor: com.sandeep.aijobapplicationtracker.utils.NetworkMonitor
 ) : ViewModel() {
 
     private val jobId: String = savedStateHandle.get<String>("jobId") ?: ""
@@ -162,6 +163,11 @@ class AiInterviewPrepViewModel @Inject constructor(
                             _uiState.value = UiState.Success(cachedPlan)
                             return@launch
                         }
+                    }
+
+                    if (!networkMonitor.isOnline()) {
+                        _uiState.value = UiState.Error("No internet connection")
+                        return@launch
                     }
 
                     val result = aiRepository.generateInterviewPlan(

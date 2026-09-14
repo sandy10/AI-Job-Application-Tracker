@@ -16,12 +16,17 @@ import com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepositor
 @HiltViewModel
 class AiJobAnalyzerViewModel @Inject constructor(
     private val repository: AiAnalyzerRepository,
-    private val profileRepository: com.sandeep.aijobapplicationtracker.domain.repository.ProfileRepository
+    private val profileRepository: com.sandeep.aijobapplicationtracker.domain.repository.ProfileRepository,
+    private val networkMonitor: com.sandeep.aijobapplicationtracker.utils.NetworkMonitor
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val uiState: StateFlow<UiState<Unit>> = _uiState
 
     fun analyzeJobDescription(jobDescription: String) {
+        if (!networkMonitor.isOnline()) {
+            _uiState.value = UiState.Error("No internet connection")
+            return
+        }
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             

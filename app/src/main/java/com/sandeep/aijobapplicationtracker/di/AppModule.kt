@@ -41,4 +41,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideFirebaseStorage(): FirebaseStorage = FirebaseStorage.getInstance()
+
+    @Provides
+    @Singleton
+    fun provideNetworkMonitor(@ApplicationContext context: Context): com.sandeep.aijobapplicationtracker.utils.NetworkMonitor {
+        return com.sandeep.aijobapplicationtracker.utils.NetworkMonitor(context)
+    }
 }
