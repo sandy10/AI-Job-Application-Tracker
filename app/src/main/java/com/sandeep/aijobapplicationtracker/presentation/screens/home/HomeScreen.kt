@@ -64,6 +64,7 @@ fun HomeScreen(
     onNavigateToApplications: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToAssistant: () -> Unit = {},
+    onNavigateToNotifications: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -111,7 +112,8 @@ fun HomeScreen(
                 is UiState.Success -> HomeContent(
                     data = s.data,
                     onNavigateToApplicationDetail = onNavigateToApplicationDetail,
-                    onNavigateToApplications = onNavigateToApplications
+                    onNavigateToApplications = onNavigateToApplications,
+                    onNavigateToNotifications = onNavigateToNotifications
                 )
 
                 is UiState.Empty -> EmptyStateView(
@@ -133,7 +135,8 @@ fun HomeScreen(
 private fun HomeContent(
     data: HomeData,
     onNavigateToApplicationDetail: (String) -> Unit,
-    onNavigateToApplications: () -> Unit
+    onNavigateToApplications: () -> Unit,
+    onNavigateToNotifications: () -> Unit
 ) {
 
 
@@ -176,12 +179,24 @@ private fun HomeContent(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    IconButton(onClick = { /* TODO: Notifications */ }) {
-                        Icon(
-                            Icons.Filled.Notifications,
-                            contentDescription = "Notifications",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
+                    Box {
+                        IconButton(onClick = onNavigateToNotifications) {
+                            Icon(
+                                Icons.Filled.Notifications,
+                                contentDescription = "Notifications",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        if (data.needsAttentionItems.isNotEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(8.dp)
+                                    .size(8.dp)
+                                    .clip(androidx.compose.foundation.shape.CircleShape)
+                                    .background(Color.Red)
+                            )
+                        }
                     }
                 }
             }
@@ -321,7 +336,7 @@ private fun StatCard(
 }
 
 @Composable
-private fun NeedsAttentionCard(
+fun NeedsAttentionCard(
     item: AttentionItem,
     onNavigateToDetail: (String) -> Unit
 ) {

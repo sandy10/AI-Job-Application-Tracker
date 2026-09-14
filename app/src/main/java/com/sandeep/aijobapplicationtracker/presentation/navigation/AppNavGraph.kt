@@ -9,6 +9,7 @@ import com.sandeep.aijobapplicationtracker.presentation.screens.home.HomeScreen
 
 import com.sandeep.aijobapplicationtracker.presentation.screens.signin.SignInScreen
 import com.sandeep.aijobapplicationtracker.presentation.screens.careersetup.CareerSetupScreen
+import com.sandeep.aijobapplicationtracker.presentation.screens.notifications.NotificationsScreen
 import com.sandeep.aijobapplicationtracker.presentation.screens.applications.ApplicationsListScreen
 import com.sandeep.aijobapplicationtracker.presentation.screens.addapplication.AddApplicationScreen
 import com.sandeep.aijobapplicationtracker.presentation.screens.applicationdetail.ApplicationDetailScreen
@@ -20,6 +21,8 @@ import com.sandeep.aijobapplicationtracker.presentation.screens.airesumematch.Ai
 import com.sandeep.aijobapplicationtracker.presentation.screens.aiassistant.AiAssistantScreen
 import com.sandeep.aijobapplicationtracker.presentation.screens.aichat.AiChatScreen
 import com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep.AiInterviewPrepScreen
+import com.sandeep.aijobapplicationtracker.presentation.screens.aifollowup.AiFollowUpScreen
+import com.sandeep.aijobapplicationtracker.presentation.screens.analytics.AnalyticsScreen
 import com.sandeep.aijobapplicationtracker.presentation.screens.profilesettings.ProfileSettingsScreen
 
 /**
@@ -86,7 +89,8 @@ fun AppNavGraph() {
                 onNavigateToApplicationDetail = { jobId -> navController.navigate(Screen.ApplicationDetail.createRoute(jobId)) },
                 onNavigateToApplications = { navController.navigate(Screen.ApplicationsList.route) },
                 onNavigateToProfile = { navController.navigate(Screen.ProfileSettings.route) },
-                onNavigateToAssistant = { navController.navigate(Screen.AiAssistant.route) }
+                onNavigateToAssistant = { navController.navigate(Screen.AiAssistant.route) },
+                onNavigateToNotifications = { navController.navigate(Screen.Notifications.route) }
             )
         }
         
@@ -176,6 +180,7 @@ fun AppNavGraph() {
         composable(Screen.AiAssistant.route) {
             AiAssistantScreen(
                 onNavigateToPrep = { jobId -> navController.navigate(Screen.AiInterviewPrep.createRoute(jobId)) },
+                onNavigateToFollowUp = { jobId -> navController.navigate(Screen.AiFollowUp.createRoute(jobId)) },
                 onNavigateToJobAnalyzer = { navController.navigate(Screen.AiJobAnalyzer.route) },
                 onNavigateToAiChat = { navController.navigate(Screen.AiChat.route) },
                 onNavigateToHome = { navController.navigate(Screen.Home.route) },
@@ -191,9 +196,28 @@ fun AppNavGraph() {
             )
         }
         
+        composable(Screen.AiFollowUp.route) {
+            AiFollowUpScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        
         composable(Screen.AiChat.route) {
             AiChatScreen(
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        
+        composable(Screen.Analytics.route) {
+            AnalyticsScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.Notifications.route) {
+            NotificationsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToApplicationDetail = { jobId -> navController.navigate(Screen.ApplicationDetail.createRoute(jobId)) }
             )
         }
         
@@ -201,6 +225,7 @@ fun AppNavGraph() {
             ProfileSettingsScreen(
                 onNavigateToResumes = { navController.navigate(Screen.MyResumes.route) },
                 onNavigateToEditProfile = { navController.navigate(Screen.CareerSetup.route) },
+                onNavigateToAnalytics = { navController.navigate(Screen.Analytics.route) },
                 onLogout = {
                     navController.navigate(Screen.SignIn.route) {
                         popUpTo(0) { inclusive = true }

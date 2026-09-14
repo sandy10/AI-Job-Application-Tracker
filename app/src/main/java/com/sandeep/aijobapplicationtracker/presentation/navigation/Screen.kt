@@ -31,12 +31,20 @@ sealed class Screen(val route: String) {
         fun createRoute(jobId: String) = "ai_resume_match/$jobId"
     }
     
+    object Notifications : Screen("notifications")
+    
     object AiInterviewPrep : Screen("ai_interview_prep/{jobId}") {
         fun createRoute(jobId: String) = "ai_interview_prep/$jobId"
+    }
+    
+    object AiFollowUp : Screen("ai_follow_up/{jobId}") {
+        fun createRoute(jobId: String) = "ai_follow_up/$jobId"
     }
     
     object AiChat : Screen("ai_chat")
     
     object ProfileSettings : Screen("profile_settings")
+    
+    object Analytics : Screen("analytics")
     // TODO: Add your screens here
 }

@@ -36,6 +36,16 @@ class MainActivity : ComponentActivity() {
             }
         }
         
+        // Schedule local notifications worker
+        val reminderRequest = androidx.work.PeriodicWorkRequestBuilder<com.sandeep.aijobapplicationtracker.utils.worker.ReminderWorker>(
+            24, java.util.concurrent.TimeUnit.HOURS
+        ).build()
+        androidx.work.WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "ReminderWorker",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            reminderRequest
+        )
+        
         // Edge-to-edge layout
         enableEdgeToEdge()
         
