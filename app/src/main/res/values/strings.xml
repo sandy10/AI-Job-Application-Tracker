@@ -35,7 +35,7 @@
     <string name="career_setup_subtitle">Help AI personalize job matches, interview preparation and recommendations.</string>
     <string name="step_1_of_1">STEP 1 OF 1</string>
     <string name="name_label">Full Name</string>
-    <string name="name_placeholder">e.g. Alex Johnson</string>
+    <string name="name_placeholder">e.g. Sandeep Jha</string>
     <string name="target_role_label">Target Role</string>
     <string name="target_role_placeholder">e.g. Senior Android Developer</string>
     <string name="experience_level_label">Experience Level</string>
@@ -60,6 +60,7 @@
     <string name="expected_ctc_placeholder">e.g. 15 LPA</string>
     <string name="notice_period_label">Notice Period (Optional)</string>
     <string name="notice_period_placeholder">e.g. 30 Days</string>
+    <string name="field_required">This field is required</string>
     
     <string name="save_profile_button">Save &amp; Continue</string>
 
@@ -280,7 +281,7 @@
     <string name="work_mode">Work Mode</string>
     <string name="applications">Applications</string>
     <string name="search_company_or_role">Search company or role</string>
-    <string name="e_g_jetpack_compose">e.g. Jetpack Compose</string>
+    <string name="e_g_skills">e.g. Project Management, Java, SEO, Tally</string>
     <string name="my_resumes_1">My Resumes</string>
     <string name="your_resume_library">Your resume library</string>
     <string name="keep_different_versions_ready_for_differ">Keep different versions ready for different opportunities.</string>

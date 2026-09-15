@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import com.sandeep.aijobapplicationtracker.domain.repository.AuthRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -26,6 +27,11 @@ class MockAuthRepositoryImpl @Inject constructor(
         return dataStore.data.map { preferences ->
             preferences[PreferencesKeys.IS_LOGGED_IN] ?: false
         }
+    }
+
+    override suspend fun verifySession(): Boolean {
+        // Mock always returns true if logged in
+        return dataStore.data.map { it[PreferencesKeys.IS_LOGGED_IN] ?: false }.first()
     }
 
     override suspend fun login(email: String, password: String): Result<Unit> {

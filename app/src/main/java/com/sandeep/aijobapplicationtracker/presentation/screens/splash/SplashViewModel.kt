@@ -38,8 +38,8 @@ class SplashViewModel @Inject constructor(
             // Wait for 1.5s for splash effect
             delay(1500)
             
-            // Check auth state
-            val isLoggedIn = authRepository.isLoggedIn().first()
+            // Check if auth session is truly valid (handles deleted users)
+            val isLoggedIn = authRepository.verifySession()
             
             if (isLoggedIn) {
                 // If logged in, check if profile has been completed (i.e. targetRole is not blank)

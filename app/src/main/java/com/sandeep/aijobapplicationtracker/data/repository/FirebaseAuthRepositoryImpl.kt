@@ -32,6 +32,18 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
         awaitClose { firebaseAuth.removeAuthStateListener(listener) }
     }
 
+    override suspend fun verifySession(): Boolean {
+        val user = firebaseAuth.currentUser ?: return false
+        return try {
+            user.reload().await()
+            true
+        } catch (e: Exception) {
+            Timber.e(e, "Session verification failed (user deleted or disabled)")
+            firebaseAuth.signOut()
+            false
+        }
+    }
+
     /**
      * Signs in with email and password using Firebase Auth.
      */

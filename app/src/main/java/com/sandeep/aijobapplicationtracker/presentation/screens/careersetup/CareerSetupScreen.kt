@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -52,6 +53,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,6 +72,7 @@ fun CareerSetupScreen(
     val uiState by viewModel.uiState.collectAsState()
     val initialProfile by viewModel.userProfile.collectAsState(initial = null)
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     var fullName by remember { mutableStateOf("") }
     var targetRole by remember { mutableStateOf("") }
@@ -85,8 +88,23 @@ fun CareerSetupScreen(
     var newSkill by remember { mutableStateOf("") }
     var expDropdownExpanded by remember { mutableStateOf(false) }
 
+    // Per-field error states for inline validation
+    var nameError by remember { mutableStateOf<String?>(null) }
+    var targetRoleError by remember { mutableStateOf<String?>(null) }
+    var experienceLevelError by remember { mutableStateOf<String?>(null) }
+    var yearsExpError by remember { mutableStateOf<String?>(null) }
+    var locationError by remember { mutableStateOf<String?>(null) }
+
+    var isEditMode by remember { mutableStateOf(false) }
+    var hasInitialized by remember { mutableStateOf(false) }
+
     LaunchedEffect(initialProfile) {
         initialProfile?.let { profile ->
+            if (!hasInitialized) {
+                isEditMode = profile.targetRole.isNotBlank()
+                hasInitialized = true
+            }
+            
             if (fullName.isBlank()) fullName = profile.name
             if (targetRole.isBlank()) targetRole = profile.targetRole
             if (experienceLevel.isBlank()) experienceLevel = profile.experienceLevel
@@ -98,10 +116,6 @@ fun CareerSetupScreen(
             if (noticePeriod.isBlank()) noticePeriod = profile.noticePeriod
             if (skillsList.isEmpty() && profile.skills.isNotEmpty()) skillsList = profile.skills
         }
-    }
-
-    val isEditMode = remember(initialProfile) {
-        initialProfile?.targetRole?.isNotBlank() == true
     }
 
     LaunchedEffect(uiState) {
@@ -117,6 +131,7 @@ fun CareerSetupScreen(
     }
 
     Scaffold(
+        modifier = Modifier.imePadding(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -198,18 +213,32 @@ fun CareerSetupScreen(
                 AppButton(
                     text = if (isEditMode) "Update profile" else stringResource(id = R.string.continue_to_dashboard),
                     onClick = {
-                        viewModel.saveProfile(
-                            name = fullName,
-                            experienceLevel = experienceLevel,
-                            yearsOfExperience = yearsExp,
-                            primaryRole = targetRole,
-                            skills = skillsList,
-                            location = location,
-                            currentCtc = currentCtc,
-                            expectedCtc = expectedCtc,
-                            noticePeriod = noticePeriod,
-                            workPreference = workPreference
-                        )
+                        // Inline field-level validation
+                        val errorMsg = context.getString(R.string.field_required)
+                        nameError = if (fullName.isBlank()) errorMsg else null
+                        targetRoleError = if (targetRole.isBlank()) errorMsg else null
+                        experienceLevelError = if (experienceLevel.isBlank()) errorMsg else null
+                        yearsExpError = if (yearsExp.isBlank()) errorMsg else null
+                        locationError = if (location.isBlank()) errorMsg else null
+
+                        // Only proceed if no errors
+                        val hasErrors = nameError != null || targetRoleError != null ||
+                            experienceLevelError != null || yearsExpError != null || locationError != null
+                        if (!hasErrors) {
+                            hasInitialized = true
+                            viewModel.saveProfile(
+                                name = fullName,
+                                experienceLevel = experienceLevel,
+                                yearsOfExperience = yearsExp,
+                                primaryRole = targetRole,
+                                skills = skillsList,
+                                location = location,
+                                currentCtc = currentCtc,
+                                expectedCtc = expectedCtc,
+                                noticePeriod = noticePeriod,
+                                workPreference = workPreference
+                            )
+                        }
                     },
                     isLoading = uiState is UiState.Loading
                 )
@@ -229,15 +258,16 @@ fun CareerSetupScreen(
             CustomTextField(
                 label = stringResource(id = R.string.name_label),
                 value = fullName,
-                onValueChange = { fullName = it },
-                placeholder = stringResource(id = R.string.name_placeholder)
+                onValueChange = { fullName = it; nameError = null },
+                placeholder = stringResource(id = R.string.name_placeholder),
+                errorMessage = nameError
             )
 
             // Target Role
             CustomTextField(
                 label = stringResource(id = R.string.target_role_label),
                 value = targetRole,
-                onValueChange = { targetRole = it },
+                onValueChange = { targetRole = it; targetRoleError = null },
                 placeholder = stringResource(id = R.string.target_role_placeholder),
                 leadingIcon = {
                     Icon(
@@ -245,7 +275,8 @@ fun CareerSetupScreen(
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
                     )
-                }
+                },
+                errorMessage = targetRoleError
             )
 
             // Exp Level & Years
@@ -253,8 +284,20 @@ fun CareerSetupScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                val expOptions = listOf("Student", "Fresher", "Mid-level", "Senior", "Lead")
-                
+                val expOptions = listOf(
+                    "Student / Intern",
+                    "Fresher / Entry-Level",
+                    "Junior / Associate",
+                    "Mid-Level",
+                    "Senior",
+                    "Lead",
+                    "Manager",
+                    "Director / Head",
+                    "Executive / C-Suite",
+                    "Freelance / Consultant",
+                    "Career Break",
+                    "Other"
+                )                
                 androidx.compose.material3.ExposedDropdownMenuBox(
                     expanded = expDropdownExpanded,
                     onExpandedChange = { expDropdownExpanded = !expDropdownExpanded },
@@ -269,7 +312,8 @@ fun CareerSetupScreen(
                         readOnly = true,
                         trailingIcon = {
                             androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon(expanded = expDropdownExpanded)
-                        }
+                        },
+                        errorMessage = experienceLevelError
                     )
                     
                     ExposedDropdownMenu(
@@ -281,6 +325,7 @@ fun CareerSetupScreen(
                                 text = { Text(selectionOption) },
                                 onClick = {
                                     experienceLevel = selectionOption
+                                    experienceLevelError = null
                                     expDropdownExpanded = false
                                 }
                             )
@@ -291,8 +336,9 @@ fun CareerSetupScreen(
                     modifier = Modifier.weight(1f),
                     label = stringResource(id = R.string.years_experience_label),
                     value = yearsExp,
-                    onValueChange = { yearsExp = it },
-                    placeholder = stringResource(id = R.string.years_experience_placeholder)
+                    onValueChange = { yearsExp = it; yearsExpError = null },
+                    placeholder = stringResource(id = R.string.years_experience_placeholder),
+                    errorMessage = yearsExpError
                 )
             }
 
@@ -379,11 +425,15 @@ fun CareerSetupScreen(
                         OutlinedTextField(
                             value = newSkill,
                             onValueChange = { newSkill = it },
-                            modifier = Modifier.weight(1f),
-                            placeholder = { Text(stringResource(R.string.e_g_jetpack_compose)) },
-                            singleLine = true
+                            modifier = Modifier.weight(1f).height(48.dp),
+                            placeholder = { Text(stringResource(R.string.e_g_skills), style = MaterialTheme.typography.bodySmall) },
+                            singleLine = true,
+                            shape = RoundedCornerShape(8.dp),
+                            textStyle = MaterialTheme.typography.bodySmall
                         )
                         Button(
+                            modifier = Modifier.height(48.dp),
+                            shape = RoundedCornerShape(8.dp),
                             onClick = { 
                                 if (newSkill.isNotBlank() && !skillsList.contains(newSkill.trim())) {
                                     skillsList = skillsList + newSkill.trim()
@@ -401,7 +451,7 @@ fun CareerSetupScreen(
             CustomTextField(
                 label = stringResource(id = R.string.location_label),
                 value = location,
-                onValueChange = { location = it },
+                onValueChange = { location = it; locationError = null },
                 placeholder = stringResource(id = R.string.location_placeholder),
                 leadingIcon = {
                     Icon(
@@ -409,7 +459,8 @@ fun CareerSetupScreen(
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
                     )
-                }
+                },
+                errorMessage = locationError
             )
 
             // Optional CTC and Notice Period Fields
@@ -514,7 +565,8 @@ private fun CustomTextField(
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     readOnly: Boolean = false,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    errorMessage: String? = null
 ) {
     Column(
         modifier = modifier,
@@ -531,6 +583,7 @@ private fun CustomTextField(
             onValueChange = onValueChange,
             readOnly = readOnly,
             enabled = enabled,
+            isError = errorMessage != null,
             placeholder = { 
                 Text(
                     text = placeholder,
@@ -544,10 +597,20 @@ private fun CustomTextField(
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = if (errorMessage != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outlineVariant,
+                focusedBorderColor = if (errorMessage != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                errorBorderColor = MaterialTheme.colorScheme.error,
             ),
             singleLine = true
         )
+        // Show inline error message in red below the field
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
     }
 }

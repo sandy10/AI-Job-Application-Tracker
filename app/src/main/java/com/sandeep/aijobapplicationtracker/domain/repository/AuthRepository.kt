@@ -13,6 +13,12 @@ interface AuthRepository {
     fun isLoggedIn(): Flow<Boolean>
 
     /**
+     * Verifies the user session by forcing a token reload.
+     * Returns false if the user was deleted or disabled on the backend.
+     */
+    suspend fun verifySession(): Boolean
+
+    /**
      * Sign in with email and password.
      */
     suspend fun login(email: String, password: String): Result<Unit>
