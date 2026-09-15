@@ -1,5 +1,7 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.addinterview
 
+import com.sandeep.aijobapplicationtracker.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -105,7 +107,7 @@ fun AddInterviewScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        "Add Interview", 
+                        stringResource(R.string.add_interview), 
                         fontSize = 18.sp, 
                         fontWeight = FontWeight.Bold, 
                         color = Color(0xFF191C1E),
@@ -163,7 +165,7 @@ fun AddInterviewScreen(
                         .clickable { viewModel.saveInterview(interviewRound, interviewType, "$date $time", meetingUrl, interviewer, notes, remindMe, reminderTime) },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Save Interview", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                    Text(stringResource(R.string.save_interview), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                 }
             }
         }
@@ -239,7 +241,7 @@ private fun AddInterviewContent(
         // Form
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("Interview Round", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
+                Text(stringResource(R.string.interview_round), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
                 Spacer(modifier = Modifier.height(4.dp))
                 DropdownField(
                     value = interviewRound,
@@ -248,7 +250,7 @@ private fun AddInterviewContent(
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
-                Text("Interview Type", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
+                Text(stringResource(R.string.interview_type), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
                 Spacer(modifier = Modifier.height(4.dp))
                 DropdownField(
                     value = interviewType,
@@ -262,7 +264,7 @@ private fun AddInterviewContent(
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("Date", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
+                Text(stringResource(R.string.date), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
                 Spacer(modifier = Modifier.height(4.dp))
                 CustomTextField(
                     value = date,
@@ -283,7 +285,7 @@ private fun AddInterviewContent(
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
-                Text("Time", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
+                Text(stringResource(R.string.time), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
                 Spacer(modifier = Modifier.height(4.dp))
                 CustomTextField(
                     value = time,
@@ -310,7 +312,7 @@ private fun AddInterviewContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         Column {
-            Text("Meeting URL", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
+            Text(stringResource(R.string.meeting_url), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
             Spacer(modifier = Modifier.height(4.dp))
             CustomTextField(value = meetingUrl, onValueChange = onMeetingUrlChange, icon = Icons.Default.Share, placeholder = "https://meet.google.com/...")
         }
@@ -318,7 +320,7 @@ private fun AddInterviewContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         Column {
-            Text("Interviewer Name (Optional)", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
+            Text(stringResource(R.string.interviewer_name_optional), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
             Spacer(modifier = Modifier.height(4.dp))
             CustomTextField(value = interviewer, onValueChange = onInterviewerChange, icon = Icons.Default.Person, placeholder = "e.g., Jane Doe")
         }
@@ -327,7 +329,7 @@ private fun AddInterviewContent(
 
         Column {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text("Notes", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
+                Text(stringResource(R.string.notes), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -346,11 +348,11 @@ private fun AddInterviewContent(
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Generating...", fontSize = 10.sp, color = Color(0xFF3525CD))
+                        Text(stringResource(R.string.generating), fontSize = 10.sp, color = Color(0xFF3525CD))
                     } else {
                         Icon(Icons.Outlined.Star, contentDescription = null, tint = Color(0xFF3525CD), modifier = Modifier.size(12.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("AI summary available", fontSize = 10.sp, color = Color(0xFF3525CD))
+                        Text(stringResource(R.string.ai_summary_available), fontSize = 10.sp, color = Color(0xFF3525CD))
                     }
                 }
             }
@@ -377,7 +379,7 @@ private fun AddInterviewContent(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Notifications, contentDescription = null, tint = Color(0xFF3525CD), modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.width(12.dp))
-                    Text("Remind me before interview", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
+                    Text(stringResource(R.string.remind_me_before_interview), fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
                 }
                 Switch(
                     checked = remindMe,

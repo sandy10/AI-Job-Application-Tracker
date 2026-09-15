@@ -1,5 +1,6 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.applications
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -121,23 +122,23 @@ fun ApplicationsListScreen(
                         .padding(horizontal = 24.dp, vertical = 16.dp)
                         .padding(bottom = 32.dp)
                 ) {
-                    Text("Sort By", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF191C1E))
+                    Text(stringResource(R.string.sort_by), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF191C1E))
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         androidx.compose.material3.FilterChip(
                             selected = selectedSortOption == SortOption.RECENTLY_ADDED,
                             onClick = { viewModel.setSortOption(SortOption.RECENTLY_ADDED) },
-                            label = { Text("Recently Added") }
+                            label = { Text(stringResource(R.string.recently_added)) }
                         )
                         androidx.compose.material3.FilterChip(
                             selected = selectedSortOption == SortOption.MATCH_SCORE,
                             onClick = { viewModel.setSortOption(SortOption.MATCH_SCORE) },
-                            label = { Text("Match Score") }
+                            label = { Text(stringResource(R.string.match_score)) }
                         )
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text("Work Mode", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF191C1E))
+                    Text(stringResource(R.string.work_mode), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF191C1E))
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf("All", "Remote", "Hybrid", "Onsite").forEach { mode ->
@@ -167,7 +168,7 @@ fun ApplicationsListScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Applications",
+                    text = stringResource(R.string.applications),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF191C1E)
@@ -194,7 +195,7 @@ fun ApplicationsListScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 8.dp),
-                placeholder = { Text("Search company or role", color = Color(0xFF64748B), fontSize = 14.sp) },
+                placeholder = { Text(stringResource(R.string.search_company_or_role), color = Color(0xFF64748B), fontSize = 14.sp) },
                 leadingIcon = {
                     Icon(
                         Icons.Default.Search,

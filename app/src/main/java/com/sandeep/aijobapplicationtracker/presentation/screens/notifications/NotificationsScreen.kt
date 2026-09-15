@@ -1,5 +1,7 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.notifications
 
+import com.sandeep.aijobapplicationtracker.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -38,7 +40,7 @@ fun NotificationsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Notifications",
+                        text = stringResource(R.string.notifications),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface

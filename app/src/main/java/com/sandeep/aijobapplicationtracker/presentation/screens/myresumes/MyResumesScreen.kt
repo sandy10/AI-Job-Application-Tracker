@@ -1,5 +1,7 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.myresumes
 
+import com.sandeep.aijobapplicationtracker.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -106,7 +108,7 @@ fun MyResumesScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        "My Resumes",
+                        stringResource(R.string.my_resumes_1),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF3525CD),
@@ -141,7 +143,7 @@ fun MyResumesScreen(
                 .padding(horizontal = 20.dp, vertical = 12.dp)
         ) {
             Text(
-                "Your resume library",
+                stringResource(R.string.your_resume_library),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF191C1E),
@@ -149,7 +151,7 @@ fun MyResumesScreen(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                "Keep different versions ready for different opportunities.",
+                stringResource(R.string.keep_different_versions_ready_for_differ),
                 fontSize = 16.sp,
                 color = Color(0xFF464555)
             )
@@ -309,7 +311,7 @@ private fun ResumeCard(
                             .border(1.dp, Color(0xFF3525CD).copy(alpha = 0.2f), RoundedCornerShape(16.dp))
                             .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
-                        Text("Primary", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3525CD))
+                        Text(stringResource(R.string.primary), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3525CD))
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                 }
@@ -335,7 +337,7 @@ private fun ResumeCard(
                         onDismissRequest = { expanded = false }
                     ) {
                         androidx.compose.material3.DropdownMenuItem(
-                            text = { Text("View Resume") },
+                            text = { Text(stringResource(R.string.view_resume)) },
                             onClick = { 
                                 expanded = false
                                 onView()
@@ -343,7 +345,7 @@ private fun ResumeCard(
                         )
                         if (!resume.isPrimary) {
                             androidx.compose.material3.DropdownMenuItem(
-                                text = { Text("Set as Primary") },
+                                text = { Text(stringResource(R.string.set_as_primary)) },
                                 onClick = { 
                                     expanded = false
                                     onSetPrimary()
@@ -351,7 +353,7 @@ private fun ResumeCard(
                             )
                         }
                         androidx.compose.material3.DropdownMenuItem(
-                            text = { Text("Delete Resume", color = Color.Red) },
+                            text = { Text(stringResource(R.string.delete_resume), color = Color.Red) },
                             onClick = { 
                                 expanded = false
                                 onDelete()
@@ -407,14 +409,14 @@ private fun UploadArea(onUploadClick: () -> Unit) {
             Spacer(modifier = Modifier.height(12.dp))
             
             Text(
-                "Upload Resume",
+                stringResource(R.string.upload_resume),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF191C1E)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                "PDF • Maximum 5 MB",
+                stringResource(R.string.pdf_maximum_5_mb),
                 fontSize = 14.sp,
                 color = Color(0xFF464555)
             )
@@ -439,7 +441,7 @@ private fun UploadArea(onUploadClick: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        "Upload Resume",
+                        stringResource(R.string.upload_resume),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color(0xFF3525CD)

@@ -203,7 +203,7 @@ fun AddApplicationScreen(
                         ),
                         shape = RoundedCornerShape(28.dp)
                     ) {
-                        Text("Save Application", fontSize = 16.sp, color = Color.White)
+                        Text(stringResource(R.string.save_application), fontSize = 16.sp, color = Color.White)
                     }
                     TextButton(
                         onClick = onNavigateBack,
@@ -211,7 +211,7 @@ fun AddApplicationScreen(
                             .fillMaxWidth()
                             .height(48.dp)
                     ) {
-                        Text("Cancel", fontSize = 16.sp, color = Color(0xFF464555)) // on-surface-variant
+                        Text(stringResource(R.string.cancel), fontSize = 16.sp, color = Color(0xFF464555)) // on-surface-variant
                     }
                 }
             }
@@ -288,8 +288,8 @@ private fun AddApplicationContent(
                         Icon(Icons.Default.Star, contentDescription = "AI", tint = Color(0xFF4F46E5), modifier = Modifier.size(18.dp))
                     }
                     Column {
-                        Text("Save time with AI", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
-                        Text("Paste a job description and let AI fill the details automatically.", fontSize = 14.sp, color = Color(0xFF464555))
+                        Text(stringResource(R.string.save_time_with_ai), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                        Text(stringResource(R.string.paste_a_job_description_and_let_ai_fill), fontSize = 14.sp, color = Color(0xFF464555))
                     }
                 }
                 
@@ -305,7 +305,7 @@ private fun AddApplicationContent(
                 ) {
                     Icon(Icons.Default.Star, contentDescription = "AI", modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Analyze Job Description", fontSize = 14.sp)
+                    Text(stringResource(R.string.analyze_job_description), fontSize = 14.sp)
                 }
             }
         }
@@ -317,7 +317,7 @@ private fun AddApplicationContent(
         ) {
             Divider(modifier = Modifier.weight(1f), color = Color(0xFFC7C4D8))
             Text(
-                text = "OR ENTER MANUALLY",
+                text = stringResource(R.string.or_enter_manually),
                 modifier = Modifier.padding(horizontal = 12.dp),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
@@ -399,10 +399,10 @@ private fun AddApplicationContent(
                                     onDateAppliedChange(formattedDate)
                                 }
                                 showDatePicker = false
-                            }) { Text("OK") }
+                            }) { Text(stringResource(R.string.ok)) }
                         },
                         dismissButton = {
-                            TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                            TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.cancel)) }
                         }
                     ) {
                         androidx.compose.material3.DatePicker(state = datePickerState)
@@ -417,14 +417,14 @@ private fun AddApplicationContent(
                 FormInput(label = "Notice Period Required", value = noticePeriod, onValueChange = onNoticePeriodChange, placeholder = "e.g. 30 Days")
                 
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Job Description", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
+                    Text(stringResource(R.string.job_description), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
                     OutlinedTextField(
                         value = jobDescription,
                         onValueChange = onJobDescriptionChange,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(100.dp),
-                        placeholder = { Text("Paste full JD here...", color = Color(0xFF777587), fontSize = 14.sp) },
+                        placeholder = { Text(stringResource(R.string.paste_full_jd_here), color = Color(0xFF777587), fontSize = 14.sp) },
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedContainerColor = Color(0xFFF2F4F6),
                             focusedContainerColor = Color.White,
@@ -436,14 +436,14 @@ private fun AddApplicationContent(
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Personal Notes", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
+                    Text(stringResource(R.string.personal_notes), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
                     OutlinedTextField(
                         value = notes,
                         onValueChange = onNotesChange,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(80.dp),
-                        placeholder = { Text("Any thoughts or prep notes?", color = Color(0xFF777587), fontSize = 14.sp) },
+                        placeholder = { Text(stringResource(R.string.any_thoughts_or_prep_notes), color = Color(0xFF777587), fontSize = 14.sp) },
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedContainerColor = Color(0xFFF2F4F6),
                             focusedContainerColor = Color.White,

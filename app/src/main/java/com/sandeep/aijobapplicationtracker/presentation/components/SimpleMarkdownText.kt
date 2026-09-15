@@ -1,5 +1,7 @@
 package com.sandeep.aijobapplicationtracker.presentation.components
 
+import com.sandeep.aijobapplicationtracker.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -96,7 +98,7 @@ fun SimpleMarkdownText(
             if (isBullet) {
                 Row(modifier = Modifier.padding(bottom = 6.dp, start = 8.dp)) {
                     Text(
-                        text = "•",
+                        text = stringResource(R.string.string_text),
                         style = MaterialTheme.typography.bodyMedium,
                         color = color,
                         fontWeight = FontWeight.Bold,

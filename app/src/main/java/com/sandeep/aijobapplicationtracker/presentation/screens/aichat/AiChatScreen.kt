@@ -1,5 +1,7 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.aichat
 
+import com.sandeep.aijobapplicationtracker.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -43,7 +45,7 @@ fun AiChatScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("AI Interview Chat", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
+                title = { Text(stringResource(R.string.ai_interview_chat), fontWeight = FontWeight.Bold, fontSize = 20.sp) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(imageVector = Icons.Default.Close, contentDescription = "Close Chat")
@@ -68,7 +70,7 @@ fun AiChatScreen(
                     value = inputText,
                     onValueChange = { inputText = it },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Ask a question...") },
+                    placeholder = { Text(stringResource(R.string.ask_a_question)) },
                     shape = RoundedCornerShape(24.dp),
                     maxLines = 3,
                     colors = OutlinedTextFieldDefaults.colors(
@@ -183,7 +185,7 @@ fun LoadingBubble() {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Finding accurate answer...",
+                    text = stringResource(R.string.finding_accurate_answer),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp
                 )

@@ -1,5 +1,6 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.applicationdetail
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -130,7 +131,7 @@ fun ApplicationDetailScreen(
                         border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFC7C4D8)),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("Edit Application", fontSize = 14.sp)
+                        Text(stringResource(R.string.edit_application), fontSize = 14.sp)
                     }
                     Box {
                         Button(
@@ -152,7 +153,7 @@ fun ApplicationDetailScreen(
                             onDismissRequest = { bottomMenuExpanded = false }
                         ) {
                             androidx.compose.material3.DropdownMenuItem(
-                                text = { Text("Delete Application") },
+                                text = { Text(stringResource(R.string.delete_application)) },
                                 onClick = { 
                                     bottomMenuExpanded = false
                                     showDeleteDialog = true
@@ -167,8 +168,8 @@ fun ApplicationDetailScreen(
         if (showDeleteDialog) {
             androidx.compose.material3.AlertDialog(
                 onDismissRequest = { showDeleteDialog = false },
-                title = { Text("Delete Application") },
-                text = { Text("Are you sure you want to delete this application?") },
+                title = { Text(stringResource(R.string.delete_application)) },
+                text = { Text(stringResource(R.string.are_you_sure_you_want_to_delete_this_app)) },
                 confirmButton = {
                     androidx.compose.material3.TextButton(
                         onClick = {
@@ -177,12 +178,12 @@ fun ApplicationDetailScreen(
                             onNavigateBack()
                         }
                     ) {
-                        Text("Yes", color = MaterialTheme.colorScheme.error)
+                        Text(stringResource(R.string.yes), color = MaterialTheme.colorScheme.error)
                     }
                 },
                 dismissButton = {
                     androidx.compose.material3.TextButton(onClick = { showDeleteDialog = false }) {
-                        Text("No")
+                        Text(stringResource(R.string.no))
                     }
                 }
             )
@@ -334,7 +335,7 @@ private fun ApplicationDetailContent(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Info, contentDescription = "Fire", tint = Color(0xFF4F46E5), modifier = Modifier.size(24.dp)) // flame icon equivalent
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Next Action", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                        Text(stringResource(R.string.next_action), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
@@ -360,7 +361,7 @@ private fun ApplicationDetailContent(
                     ) {
                         Icon(Icons.Default.Star, contentDescription = "AI", modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Prepare with AI", fontSize = 14.sp)
+                        Text(stringResource(R.string.prepare_with_ai_1), fontSize = 14.sp)
                     }
                 }
             }
@@ -393,7 +394,7 @@ private fun ApplicationDetailContent(
 
         // Submitted Resume
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-            Text("Resume Analysis", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+            Text(stringResource(R.string.resume_analysis), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
             Spacer(modifier = Modifier.height(12.dp))
             Box(
                 modifier = Modifier
@@ -435,7 +436,7 @@ private fun ApplicationDetailContent(
                                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                             )
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("✨", fontSize = 12.sp)
+                                Text(stringResource(R.string.string_text_2), fontSize = 12.sp)
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = if (data.resumeUsed == "No Resume Uploaded") "Update Resume to Match"
@@ -457,7 +458,7 @@ private fun ApplicationDetailContent(
                             .clickable(enabled = isActionEnabled) { onNavigateToResumeMatch() }
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
-                        Text("View Analysis", fontSize = 12.sp, color = Color(0xFF3525CD), fontWeight = FontWeight.Medium)
+                        Text(stringResource(R.string.view_analysis), fontSize = 12.sp, color = Color(0xFF3525CD), fontWeight = FontWeight.Medium)
                     }
                 }
             }
@@ -470,19 +471,19 @@ private fun ApplicationDetailContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Interviews", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                Text(stringResource(R.string.interviews), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable(enabled = isActionEnabled) { 
                     onNavigateToAddInterview()
                 }) {
                     Icon(Icons.Default.Add, contentDescription = "Add", tint = Color(0xFF3525CD), modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Add Interview", fontSize = 12.sp, color = Color(0xFF3525CD))
+                    Text(stringResource(R.string.add_interview), fontSize = 12.sp, color = Color(0xFF3525CD))
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
             
             if (data.interviews.isEmpty()) {
-                Text("No interviews scheduled yet.", fontSize = 14.sp, color = Color(0xFF777587))
+                Text(stringResource(R.string.no_interviews_scheduled_yet), fontSize = 14.sp, color = Color(0xFF777587))
             } else {
                 Column(modifier = Modifier.padding(start = 12.dp)) {
                     data.interviews.forEachIndexed { index, interview ->
@@ -520,7 +521,7 @@ private fun ApplicationDetailContent(
         // Recruiter
         if (data.recruiter.isNotBlank()) {
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                Text("Recruiter", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                Text(stringResource(R.string.recruiter), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
                 Spacer(modifier = Modifier.height(12.dp))
                 Box(
                     modifier = Modifier
@@ -564,13 +565,13 @@ private fun ApplicationDetailContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Notes", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                Text(stringResource(R.string.notes), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { 
                     showNoteDialog = true
                 }) {
                     Icon(Icons.Default.Add, contentDescription = "Add", tint = Color(0xFF3525CD), modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Add Note", fontSize = 12.sp, color = Color(0xFF3525CD))
+                    Text(stringResource(R.string.add_note), fontSize = 12.sp, color = Color(0xFF3525CD))
                 }
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -592,7 +593,7 @@ private fun ApplicationDetailContent(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Star, contentDescription = "AI", tint = Color(0xFF3525CD), modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("AI Extracted Skills", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF3525CD))
+                            Text(stringResource(R.string.ai_extracted_skills), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF3525CD))
                         }
                         
                         @OptIn(ExperimentalLayoutApi::class)
@@ -641,13 +642,13 @@ private fun ApplicationDetailContent(
         var noteText by androidx.compose.runtime.remember(data.notes) { androidx.compose.runtime.mutableStateOf(if (data.notes == "No notes.") "" else data.notes) }
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { showNoteDialog = false },
-            title = { Text("Add Note", fontSize = 18.sp, fontWeight = FontWeight.SemiBold) },
+            title = { Text(stringResource(R.string.add_note), fontSize = 18.sp, fontWeight = FontWeight.SemiBold) },
             text = {
                 androidx.compose.material3.OutlinedTextField(
                     value = noteText,
                     onValueChange = { noteText = it },
                     modifier = Modifier.fillMaxWidth().height(120.dp),
-                    label = { Text("Note content") },
+                    label = { Text(stringResource(R.string.note_content)) },
                     maxLines = 5
                 )
             },
@@ -656,12 +657,12 @@ private fun ApplicationDetailContent(
                     onAddNote(noteText)
                     showNoteDialog = false
                 }) {
-                    Text("Save", color = Color(0xFF3525CD))
+                    Text(stringResource(R.string.save), color = Color(0xFF3525CD))
                 }
             },
             dismissButton = {
                 androidx.compose.material3.TextButton(onClick = { showNoteDialog = false }) {
-                    Text("Cancel", color = Color(0xFF777587))
+                    Text(stringResource(R.string.cancel), color = Color(0xFF777587))
                 }
             }
         )

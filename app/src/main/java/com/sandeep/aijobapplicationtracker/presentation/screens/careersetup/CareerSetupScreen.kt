@@ -380,7 +380,7 @@ fun CareerSetupScreen(
                             value = newSkill,
                             onValueChange = { newSkill = it },
                             modifier = Modifier.weight(1f),
-                            placeholder = { Text("e.g. Jetpack Compose") },
+                            placeholder = { Text(stringResource(R.string.e_g_jetpack_compose)) },
                             singleLine = true
                         )
                         Button(

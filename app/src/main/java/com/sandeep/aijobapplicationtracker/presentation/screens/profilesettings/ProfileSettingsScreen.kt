@@ -174,14 +174,14 @@ private fun ProfileContent(
             onDismissRequest = { showLogoutDialog = false },
             title = {
                 Text(
-                    text = "Logout",
+                    text = stringResource(R.string.logout_1),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
                 Text(
-                    text = "Are you sure you want to log out of your account?",
+                    text = stringResource(R.string.are_you_sure_you_want_to_log_out_of_your),
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
@@ -195,14 +195,14 @@ private fun ProfileContent(
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Logout")
+                    Text(stringResource(R.string.logout_1))
                 }
             },
             dismissButton = {
                 androidx.compose.material3.TextButton(
                     onClick = { showLogoutDialog = false }
                 ) {
-                    Text("Cancel", color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onSurface)
                 }
             }
         )
@@ -535,13 +535,13 @@ private fun ProfileContent(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "Job Search Analytics",
+                                text = stringResource(R.string.job_search_analytics),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "View your conversion rates",
+                                text = stringResource(R.string.view_your_conversion_rates),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

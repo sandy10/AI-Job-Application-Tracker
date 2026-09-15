@@ -343,7 +343,7 @@ private fun SignInContent(
                     AppTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it; confirmPasswordError = null },
-                        label = "Confirm Password",
+                        label = stringResource(R.string.confirm_password),
                         placeholder = "Confirm your password",
                         isPassword = true,
                         errorMessage = confirmPasswordError,
@@ -466,15 +466,15 @@ private fun SignInContent(
         
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { if (!isResetting) showForgotPasswordDialog = false },
-            title = { Text("Reset Password") },
+            title = { Text(stringResource(R.string.reset_password)) },
             text = {
                 Column {
-                    Text("Enter your email address to receive a password reset link.", style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.enter_your_email_address_to_receive_a_pa), style = MaterialTheme.typography.bodyMedium)
                     Spacer(modifier = Modifier.height(16.dp))
                     AppTextField(
                         value = resetEmail,
                         onValueChange = { resetEmail = it; resetEmailError = null },
-                        label = "Email",
+                        label = stringResource(R.string.email),
                         placeholder = "your@email.com",
                         errorMessage = resetEmailError,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
@@ -512,7 +512,7 @@ private fun SignInContent(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text("Send Link")
+                        Text(stringResource(R.string.send_link))
                     }
                 }
             },
@@ -521,7 +521,7 @@ private fun SignInContent(
                     onClick = { showForgotPasswordDialog = false },
                     enabled = !isResetting
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )

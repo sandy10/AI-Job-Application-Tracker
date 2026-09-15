@@ -1,5 +1,7 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.aijobanalyzer
 
+import com.sandeep.aijobapplicationtracker.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -75,7 +77,7 @@ fun AiJobAnalyzerScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        text = "Analyze Job",
+                        text = stringResource(R.string.analyze_job),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF191C1E),
@@ -132,13 +134,13 @@ private fun AiJobAnalyzerContent(
         ) {
             Icon(Icons.Default.Star, contentDescription = "AI", tint = Color(0xFF06B6D4), modifier = Modifier.size(16.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text("AI Powered Analysis", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3525CD))
+            Text(stringResource(R.string.ai_powered_analysis), fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3525CD))
         }
         
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "Turn any job description into actionable insights",
+            text = stringResource(R.string.turn_any_job_description_into_actionable),
             fontSize = 22.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFF0F172A)
@@ -147,7 +149,7 @@ private fun AiJobAnalyzerContent(
         Spacer(modifier = Modifier.height(12.dp))
         
         Text(
-            text = "Paste the complete job description below. AI will extract the important details for you.",
+            text = stringResource(R.string.paste_the_complete_job_description_below),
             fontSize = 14.sp,
             color = Color(0xFF464555)
         )
@@ -155,7 +157,7 @@ private fun AiJobAnalyzerContent(
         Spacer(modifier = Modifier.height(24.dp))
         
         // Input Section
-        Text("Job Description", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E), modifier = Modifier.padding(start = 4.dp))
+        Text(stringResource(R.string.job_description), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E), modifier = Modifier.padding(start = 4.dp))
         Spacer(modifier = Modifier.height(4.dp))
         
         Box(modifier = Modifier.weight(1f)) {
@@ -163,7 +165,7 @@ private fun AiJobAnalyzerContent(
                 value = jobDescription,
                 onValueChange = { if (it.length <= maxChars) jobDescription = it },
                 modifier = Modifier.fillMaxSize(),
-                placeholder = { Text("Paste the job description here...", color = Color(0xFF777587), fontSize = 14.sp) },
+                placeholder = { Text(stringResource(R.string.paste_the_job_description_here), color = Color(0xFF777587), fontSize = 14.sp) },
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = Color.White,
                     focusedContainerColor = Color.White,
@@ -192,7 +194,7 @@ private fun AiJobAnalyzerContent(
         ) {
             Icon(Icons.Default.Warning, contentDescription = "Privacy", tint = Color(0xFF464555), modifier = Modifier.size(16.dp)) // Using Warning or Shield equivalent
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Your job description is processed securely.", fontSize = 12.sp, color = Color(0xFF464555))
+            Text(stringResource(R.string.your_job_description_is_processed_secure), fontSize = 12.sp, color = Color(0xFF464555))
         }
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -214,18 +216,18 @@ private fun AiJobAnalyzerContent(
                     color = Color.White
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                Text("Analyzing...", fontSize = 16.sp)
+                Text(stringResource(R.string.analyzing), fontSize = 16.sp)
             } else {
                 Icon(Icons.Default.Star, contentDescription = "AI", modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Analyze with AI", fontSize = 16.sp)
+                Text(stringResource(R.string.analyze_with_ai_1), fontSize = 16.sp)
             }
         }
         
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "AI can make mistakes. Review extracted information before saving.",
+            text = stringResource(R.string.ai_can_make_mistakes_review_extracted_in),
             fontSize = 12.sp,
             color = Color(0xFF94A3B8),
             textAlign = TextAlign.Center,

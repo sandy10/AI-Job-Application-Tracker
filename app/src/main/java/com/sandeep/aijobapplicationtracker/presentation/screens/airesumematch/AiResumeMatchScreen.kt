@@ -1,5 +1,7 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.airesumematch
 
+import com.sandeep.aijobapplicationtracker.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -84,7 +86,7 @@ fun AiResumeMatchScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        "Resume Match",
+                        stringResource(R.string.resume_match),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF3525CD)
@@ -145,7 +147,7 @@ fun AiResumeMatchScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Outlined.Face, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Prepare for Interview", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                Text(stringResource(R.string.prepare_for_interview), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                             }
                         }
                         Box(
@@ -158,7 +160,7 @@ fun AiResumeMatchScreen(
                                 .clickable { onViewJobDetailsClick(jobId) },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("View Job Details", fontSize = 14.sp, color = Color(0xFF191C1E))
+                            Text(stringResource(R.string.view_job_details), fontSize = 14.sp, color = Color(0xFF191C1E))
                         }
                     }
                 }
@@ -267,7 +269,7 @@ private fun AiResumeMatchContent(
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "Your experience aligns strongly with this position.",
+                text = stringResource(R.string.your_experience_aligns_strongly_with_thi),
                 fontSize = 14.sp,
                 color = Color(0xFF464555),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -313,7 +315,7 @@ private fun AiResumeMatchContent(
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
                         Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF16A34A), modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Matched Skills", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                        Text(stringResource(R.string.matched_skills), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
                     }
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -347,7 +349,7 @@ private fun AiResumeMatchContent(
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
                         Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFD97706), modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Skill Gaps", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                        Text(stringResource(R.string.skill_gaps), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
                     }
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -378,13 +380,13 @@ private fun AiResumeMatchContent(
                     .padding(16.dp)
             ) {
                 Column {
-                    Text("Experience Match", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E), modifier = Modifier.padding(bottom = 16.dp))
+                    Text(stringResource(R.string.experience_match), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E), modifier = Modifier.padding(bottom = 16.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Your Experience: 9 years", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
-                        Text("Required: 7+ years", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
+                        Text(stringResource(R.string.your_experience_9_years), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
+                        Text(stringResource(R.string.required_7_years), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Box(

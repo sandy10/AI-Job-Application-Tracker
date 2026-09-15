@@ -1,5 +1,7 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.analytics
 
+import com.sandeep.aijobapplicationtracker.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -29,7 +31,7 @@ fun AnalyticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Job Search Analytics") },
+                title = { Text(stringResource(R.string.job_search_analytics)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -66,7 +68,7 @@ fun AnalyticsScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            text = "JOB SEARCH PERFORMANCE",
+                            text = stringResource(R.string.job_search_performance),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -82,7 +84,7 @@ fun AnalyticsScreen(
                         }
 
                         Text(
-                            text = "CONVERSION RATES",
+                            text = stringResource(R.string.conversion_rates),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -97,7 +99,7 @@ fun AnalyticsScreen(
                         }
 
                         Text(
-                            text = "APPLICATIONS BY SOURCE",
+                            text = stringResource(R.string.applications_by_source),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary

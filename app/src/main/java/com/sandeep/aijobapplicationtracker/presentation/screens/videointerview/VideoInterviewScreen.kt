@@ -2,6 +2,8 @@ package com.sandeep.aijobapplicationtracker.presentation.screens.videointerview
 
 import android.Manifest
 import android.content.pm.PackageManager
+import com.sandeep.aijobapplicationtracker.R
+import androidx.compose.ui.res.stringResource
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -102,7 +104,7 @@ fun VideoInterviewScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Video AI Interview") },
+                title = { Text(stringResource(R.string.video_ai_interview)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -178,7 +180,7 @@ fun VideoInterviewScreen(
                                         tint = Color.White,
                                         modifier = Modifier.size(64.dp).padding(bottom = 16.dp)
                                     )
-                                    Text("Please position your face in the camera frame", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                                    Text(stringResource(R.string.please_position_your_face_in_the_camera), color = Color.White, style = MaterialTheme.typography.titleMedium)
                                 }
                             }
                         }
@@ -222,7 +224,7 @@ fun VideoInterviewScreen(
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        Text("Your Voice:", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.your_voice), style = MaterialTheme.typography.labelMedium)
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -271,13 +273,13 @@ fun VideoInterviewScreen(
                         .verticalScroll(rememberScrollState())
                         .padding(16.dp)
                 ) {
-                    Text("Interview Complete", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 16.dp))
+                    Text(stringResource(R.string.interview_complete), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 16.dp))
                     Card(modifier = Modifier.fillMaxWidth()) {
                         SimpleMarkdownText(text = state.feedbackMarkdown, modifier = Modifier.padding(16.dp))
                     }
                     Spacer(modifier = Modifier.height(24.dp))
                     Button(onClick = onNavigateBack, modifier = Modifier.fillMaxWidth()) {
-                        Text("Back to Application")
+                        Text(stringResource(R.string.back_to_application))
                     }
                 }
             } else if (uiState is InterviewState.Error) {
@@ -291,7 +293,7 @@ fun VideoInterviewScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text("Setting up camera...", color = Color.White)
+                    Text(stringResource(R.string.setting_up_camera), color = Color.White)
                 }
             }
         }

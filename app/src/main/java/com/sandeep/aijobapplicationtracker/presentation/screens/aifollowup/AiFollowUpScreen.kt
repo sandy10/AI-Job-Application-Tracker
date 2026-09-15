@@ -4,6 +4,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
+import com.sandeep.aijobapplicationtracker.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -38,7 +40,7 @@ fun AiFollowUpScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("AI Follow-Up") },
+                title = { Text(stringResource(R.string.ai_follow_up)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -66,7 +68,7 @@ fun AiFollowUpScreen(
                     ) {
                         LoadingView()
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("Drafting follow-up email...")
+                        Text(stringResource(R.string.drafting_follow_up_email))
                     }
                 }
                 is UiState.Error -> {
@@ -86,7 +88,7 @@ fun AiFollowUpScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            text = "Drafted Email",
+                            text = stringResource(R.string.drafted_email),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -99,10 +101,10 @@ fun AiFollowUpScreen(
                         }
 
                         AppButton(
-                            text = "Copy to Clipboard",
+                            text = stringResource(R.string.copy_to_clipboard),
                             onClick = {
                                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                val clip = ClipData.newPlainText("Follow-up Email", s.data)
+                                val clip = ClipData.newPlainText(context.getString(R.string.follow_up_email), s.data)
                                 clipboard.setPrimaryClip(clip)
                                 Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show()
                             }

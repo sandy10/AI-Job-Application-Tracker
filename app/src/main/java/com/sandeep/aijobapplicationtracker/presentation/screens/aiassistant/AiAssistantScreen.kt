@@ -1,5 +1,6 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.aiassistant
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -102,7 +103,7 @@ fun AiAssistantScreen(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "AI Career Assistant",
+                        text = stringResource(R.string.ai_career_assistant),
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -117,7 +118,7 @@ fun AiAssistantScreen(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Your personalized job-search command center.",
+                    text = stringResource(R.string.your_personalized_job_search_command_cen),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -191,7 +192,7 @@ fun AiAssistantScreen(
                             Column {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
-                                        text = "Mock Interview",
+                                        text = stringResource(R.string.mock_interview),
                                         style = MaterialTheme.typography.labelLarge,
                                         color = MaterialTheme.colorScheme.onSurface,
                                         fontWeight = FontWeight.Bold
@@ -205,7 +206,7 @@ fun AiAssistantScreen(
                                     )
                                 }
                                 Text(
-                                    text = "Practice with AI",
+                                    text = stringResource(R.string.practice_with_ai),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -243,13 +244,13 @@ fun AiAssistantScreen(
                     verticalAlignment = Alignment.Bottom
                 ) {
                     Text(
-                        text = "Next Actions",
+                        text = stringResource(R.string.next_actions),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "View all",
+                        text = stringResource(R.string.view_all_1),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primaryContainer,
                         fontWeight = FontWeight.Medium,
@@ -270,7 +271,7 @@ fun AiAssistantScreen(
                         
                         if (actions.isEmpty()) {
                             Text(
-                                text = "No pending actions right now. Good job!",
+                                text = stringResource(R.string.no_pending_actions_right_now_good_job),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -320,7 +321,7 @@ fun AiAssistantScreen(
                     }
                     is UiState.Empty -> {
                         Text(
-                            text = "No pending actions right now. Good job!",
+                            text = stringResource(R.string.no_pending_actions_right_now_good_job),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

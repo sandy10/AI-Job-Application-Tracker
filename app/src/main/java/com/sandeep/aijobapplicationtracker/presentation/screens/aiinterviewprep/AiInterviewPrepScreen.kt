@@ -1,5 +1,6 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -89,7 +90,7 @@ fun AiInterviewPrepScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Interview Prep",
+                            text = stringResource(R.string.interview_prep),
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF3525CD) // primary color
@@ -165,7 +166,7 @@ fun AiInterviewPrepScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Start Video AI Interview",
+                                text = stringResource(R.string.start_video_ai_interview),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = Color.White,
                                 fontSize = 16.sp
@@ -198,7 +199,7 @@ fun AiInterviewPrepScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Generate More Questions",
+                                    text = stringResource(R.string.generate_more_questions),
                                     style = MaterialTheme.typography.labelLarge,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     fontSize = 16.sp
@@ -322,7 +323,7 @@ private fun AiInterviewPrepContent(
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = "AI Prepared",
+                                    text = stringResource(R.string.ai_prepared),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Medium
@@ -340,7 +341,7 @@ private fun AiInterviewPrepContent(
         item {
             Column {
                 Text(
-                    text = "🔥 Focus Areas",
+                    text = stringResource(R.string.focus_areas),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -377,7 +378,7 @@ private fun AiInterviewPrepContent(
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Likely Questions & Answers",
+                        text = stringResource(R.string.likely_questions_answers),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -434,7 +435,7 @@ private fun AiInterviewPrepContent(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "AI Strategy Tip",
+                                text = stringResource(R.string.ai_strategy_tip),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
@@ -457,7 +458,7 @@ private fun AiInterviewPrepContent(
         item {
             Column {
                 Text(
-                    text = "Behavioral Questions",
+                    text = stringResource(R.string.behavioral_questions),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface

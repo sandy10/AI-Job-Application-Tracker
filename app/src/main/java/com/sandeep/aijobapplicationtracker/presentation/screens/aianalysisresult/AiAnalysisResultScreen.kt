@@ -1,5 +1,7 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.aianalysisresult
 
+import com.sandeep.aijobapplicationtracker.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -75,7 +77,7 @@ fun AiAnalysisResultScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        text = "Analysis Complete",
+                        text = stringResource(R.string.analysis_complete),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF3525CD), // primary
@@ -121,7 +123,7 @@ fun AiAnalysisResultScreen(
                         border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF3525CD)),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("Edit Details", fontSize = 16.sp)
+                        Text(stringResource(R.string.edit_details), fontSize = 16.sp)
                     }
                     Button(
                         onClick = viewModel::confirmAndSave,
@@ -135,7 +137,7 @@ fun AiAnalysisResultScreen(
                     ) {
                         Icon(Icons.Default.Star, contentDescription = "Save", modifier = Modifier.size(20.dp)) // placeholder for save icon
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Save Application", fontSize = 16.sp)
+                        Text(stringResource(R.string.save_application), fontSize = 16.sp)
                     }
                 }
             }
@@ -213,14 +215,14 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
                 ) {
                     Icon(Icons.Default.Star, contentDescription = "Trend", tint = Color(0xFF3525CD), modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Strong opportunity for your profile", fontSize = 14.sp, color = Color(0xFF3525CD))
+                    Text(stringResource(R.string.strong_opportunity_for_your_profile), fontSize = 14.sp, color = Color(0xFF3525CD))
                 }
             }
         }
 
         // Extracted Information Section
         Column {
-            Text("KEY DETAILS", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF464555), letterSpacing = 1.sp)
+            Text(stringResource(R.string.key_details), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF464555), letterSpacing = 1.sp)
             Spacer(modifier = Modifier.height(8.dp))
             
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -258,7 +260,7 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
         // Required Skills
         val skillsList = if (data.skills.isNotEmpty()) data.skills else listOf("Kotlin", "Jetpack Compose", "Coroutines", "MVVM", "Firebase", "CI/CD")
         Column {
-            Text("Required Skills", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF464555))
+            Text(stringResource(R.string.required_skills), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF464555))
             Spacer(modifier = Modifier.height(8.dp))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -281,7 +283,7 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
         // Important Keywords
         val keywordsList = listOf("Clean Architecture", "Performance Testing", "Leadership")
         Column {
-            Text("Important Keywords", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF464555))
+            Text(stringResource(R.string.important_keywords), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF464555))
             Spacer(modifier = Modifier.height(8.dp))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -304,7 +306,7 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
 
         // Key Responsibilities
         Column {
-            Text("Key Responsibilities", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF464555))
+            Text(stringResource(R.string.key_responsibilities), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF464555))
             Spacer(modifier = Modifier.height(8.dp))
             Box(
                 modifier = Modifier
@@ -344,11 +346,11 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Star, contentDescription = "AI", tint = Color(0xFF0891B2), modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("AI Summary", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF164E63))
+                    Text(stringResource(R.string.ai_summary), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF164E63))
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    "\"This role strongly focuses on modern Android development, scalable architecture and technical ownership.\"",
+                    text = "\"This role strongly focuses on modern Android development, scalable architecture and technical ownership.\"",
                     fontSize = 14.sp,
                     color = Color(0xFF083344),
                     lineHeight = 20.sp
