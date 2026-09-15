@@ -12,6 +12,10 @@ import javax.inject.Inject
 
 import com.sandeep.aijobapplicationtracker.domain.repository.AuthRepository
 import com.sandeep.aijobapplicationtracker.domain.repository.ProfileRepository
+import com.sandeep.aijobapplicationtracker.utils.AnalyticsHelper
+import com.sandeep.aijobapplicationtracker.utils.Constants
+import com.sandeep.aijobapplicationtracker.utils.CrashlyticsHelper
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.first
 
 /**
@@ -22,7 +26,9 @@ import kotlinx.coroutines.flow.first
 class SignInViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val profileRepository: ProfileRepository,
-    private val networkMonitor: com.sandeep.aijobapplicationtracker.utils.NetworkMonitor
+    private val networkMonitor: com.sandeep.aijobapplicationtracker.utils.NetworkMonitor,
+    private val analyticsHelper: AnalyticsHelper,
+    private val crashlyticsHelper: CrashlyticsHelper
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<Boolean>>(UiState.Idle)
     val uiState: StateFlow<UiState<Boolean>> = _uiState
@@ -41,11 +47,17 @@ class SignInViewModel @Inject constructor(
             val result = authRepository.login(email, pass)
             
             if (result.isSuccess) {
+                analyticsHelper.trackLogin("email")
+                val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                crashlyticsHelper.setUserId(uid)
+                crashlyticsHelper.log("User signed in via email")
                 val profile = profileRepository.getProfile().first()
                 val isComplete = profile?.targetRole?.isNotBlank() == true
                 _uiState.value = UiState.Success(isComplete)
             } else {
-                _uiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "Sign in failed")
+                val error = result.exceptionOrNull()
+                crashlyticsHelper.recordException(error ?: Exception("Email login failed"), "Email login failed")
+                _uiState.value = UiState.Error(error?.message ?: "Sign in failed")
                 // Reset to idle after error so the user can try again
                 delay(2000)
                 _uiState.value = UiState.Idle
@@ -111,6 +123,7 @@ class SignInViewModel @Inject constructor(
             val result = authRepository.signInWithGoogleIdToken(idToken)
 
             if (result.isSuccess) {
+                analyticsHelper.trackLogin("google")
                 val profile = profileRepository.getProfile().first()
                 val isComplete = profile?.targetRole?.isNotBlank() == true
                 _uiState.value = UiState.Success(isComplete)

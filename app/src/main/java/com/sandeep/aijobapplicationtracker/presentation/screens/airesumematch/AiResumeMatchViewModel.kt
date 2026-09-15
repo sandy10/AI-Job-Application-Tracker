@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sandeep.aijobapplicationtracker.utils.UiState
+import com.sandeep.aijobapplicationtracker.utils.AnalyticsHelper
+import com.sandeep.aijobapplicationtracker.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +31,8 @@ class AiResumeMatchViewModel @Inject constructor(
     private val repository: com.sandeep.aijobapplicationtracker.domain.repository.JobApplicationRepository,
     private val profileRepository: com.sandeep.aijobapplicationtracker.domain.repository.ProfileRepository,
     private val aiAnalyzer: com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepository,
-    private val networkMonitor: com.sandeep.aijobapplicationtracker.utils.NetworkMonitor
+    private val networkMonitor: com.sandeep.aijobapplicationtracker.utils.NetworkMonitor,
+    private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
 
     val jobId: String = savedStateHandle.get<String>("jobId") ?: ""
@@ -42,6 +45,7 @@ class AiResumeMatchViewModel @Inject constructor(
     }
 
     private fun analyzeMatch() {
+        analyticsHelper.trackAiFeatureUsed(Constants.Analytics.FEATURE_RESUME_MATCH, jobId)
         if (!networkMonitor.isOnline()) {
             _uiState.value = UiState.Error("No internet connection")
             return

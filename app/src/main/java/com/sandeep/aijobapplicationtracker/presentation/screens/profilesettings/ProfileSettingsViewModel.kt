@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.sandeep.aijobapplicationtracker.domain.model.UserProfileModel
 import com.sandeep.aijobapplicationtracker.domain.repository.AuthRepository
 import com.sandeep.aijobapplicationtracker.domain.repository.ProfileRepository
+import com.sandeep.aijobapplicationtracker.utils.AnalyticsHelper
+import com.sandeep.aijobapplicationtracker.utils.Constants
 import com.sandeep.aijobapplicationtracker.utils.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +15,8 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+import com.sandeep.aijobapplicationtracker.utils.CrashlyticsHelper
+
 /**
  * ViewModel for the Profile Settings screen.
  * Loads real user profile data from Firestore via [ProfileRepository].
@@ -20,7 +24,9 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileSettingsViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val analyticsHelper: AnalyticsHelper,
+    private val crashlyticsHelper: CrashlyticsHelper
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState<UserProfileModel>>(UiState.Loading)
@@ -61,6 +67,8 @@ class ProfileSettingsViewModel @Inject constructor(
      * navigation back to the Sign In screen.
      */
     fun logout() {
+        analyticsHelper.trackLogout()
+        crashlyticsHelper.clearUserId()
         viewModelScope.launch {
             authRepository.logout()
             _uiState.value = UiState.Empty

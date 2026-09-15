@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepository
 import com.sandeep.aijobapplicationtracker.domain.repository.JobApplicationRepository
+import com.sandeep.aijobapplicationtracker.utils.AnalyticsHelper
+import com.sandeep.aijobapplicationtracker.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -38,7 +40,8 @@ sealed class InterviewState {
 class VideoInterviewViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val jobRepository: JobApplicationRepository,
-    private val aiRepository: AiAnalyzerRepository
+    private val aiRepository: AiAnalyzerRepository,
+    private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
 
     private val jobId: String = checkNotNull(savedStateHandle["jobId"])
@@ -73,6 +76,7 @@ class VideoInterviewViewModel @Inject constructor(
     }
 
     private fun startInterview() {
+        analyticsHelper.trackVideoInterviewStarted(jobId)
         _uiState.value = InterviewState.GeneratingQuestions("Preparing AI Interview...")
         
         viewModelScope.launch {
@@ -241,6 +245,10 @@ class VideoInterviewViewModel @Inject constructor(
         viewModelScope.launch {
             val result = aiRepository.evaluateVideoInterview(qaPairs, jobRole)
             result.onSuccess { feedback ->
+                // Extract score from feedback markdown: "### Overall Score: X/10"
+                val scoreRegex = Regex("""Overall Score:\s*(\d+)/10""")
+                val score = scoreRegex.find(feedback)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+                analyticsHelper.trackVideoInterviewCompleted(jobId, score)
                 _uiState.value = InterviewState.Finished(feedback)
             }.onFailure { e ->
                 _uiState.value = InterviewState.Error(e.message ?: "Evaluation failed")

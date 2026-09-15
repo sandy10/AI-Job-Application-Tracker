@@ -3,6 +3,8 @@ package com.sandeep.aijobapplicationtracker.presentation.screens.aijobanalyzer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sandeep.aijobapplicationtracker.utils.UiState
+import com.sandeep.aijobapplicationtracker.utils.AnalyticsHelper
+import com.sandeep.aijobapplicationtracker.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,12 +19,14 @@ import com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepositor
 class AiJobAnalyzerViewModel @Inject constructor(
     private val repository: AiAnalyzerRepository,
     private val profileRepository: com.sandeep.aijobapplicationtracker.domain.repository.ProfileRepository,
-    private val networkMonitor: com.sandeep.aijobapplicationtracker.utils.NetworkMonitor
+    private val networkMonitor: com.sandeep.aijobapplicationtracker.utils.NetworkMonitor,
+    private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val uiState: StateFlow<UiState<Unit>> = _uiState
 
     fun analyzeJobDescription(jobDescription: String) {
+        analyticsHelper.trackAiFeatureUsed(Constants.Analytics.FEATURE_JOB_ANALYZER)
         if (!networkMonitor.isOnline()) {
             _uiState.value = UiState.Error("No internet connection")
             return

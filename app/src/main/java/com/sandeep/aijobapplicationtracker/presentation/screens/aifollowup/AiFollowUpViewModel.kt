@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepository
 import com.sandeep.aijobapplicationtracker.domain.repository.JobApplicationRepository
+import com.sandeep.aijobapplicationtracker.utils.AnalyticsHelper
+import com.sandeep.aijobapplicationtracker.utils.Constants
 import com.sandeep.aijobapplicationtracker.utils.NetworkMonitor
 import com.sandeep.aijobapplicationtracker.utils.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +23,8 @@ class AiFollowUpViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val jobRepository: JobApplicationRepository,
     private val aiRepository: AiAnalyzerRepository,
-    private val networkMonitor: NetworkMonitor
+    private val networkMonitor: NetworkMonitor,
+    private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
 
     private val jobId: String = checkNotNull(savedStateHandle["jobId"])

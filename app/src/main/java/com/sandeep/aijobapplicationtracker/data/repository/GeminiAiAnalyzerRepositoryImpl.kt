@@ -11,8 +11,11 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.sandeep.aijobapplicationtracker.utils.CrashlyticsHelper
 
-class GeminiAiAnalyzerRepositoryImpl @Inject constructor() : AiAnalyzerRepository {
+class GeminiAiAnalyzerRepositoryImpl @Inject constructor(
+    private val crashlyticsHelper: CrashlyticsHelper
+) : AiAnalyzerRepository {
 
     private val _latestExtractedData = MutableStateFlow<ExtractedJobData?>(null)
     override val latestExtractedData: StateFlow<ExtractedJobData?> = _latestExtractedData.asStateFlow()
@@ -98,7 +101,7 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor() : AiAnalyzerRepositor
             Result.success(extractedData)
         } catch (e: Exception) {
             val errorMessage = e.message ?: "Unknown Error"
-            Timber.e(e, "AI Analysis Failed: $errorMessage")
+            crashlyticsHelper.recordException(e, "AI Job Analysis Failed: $errorMessage")
             
             if (errorMessage.contains("503")) {
                 Result.failure(Exception("Google AI Servers are currently overloaded. Please try again in a few minutes."))

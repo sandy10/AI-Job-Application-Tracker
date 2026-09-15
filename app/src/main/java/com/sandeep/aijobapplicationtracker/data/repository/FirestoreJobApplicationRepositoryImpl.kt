@@ -14,6 +14,8 @@ import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import javax.inject.Inject
 
+import com.sandeep.aijobapplicationtracker.utils.CrashlyticsHelper
+
 /**
  * Firebase Firestore implementation of [JobApplicationRepository].
  * All job applications are stored per-user at:
@@ -21,7 +23,8 @@ import javax.inject.Inject
  */
 class FirestoreJobApplicationRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val crashlyticsHelper: CrashlyticsHelper
 ) : JobApplicationRepository {
 
     /** Returns the current user's UID. Throws if not logged in. */
@@ -73,7 +76,7 @@ class FirestoreJobApplicationRepositoryImpl @Inject constructor(
                 .await()
             Timber.d("Application saved: ${application.id}")
         } catch (e: Exception) {
-            Timber.e(e, "Failed to save application")
+            crashlyticsHelper.recordException(e, "Failed to save application")
         }
     }
 
@@ -88,7 +91,7 @@ class FirestoreJobApplicationRepositoryImpl @Inject constructor(
                 .await()
             Timber.d("Application updated: ${application.id}")
         } catch (e: Exception) {
-            Timber.e(e, "Failed to update application")
+            crashlyticsHelper.recordException(e, "Failed to update application")
         }
     }
 

@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sandeep.aijobapplicationtracker.utils.UiState
+import com.sandeep.aijobapplicationtracker.utils.AnalyticsHelper
+import com.sandeep.aijobapplicationtracker.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -134,7 +136,8 @@ class AiInterviewPrepViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val jobRepository: com.sandeep.aijobapplicationtracker.domain.repository.JobApplicationRepository,
     private val aiRepository: com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepository,
-    private val networkMonitor: com.sandeep.aijobapplicationtracker.utils.NetworkMonitor
+    private val networkMonitor: com.sandeep.aijobapplicationtracker.utils.NetworkMonitor,
+    private val analyticsHelper: AnalyticsHelper
 ) : ViewModel() {
 
     private val jobId: String = savedStateHandle.get<String>("jobId") ?: ""
@@ -150,6 +153,7 @@ class AiInterviewPrepViewModel @Inject constructor(
     val isGeneratingMore: StateFlow<Boolean> = _isGeneratingMore
 
     fun generatePrepPlan(forceRegenerate: Boolean = false) {
+        analyticsHelper.trackAiFeatureUsed(Constants.Analytics.FEATURE_INTERVIEW_PREP, jobId)
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {

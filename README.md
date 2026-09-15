@@ -26,9 +26,10 @@ AI Job Application Tracker is an **Android-first workspace** tailored for studen
 * **Live Video AI Mock Interview**: Practice your pitch! Activate your camera and microphone to engage in a continuous, live simulated interview with the AI, which generates follow-up questions dynamically based on your spoken answers, and provides a final scored evaluation out of 10.
 * **AI Follow-Up**: Automatically drafts context-aware emails to recruiters (e.g., post-interview thank you emails or status check-ins) that you can copy to your clipboard in one tap.
 
-### 5. Profile & Analytics
+### 5. Profile, Analytics & Stability
 * **My Resumes**: Upload and manage different versions of your resume (e.g., Android Lead vs. KMP Developer) stored securely in Firebase Cloud Storage.
 * **Job Search Analytics**: Review your conversion rates (Application → Interview → Offer) to see where your funnel needs improvement.
+* **App Stability & Tracking**: Integrated with **Google Analytics** for seamless user-journey tracking, and **Firebase Crashlytics** for real-time monitoring of AI timeouts, Firestore failures, and fatal crashes, with user-scoped crash reporting.
 * **Settings & Logout**: Manage app notifications, update career profiles, or securely log out.
 
 ---
@@ -45,7 +46,9 @@ This project strictly adheres to modern Android development standards and **Clea
 * **Navigation**: Jetpack Navigation Compose
 * **AI Engine**: Firebase Vertex AI (`gemini-2.5-flash`)
 * **Backend / Database**: Firebase (Firestore, Authentication, Storage)
+* **Analytics & Stability**: Google Analytics (Event tracking) & Firebase Crashlytics (Fatal and non-fatal AI error logging)
 * **Audio/Speech**: Android native `SpeechRecognizer` and `TextToSpeech` API for the Video AI mock interviews.
+* **Localization**: 100% UI strings extracted to `strings.xml` with centralized Constants.
 
 ---
 
