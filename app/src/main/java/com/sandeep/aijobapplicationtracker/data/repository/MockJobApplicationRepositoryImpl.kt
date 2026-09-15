@@ -1,6 +1,7 @@
 package com.sandeep.aijobapplicationtracker.data.repository
 
 import androidx.datastore.core.DataStore
+import com.sandeep.aijobapplicationtracker.utils.Constants
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -64,18 +65,18 @@ class MockJobApplicationRepositoryImpl @Inject constructor(
             val jsonArray = JSONArray(jsonString)
             for (i in 0 until jsonArray.length()) {
                 val obj = jsonArray.getJSONObject(i)
-                val interviewsJson = obj.optJSONArray("interviews")
+                val interviewsJson = obj.optJSONArray(Constants.Firestore.FIELD_INTERVIEWS)
                 val interviewsList = mutableListOf<com.sandeep.aijobapplicationtracker.domain.model.InterviewModel>()
                 if (interviewsJson != null) {
                     for (j in 0 until interviewsJson.length()) {
                         val intObj = interviewsJson.getJSONObject(j)
                         interviewsList.add(
                             com.sandeep.aijobapplicationtracker.domain.model.InterviewModel(
-                                roundNumber = intObj.optString("roundNumber", ""),
-                                type = intObj.optString("type", ""),
-                                dateTime = intObj.optString("dateTime", ""),
-                                meetingUrl = intObj.optString("meetingUrl", ""),
-                                interviewer = intObj.optString("interviewer", "")
+                                roundNumber = intObj.optString(Constants.Firestore.FIELD_ROUND_NUMBER, ""),
+                                type = intObj.optString(Constants.Firestore.FIELD_TYPE, ""),
+                                dateTime = intObj.optString(Constants.Firestore.FIELD_DATE_TIME, ""),
+                                meetingUrl = intObj.optString(Constants.Firestore.FIELD_MEETING_URL, ""),
+                                interviewer = intObj.optString(Constants.Firestore.FIELD_INTERVIEWER, "")
                             )
                         )
                     }
@@ -83,24 +84,24 @@ class MockJobApplicationRepositoryImpl @Inject constructor(
 
                 list.add(
                     JobApplicationModel(
-                        id = obj.optString("id", ""),
-                        company = obj.optString("company", ""),
-                        jobTitle = obj.optString("jobTitle", ""),
-                        jobUrl = obj.optString("jobUrl", ""),
-                        location = obj.optString("location", ""),
-                        workMode = obj.optString("workMode", ""),
-                        source = obj.optString("source", ""),
-                        status = obj.optString("status", ""),
-                        dateApplied = obj.optString("dateApplied", ""),
-                        salary = obj.optString("salary", ""),
-                        recruiter = obj.optString("recruiter", ""),
-                        noticePeriod = obj.optString("noticePeriod", ""),
-                        jobDescription = obj.optString("jobDescription", ""),
-                        notes = obj.optString("notes", ""),
-                        matchScore = obj.optInt("matchScore", 0),
-                        selectedResumeId = obj.optString("selectedResumeId", ""),
-                        aiInterviewPlanJson = obj.optString("aiInterviewPlanJson", ""),
-                        timestamp = obj.optLong("timestamp", System.currentTimeMillis()),
+                        id = obj.optString(Constants.Firestore.FIELD_ID, ""),
+                        company = obj.optString(Constants.Firestore.FIELD_COMPANY, ""),
+                        jobTitle = obj.optString(Constants.Firestore.FIELD_JOB_TITLE, ""),
+                        jobUrl = obj.optString(Constants.Firestore.FIELD_JOB_URL, ""),
+                        location = obj.optString(Constants.Firestore.FIELD_LOCATION, ""),
+                        workMode = obj.optString(Constants.Firestore.FIELD_WORK_MODE, ""),
+                        source = obj.optString(Constants.Firestore.FIELD_SOURCE, ""),
+                        status = obj.optString(Constants.Firestore.FIELD_STATUS, ""),
+                        dateApplied = obj.optString(Constants.Firestore.FIELD_DATE_APPLIED, ""),
+                        salary = obj.optString(Constants.Firestore.FIELD_SALARY, ""),
+                        recruiter = obj.optString(Constants.Firestore.FIELD_RECRUITER, ""),
+                        noticePeriod = obj.optString(Constants.Firestore.FIELD_NOTICE_PERIOD, ""),
+                        jobDescription = obj.optString(Constants.Firestore.FIELD_JOB_DESCRIPTION, ""),
+                        notes = obj.optString(Constants.Firestore.FIELD_NOTES, ""),
+                        matchScore = obj.optInt(Constants.Firestore.FIELD_MATCH_SCORE, 0),
+                        selectedResumeId = obj.optString(Constants.Firestore.FIELD_SELECTED_RESUME_ID, ""),
+                        aiInterviewPlanJson = obj.optString(Constants.Firestore.FIELD_AI_INTERVIEW_PLAN, ""),
+                        timestamp = obj.optLong(Constants.Firestore.FIELD_TIMESTAMP, System.currentTimeMillis()),
                         interviews = interviewsList
                     )
                 )
@@ -116,37 +117,37 @@ class MockJobApplicationRepositoryImpl @Inject constructor(
         try {
             for (app in list) {
                 val obj = JSONObject().apply {
-                    put("id", app.id)
-                    put("company", app.company)
-                    put("jobTitle", app.jobTitle)
-                    put("jobUrl", app.jobUrl)
-                    put("location", app.location)
-                    put("workMode", app.workMode)
-                    put("source", app.source)
-                    put("status", app.status)
-                    put("dateApplied", app.dateApplied)
-                    put("salary", app.salary)
-                    put("recruiter", app.recruiter)
-                    put("noticePeriod", app.noticePeriod)
-                    put("jobDescription", app.jobDescription)
-                    put("notes", app.notes)
-                    put("matchScore", app.matchScore)
-                    put("selectedResumeId", app.selectedResumeId)
-                    put("aiInterviewPlanJson", app.aiInterviewPlanJson)
-                    put("timestamp", app.timestamp)
+                    put(Constants.Firestore.FIELD_ID, app.id)
+                    put(Constants.Firestore.FIELD_COMPANY, app.company)
+                    put(Constants.Firestore.FIELD_JOB_TITLE, app.jobTitle)
+                    put(Constants.Firestore.FIELD_JOB_URL, app.jobUrl)
+                    put(Constants.Firestore.FIELD_LOCATION, app.location)
+                    put(Constants.Firestore.FIELD_WORK_MODE, app.workMode)
+                    put(Constants.Firestore.FIELD_SOURCE, app.source)
+                    put(Constants.Firestore.FIELD_STATUS, app.status)
+                    put(Constants.Firestore.FIELD_DATE_APPLIED, app.dateApplied)
+                    put(Constants.Firestore.FIELD_SALARY, app.salary)
+                    put(Constants.Firestore.FIELD_RECRUITER, app.recruiter)
+                    put(Constants.Firestore.FIELD_NOTICE_PERIOD, app.noticePeriod)
+                    put(Constants.Firestore.FIELD_JOB_DESCRIPTION, app.jobDescription)
+                    put(Constants.Firestore.FIELD_NOTES, app.notes)
+                    put(Constants.Firestore.FIELD_MATCH_SCORE, app.matchScore)
+                    put(Constants.Firestore.FIELD_SELECTED_RESUME_ID, app.selectedResumeId)
+                    put(Constants.Firestore.FIELD_AI_INTERVIEW_PLAN, app.aiInterviewPlanJson)
+                    put(Constants.Firestore.FIELD_TIMESTAMP, app.timestamp)
 
                     val interviewsArray = JSONArray()
                     for (interview in app.interviews) {
                         val intObj = JSONObject().apply {
-                            put("roundNumber", interview.roundNumber)
-                            put("type", interview.type)
-                            put("dateTime", interview.dateTime)
-                            put("meetingUrl", interview.meetingUrl)
-                            put("interviewer", interview.interviewer)
+                            put(Constants.Firestore.FIELD_ROUND_NUMBER, interview.roundNumber)
+                            put(Constants.Firestore.FIELD_TYPE, interview.type)
+                            put(Constants.Firestore.FIELD_DATE_TIME, interview.dateTime)
+                            put(Constants.Firestore.FIELD_MEETING_URL, interview.meetingUrl)
+                            put(Constants.Firestore.FIELD_INTERVIEWER, interview.interviewer)
                         }
                         interviewsArray.put(intObj)
                     }
-                    put("interviews", interviewsArray)
+                    put(Constants.Firestore.FIELD_INTERVIEWS, interviewsArray)
                 }
                 jsonArray.put(obj)
             }

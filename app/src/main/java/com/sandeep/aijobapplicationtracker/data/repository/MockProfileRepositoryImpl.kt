@@ -1,6 +1,7 @@
 package com.sandeep.aijobapplicationtracker.data.repository
 
 import androidx.datastore.core.DataStore
+import com.sandeep.aijobapplicationtracker.utils.Constants
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -18,15 +19,15 @@ class MockProfileRepositoryImpl @Inject constructor(
 ) : ProfileRepository {
 
     private object Keys {
-        val NAME = stringPreferencesKey("profile_name")
-        val TARGET_ROLE = stringPreferencesKey("profile_role")
-        val EXP_LEVEL = stringPreferencesKey("profile_exp_level")
-        val YEARS_EXP = stringPreferencesKey("profile_years_exp")
-        val LOCATION = stringPreferencesKey("profile_location")
-        val WORK_PREF = stringPreferencesKey("profile_work_pref")
-        val CURRENT_CTC = stringPreferencesKey("profile_current_ctc")
-        val EXPECTED_CTC = stringPreferencesKey("profile_expected_ctc")
-        val NOTICE_PERIOD = stringPreferencesKey("profile_notice_period")
+        val NAME = stringPreferencesKey(Constants.Preferences.PROFILE_NAME)
+        val TARGET_ROLE = stringPreferencesKey(Constants.Preferences.PROFILE_ROLE)
+        val EXP_LEVEL = stringPreferencesKey(Constants.Preferences.PROFILE_EXP_LEVEL)
+        val YEARS_EXP = stringPreferencesKey(Constants.Preferences.PROFILE_YEARS_EXP)
+        val LOCATION = stringPreferencesKey(Constants.Preferences.PROFILE_LOCATION)
+        val WORK_PREF = stringPreferencesKey(Constants.Preferences.PROFILE_WORK_PREF)
+        val CURRENT_CTC = stringPreferencesKey(Constants.Preferences.PROFILE_CURRENT_CTC)
+        val EXPECTED_CTC = stringPreferencesKey(Constants.Preferences.PROFILE_EXPECTED_CTC)
+        val NOTICE_PERIOD = stringPreferencesKey(Constants.Preferences.PROFILE_NOTICE_PERIOD)
     }
 
     override fun getProfile(): Flow<UserProfileModel?> {

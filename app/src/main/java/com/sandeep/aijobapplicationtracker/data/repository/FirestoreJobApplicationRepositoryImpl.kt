@@ -1,6 +1,7 @@
 package com.sandeep.aijobapplicationtracker.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
+import com.sandeep.aijobapplicationtracker.utils.Constants
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.sandeep.aijobapplicationtracker.domain.model.InterviewModel
@@ -29,7 +30,7 @@ class FirestoreJobApplicationRepositoryImpl @Inject constructor(
 
     /** Reference to the current user's applications collection in Firestore. */
     private fun applicationsCollection() =
-        firestore.collection("users").document(requireUserId()).collection("applications")
+        firestore.collection(Constants.Firestore.USERS).document(requireUserId()).collection(Constants.Firestore.APPLICATIONS)
 
     /**
      * Emits a real-time list of job applications from Firestore,
@@ -44,8 +45,8 @@ class FirestoreJobApplicationRepositoryImpl @Inject constructor(
         }
 
         val listener = firestore
-            .collection("users").document(uid).collection("applications")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .collection(Constants.Firestore.USERS).document(uid).collection(Constants.Firestore.APPLICATIONS)
+            .orderBy(Constants.Firestore.FIELD_TIMESTAMP, Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     Timber.e(error, "Firestore getApplications error")
@@ -109,35 +110,35 @@ class FirestoreJobApplicationRepositoryImpl @Inject constructor(
 /** Converts a Firestore document map to a [JobApplicationModel]. */
 private fun com.google.firebase.firestore.DocumentSnapshot.toJobApplicationModel(): JobApplicationModel? {
     return try {
-        val interviewsList = (get("interviews") as? List<Map<String, Any>>)?.map { map ->
+        val interviewsList = (get(Constants.Firestore.FIELD_INTERVIEWS) as? List<Map<String, Any>>)?.map { map ->
             InterviewModel(
-                roundNumber = map["roundNumber"] as? String ?: "",
-                type = map["type"] as? String ?: "",
-                dateTime = map["dateTime"] as? String ?: "",
-                meetingUrl = map["meetingUrl"] as? String ?: "",
-                interviewer = map["interviewer"] as? String ?: ""
+                roundNumber = map[Constants.Firestore.FIELD_ROUND_NUMBER] as? String ?: "",
+                type = map[Constants.Firestore.FIELD_TYPE] as? String ?: "",
+                dateTime = map[Constants.Firestore.FIELD_DATE_TIME] as? String ?: "",
+                meetingUrl = map[Constants.Firestore.FIELD_MEETING_URL] as? String ?: "",
+                interviewer = map[Constants.Firestore.FIELD_INTERVIEWER] as? String ?: ""
             )
         } ?: emptyList()
 
         JobApplicationModel(
             id = id,
-            company = getString("company") ?: "",
-            jobTitle = getString("jobTitle") ?: "",
-            jobUrl = getString("jobUrl") ?: "",
-            location = getString("location") ?: "",
-            workMode = getString("workMode") ?: "",
-            source = getString("source") ?: "",
-            status = getString("status") ?: "Saved",
-            dateApplied = getString("dateApplied") ?: "",
-            salary = getString("salary") ?: "",
-            recruiter = getString("recruiter") ?: "",
-            noticePeriod = getString("noticePeriod") ?: "",
-            jobDescription = getString("jobDescription") ?: "",
-            notes = getString("notes") ?: "",
-            matchScore = (getLong("matchScore") ?: 0L).toInt(),
-            selectedResumeId = getString("selectedResumeId") ?: "",
-            aiInterviewPlanJson = getString("aiInterviewPlanJson") ?: "",
-            timestamp = getLong("timestamp") ?: System.currentTimeMillis(),
+            company = getString(Constants.Firestore.FIELD_COMPANY) ?: "",
+            jobTitle = getString(Constants.Firestore.FIELD_JOB_TITLE) ?: "",
+            jobUrl = getString(Constants.Firestore.FIELD_JOB_URL) ?: "",
+            location = getString(Constants.Firestore.FIELD_LOCATION) ?: "",
+            workMode = getString(Constants.Firestore.FIELD_WORK_MODE) ?: "",
+            source = getString(Constants.Firestore.FIELD_SOURCE) ?: "",
+            status = getString(Constants.Firestore.FIELD_STATUS) ?: "Saved",
+            dateApplied = getString(Constants.Firestore.FIELD_DATE_APPLIED) ?: "",
+            salary = getString(Constants.Firestore.FIELD_SALARY) ?: "",
+            recruiter = getString(Constants.Firestore.FIELD_RECRUITER) ?: "",
+            noticePeriod = getString(Constants.Firestore.FIELD_NOTICE_PERIOD) ?: "",
+            jobDescription = getString(Constants.Firestore.FIELD_JOB_DESCRIPTION) ?: "",
+            notes = getString(Constants.Firestore.FIELD_NOTES) ?: "",
+            matchScore = (getLong(Constants.Firestore.FIELD_MATCH_SCORE) ?: 0L).toInt(),
+            selectedResumeId = getString(Constants.Firestore.FIELD_SELECTED_RESUME_ID) ?: "",
+            aiInterviewPlanJson = getString(Constants.Firestore.FIELD_AI_INTERVIEW_PLAN) ?: "",
+            timestamp = getLong(Constants.Firestore.FIELD_TIMESTAMP) ?: System.currentTimeMillis(),
             interviews = interviewsList
         )
     } catch (e: Exception) {
@@ -148,30 +149,30 @@ private fun com.google.firebase.firestore.DocumentSnapshot.toJobApplicationModel
 
 /** Converts a [JobApplicationModel] to a map suitable for Firestore. */
 private fun JobApplicationModel.toFirestoreMap(): Map<String, Any> = mapOf(
-    "company" to company,
-    "jobTitle" to jobTitle,
-    "jobUrl" to jobUrl,
-    "location" to location,
-    "workMode" to workMode,
-    "source" to source,
-    "status" to status,
-    "dateApplied" to dateApplied,
-    "salary" to salary,
-    "recruiter" to recruiter,
-    "noticePeriod" to noticePeriod,
-    "jobDescription" to jobDescription,
-    "notes" to notes,
-    "matchScore" to matchScore,
-    "selectedResumeId" to selectedResumeId,
-    "aiInterviewPlanJson" to aiInterviewPlanJson,
-    "timestamp" to timestamp,
-    "interviews" to interviews.map { interview ->
+    Constants.Firestore.FIELD_COMPANY to company,
+    Constants.Firestore.FIELD_JOB_TITLE to jobTitle,
+    Constants.Firestore.FIELD_JOB_URL to jobUrl,
+    Constants.Firestore.FIELD_LOCATION to location,
+    Constants.Firestore.FIELD_WORK_MODE to workMode,
+    Constants.Firestore.FIELD_SOURCE to source,
+    Constants.Firestore.FIELD_STATUS to status,
+    Constants.Firestore.FIELD_DATE_APPLIED to dateApplied,
+    Constants.Firestore.FIELD_SALARY to salary,
+    Constants.Firestore.FIELD_RECRUITER to recruiter,
+    Constants.Firestore.FIELD_NOTICE_PERIOD to noticePeriod,
+    Constants.Firestore.FIELD_JOB_DESCRIPTION to jobDescription,
+    Constants.Firestore.FIELD_NOTES to notes,
+    Constants.Firestore.FIELD_MATCH_SCORE to matchScore,
+    Constants.Firestore.FIELD_SELECTED_RESUME_ID to selectedResumeId,
+    Constants.Firestore.FIELD_AI_INTERVIEW_PLAN to aiInterviewPlanJson,
+    Constants.Firestore.FIELD_TIMESTAMP to timestamp,
+    Constants.Firestore.FIELD_INTERVIEWS to interviews.map { interview ->
         mapOf(
-            "roundNumber" to interview.roundNumber,
-            "type" to interview.type,
-            "dateTime" to interview.dateTime,
-            "meetingUrl" to interview.meetingUrl,
-            "interviewer" to interview.interviewer
+            Constants.Firestore.FIELD_ROUND_NUMBER to interview.roundNumber,
+            Constants.Firestore.FIELD_TYPE to interview.type,
+            Constants.Firestore.FIELD_DATE_TIME to interview.dateTime,
+            Constants.Firestore.FIELD_MEETING_URL to interview.meetingUrl,
+            Constants.Firestore.FIELD_INTERVIEWER to interview.interviewer
         )
     }
 )
