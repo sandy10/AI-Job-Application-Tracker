@@ -74,6 +74,7 @@ fun ProfileSettingsScreen(
     onNavigateToAssistant: () -> Unit = {},
     onNavigateToResumes: () -> Unit = {},
     onNavigateToEditProfile: () -> Unit = {},
+    onNavigateToAnalytics: () -> Unit = {},
     onLogout: () -> Unit = {},
     viewModel: ProfileSettingsViewModel = hiltViewModel()
 ) {
@@ -143,6 +144,7 @@ fun ProfileSettingsScreen(
                     profile = s.data,
                     onNavigateToResumes = onNavigateToResumes,
                     onNavigateToEditProfile = onNavigateToEditProfile,
+                    onNavigateToAnalytics = onNavigateToAnalytics,
                     onLogout = { viewModel.logout() }
                 )
                 is UiState.Error, is UiState.Empty -> {
@@ -162,6 +164,7 @@ private fun ProfileContent(
     profile: UserProfileModel,
     onNavigateToResumes: () -> Unit,
     onNavigateToEditProfile: () -> Unit,
+    onNavigateToAnalytics: () -> Unit,
     onLogout: () -> Unit
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
@@ -489,6 +492,56 @@ private fun ProfileContent(
                             )
                             Text(
                                 text = stringResource(id = R.string.manage_resumes),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 📊 Analytics 📊
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+                    .clickable { onNavigateToAnalytics() }
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFFEEF2FF)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = "Job Search Analytics",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Job Search Analytics",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "View your conversion rates",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

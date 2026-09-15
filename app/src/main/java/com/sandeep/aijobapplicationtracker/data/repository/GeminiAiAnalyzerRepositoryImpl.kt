@@ -328,4 +328,15 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor() : AiAnalyzerRepositor
     override fun clearExtractedData() {
         _latestExtractedData.value = null
     }
+    override suspend fun generateFollowUpEmail(company: String, role: String, recruiterName: String?, daysSinceApplied: Int): Result<String> {
+        return try {
+            val prompt = "Generate a professional follow-up email for a job application.\nCompany: $company\nRole: $role\nRecruiter Name: ${recruiterName ?: "Hiring Manager"}\nDays since applied: $daysSinceApplied\n\nThe email should be polite, concise, and express continued interest in the role.\nDo not include subject line or placeholders like [Your Name]. Just the email body."
+            val response = generativeModel.generateContent(prompt)
+            val text = response.text ?: return Result.failure(Exception("Empty response from AI"))
+            Result.success(text.trim())
+        } catch (e: Exception) {
+            Timber.e(e, "Error generating follow up email")
+            Result.failure(e)
+        }
+    }
 }

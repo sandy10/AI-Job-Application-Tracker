@@ -52,6 +52,7 @@ import com.sandeep.aijobapplicationtracker.utils.UiState
 @Composable
 fun AiAssistantScreen(
     onNavigateToPrep: (String) -> Unit,
+    onNavigateToFollowUp: (String) -> Unit,
     onNavigateToJobAnalyzer: () -> Unit,
     onNavigateToAiChat: () -> Unit,
     onNavigateToHome: () -> Unit = {},
@@ -293,7 +294,7 @@ fun AiAssistantScreen(
                                                 if (action.actionType == ActionType.PREPARE_INTERVIEW) {
                                                     onNavigateToPrep(action.jobId)
                                                 } else if (action.actionType == ActionType.FOLLOW_UP) {
-                                                    onNavigateToAiChat()
+                                                    onNavigateToFollowUp(action.jobId)
                                                 }
                                             }
                                             .padding(horizontal = 12.dp, vertical = 8.dp),
