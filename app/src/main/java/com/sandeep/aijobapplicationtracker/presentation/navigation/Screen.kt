@@ -46,5 +46,8 @@ sealed class Screen(val route: String) {
     object ProfileSettings : Screen("profile_settings")
     
     object Analytics : Screen("analytics")
-    // TODO: Add your screens here
+    
+    object VideoInterview : Screen("video_interview/{jobId}") {
+        fun createRoute(jobId: String) = "video_interview/$jobId"
+    }
 }

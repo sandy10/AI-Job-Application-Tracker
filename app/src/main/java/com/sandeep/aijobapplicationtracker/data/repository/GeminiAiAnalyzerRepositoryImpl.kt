@@ -339,4 +339,56 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor() : AiAnalyzerRepositor
             Result.failure(e)
         }
     }
+
+    override suspend fun generateVideoInterviewQuestions(jobDescription: String, resumeContent: String): Result<List<String>> {
+        return try {
+            val prompt = "You are an expert technical interviewer. Generate exactly 4 additional interview questions based on the candidate's resume and the job description. The questions should be specific and probing. Format your response as a simple JSON array of strings: [\"Question 2\", \"Question 3\", \"Question 4\", \"Question 5\"]. Do not include markdown code block formatting like ```json. Just the array. Job Description: $jobDescription. Resume: $resumeContent."
+            val response = generativeModel.generateContent(prompt)
+            val text = response.text?.replace("```json", "")?.replace("```", "")?.trim() ?: ""
+            
+            val questions = mutableListOf<String>()
+            questions.add("Please tell me about yourself and your most significant projects.")
+            
+            try {
+                val jsonArray = org.json.JSONArray(text)
+                for (i in 0 until jsonArray.length()) {
+                    questions.add(jsonArray.getString(i))
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "JSON Parsing failed for video interview questions")
+                questions.add("What specific skills do you bring to this role?")
+                questions.add("Can you describe a challenging technical problem you solved?")
+                questions.add("How do you stay updated with the latest technologies?")
+                questions.add("Why do you want to work for our company?")
+            }
+            
+            Result.success(questions.take(5))
+        } catch (e: Exception) {
+            Timber.e(e, "Error generating video interview questions")
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun evaluateVideoInterview(qaPairs: List<Pair<String, String>>, role: String): Result<String> {
+        return try {
+            val transcript = qaPairs.joinToString("\n\n") { "Q: ${it.first}\nA: ${it.second}" }
+            val prompt = """
+                You are an expert interviewer evaluating a candidate for a $role position. Here is the transcript of their video interview:
+                
+                $transcript
+                
+                Provide constructive feedback on their answers.
+                At the very beginning, give an overall score out of 10 in the format: ### Overall Score: X/10
+                Then, highlight what they did well and areas for improvement.
+                Format the response beautifully using Markdown with headings (e.g. ###), bolding (**), and bullet points (-).
+            """.trimIndent()
+            
+            val response = generativeModel.generateContent(prompt)
+            val text = response.text ?: return Result.failure(Exception("Empty response from AI"))
+            Result.success(text.trim())
+        } catch (e: Exception) {
+            Timber.e(e, "Error evaluating video interview")
+            Result.failure(e)
+        }
+    }
 }

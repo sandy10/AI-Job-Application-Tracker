@@ -1,6 +1,7 @@
 package com.sandeep.aijobapplicationtracker.presentation.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,8 +31,26 @@ fun SimpleMarkdownText(
                 continue
             }
             
-            val isBullet = trimmed.startsWith("* ") || trimmed.startsWith("- ")
-            val content = if (isBullet) trimmed.substring(2).trim() else trimmed
+            var isBullet = false
+            var content = trimmed
+            var headerLevel = 0
+            
+            if (trimmed.startsWith("# ")) {
+                headerLevel = 1
+                content = trimmed.substring(2).trim()
+            } else if (trimmed.startsWith("## ")) {
+                headerLevel = 2
+                content = trimmed.substring(3).trim()
+            } else if (trimmed.startsWith("### ")) {
+                headerLevel = 3
+                content = trimmed.substring(4).trim()
+            } else if (trimmed.startsWith("#### ")) {
+                headerLevel = 4
+                content = trimmed.substring(5).trim()
+            } else if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
+                isBullet = true
+                content = trimmed.substring(2).trim()
+            }
             
             val annotatedString = buildAnnotatedString {
                 var currentIndex = 0
@@ -49,7 +68,7 @@ fun SimpleMarkdownText(
                     }
                     
                     // Add bold text
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color(0xFF191C1E))) {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)) {
                         append(boldText)
                     }
                     
@@ -62,8 +81,20 @@ fun SimpleMarkdownText(
                 }
             }
             
+            val textStyle = when (headerLevel) {
+                1 -> MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
+                2 -> MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+                3 -> MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                4 -> MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                else -> MaterialTheme.typography.bodyMedium
+            }
+            
+            val textColor = if (headerLevel > 0) MaterialTheme.colorScheme.onSurface else color
+            val bottomPadding = if (headerLevel > 0) 12.dp else 8.dp
+            val topPadding = if (headerLevel > 0) 16.dp else 0.dp
+            
             if (isBullet) {
-                androidx.compose.foundation.layout.Row(modifier = Modifier.padding(bottom = 6.dp, start = 8.dp)) {
+                Row(modifier = Modifier.padding(bottom = 6.dp, start = 8.dp)) {
                     Text(
                         text = "•",
                         style = MaterialTheme.typography.bodyMedium,
@@ -81,10 +112,10 @@ fun SimpleMarkdownText(
             } else {
                 Text(
                     text = annotatedString,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = color,
-                    lineHeight = 22.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    style = textStyle,
+                    color = textColor,
+                    lineHeight = if (headerLevel > 0) 30.sp else 22.sp,
+                    modifier = Modifier.padding(top = topPadding, bottom = bottomPadding)
                 )
             }
         }

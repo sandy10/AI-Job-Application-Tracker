@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
 import com.sandeep.aijobapplicationtracker.presentation.screens.splash.SplashScreen
 import com.sandeep.aijobapplicationtracker.presentation.screens.home.HomeScreen
 
@@ -190,9 +192,11 @@ fun AppNavGraph() {
             )
         }
         
-        composable(Screen.AiInterviewPrep.route) {
+        composable(Screen.AiInterviewPrep.route) { backStackEntry ->
+            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
             AiInterviewPrepScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onStartVideoInterview = { navController.navigate(Screen.VideoInterview.createRoute(jobId)) }
             )
         }
         
@@ -234,6 +238,16 @@ fun AppNavGraph() {
                 onNavigateToHome = { navController.navigate(Screen.Home.route) },
                 onNavigateToApplications = { navController.navigate(Screen.ApplicationsList.route) },
                 onNavigateToAssistant = { navController.navigate(Screen.AiAssistant.route) }
+            )
+        }
+
+        composable(
+            route = Screen.VideoInterview.route,
+            arguments = listOf(navArgument("jobId") { type = androidx.navigation.NavType.StringType })
+        ) { backStackEntry ->
+            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+            com.sandeep.aijobapplicationtracker.presentation.screens.videointerview.VideoInterviewScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

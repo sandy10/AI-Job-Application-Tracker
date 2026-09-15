@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -72,6 +73,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 @Composable
 fun AiInterviewPrepScreen(
     onNavigateBack: () -> Unit,
+    onStartVideoInterview: () -> Unit = {},
     viewModel: AiInterviewPrepViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -136,14 +138,41 @@ fun AiInterviewPrepScreen(
         bottomBar = {
             if (uiState is UiState.Success) {
                 val isGenerating by viewModel.isGeneratingMore.collectAsState()
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.White)
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant)
                         .padding(horizontal = 20.dp, vertical = 16.dp)
-                        .padding(bottom = 16.dp) // extra padding for safe area
+                        .padding(bottom = 16.dp), // extra padding for safe area
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.primary)
+                            .clickable { onStartVideoInterview() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = "Start Video Interview",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Start Video AI Interview",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = Color.White,
+                                fontSize = 16.sp
+                            )
+                        }
+                    }
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -162,7 +191,7 @@ fun AiInterviewPrepScreen(
                         } else {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
-                                    imageVector = Icons.Default.Star, // Re-using standard icon
+                                    imageVector = Icons.Default.Star,
                                     contentDescription = "Generate",
                                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                     modifier = Modifier.size(20.dp)

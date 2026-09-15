@@ -12,5 +12,7 @@ interface AiAnalyzerRepository {
     suspend fun generateResumeMatchAnalysis(jobDescription: String, candidateProfile: String): Result<com.sandeep.aijobapplicationtracker.presentation.screens.airesumematch.ResumeMatchResult>
     suspend fun generateFollowUpEmail(company: String, role: String, recruiterName: String?, daysSinceApplied: Int): Result<String>
     suspend fun sendChatMessage(prompt: String): Result<String>
+    suspend fun generateVideoInterviewQuestions(jobDescription: String, resumeContent: String): Result<List<String>>
+    suspend fun evaluateVideoInterview(qaPairs: List<Pair<String, String>>, role: String): Result<String>
     fun clearExtractedData()
 }
