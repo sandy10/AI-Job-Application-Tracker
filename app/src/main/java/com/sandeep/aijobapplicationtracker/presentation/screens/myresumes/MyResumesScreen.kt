@@ -1,5 +1,7 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.myresumes
 
+import androidx.compose.material3.MaterialTheme
+
 import com.sandeep.aijobapplicationtracker.R
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
@@ -24,9 +26,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,7 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -68,7 +70,7 @@ fun MyResumesScreen(
     onNavigateBack: () -> Unit,
     viewModel: MyResumesViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     val filePickerLauncher = rememberLauncherForActivityResult(
@@ -103,7 +105,7 @@ fun MyResumesScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF7F9FB),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { 
@@ -111,7 +113,7 @@ fun MyResumesScreen(
                         stringResource(R.string.my_resumes_1),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3525CD),
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     ) 
@@ -124,14 +126,14 @@ fun MyResumesScreen(
                             .clip(CircleShape)
                             .background(Color.Transparent)
                     ) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFF464555))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 },
                 actions = {
                     Spacer(modifier = Modifier.width(48.dp))
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF7F9FB)
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         }
@@ -146,14 +148,14 @@ fun MyResumesScreen(
                 stringResource(R.string.your_resume_library),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF191C1E),
+                color = MaterialTheme.colorScheme.onSurface,
                 lineHeight = 40.sp
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 stringResource(R.string.keep_different_versions_ready_for_differ),
                 fontSize = 16.sp,
-                color = Color(0xFF464555)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(24.dp))
             
@@ -221,13 +223,13 @@ private fun ResumeCard(
     onDelete: () -> Unit,
     onView: () -> Unit
 ) {
-    val borderColor = if (resume.isPrimary) Color.Transparent else Color(0xFFC7C4D8)
+    val borderColor = if (resume.isPrimary) Color.Transparent else MaterialTheme.colorScheme.outline
     val cardModifier = if (resume.isPrimary) {
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
-            .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(16.dp)) // Base border
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp)) // Base border
             // Draw left primary border over it by overlaying a Box
     } else {
         Modifier
@@ -248,7 +250,7 @@ private fun ResumeCard(
                         .fillMaxHeight()
                         .width(4.dp)
                         .align(Alignment.CenterStart)
-                        .background(Color(0xFF3525CD))
+                        .background(MaterialTheme.colorScheme.primary)
                 )
             }
         }
@@ -259,8 +261,8 @@ private fun ResumeCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val iconBg = if (resume.isPrimary) Color(0xFF3525CD).copy(alpha = 0.1f) else Color(0xFFECEEF0)
-            val iconColor = if (resume.isPrimary) Color(0xFF3525CD) else Color(0xFF464555)
+            val iconBg = if (resume.isPrimary) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant
+            val iconColor = if (resume.isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
             
             Box(
                 modifier = Modifier
@@ -270,7 +272,7 @@ private fun ResumeCard(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.List,
+                    imageVector = Icons.AutoMirrored.Filled.List,
                     contentDescription = null,
                     tint = iconColor,
                     modifier = Modifier.size(24.dp)
@@ -284,7 +286,7 @@ private fun ResumeCard(
                     text = resume.fileName,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF191C1E),
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -293,7 +295,7 @@ private fun ResumeCard(
                 Text(
                     text = "Updated ${resume.uploadedAt} • $sizeMb",
                     fontSize = 14.sp,
-                    color = Color(0xFF464555),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -307,11 +309,11 @@ private fun ResumeCard(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0xFF3525CD).copy(alpha = 0.1f))
-                            .border(1.dp, Color(0xFF3525CD).copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
                             .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
-                        Text(stringResource(R.string.primary), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3525CD))
+                        Text(stringResource(R.string.primary), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.primary)
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                 }
@@ -327,7 +329,7 @@ private fun ResumeCard(
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = "More",
-                            tint = Color(0xFF464555),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -368,12 +370,12 @@ private fun ResumeCard(
 
 @Composable
 private fun UploadArea(onUploadClick: () -> Unit) {
-    val strokeColor = Color(0xFFC7C4D8)
+    val strokeColor = MaterialTheme.colorScheme.outline
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFFF7F9FB).copy(alpha = 0.5f))
+            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f))
             .clickable { onUploadClick() }
             .drawBehind {
                 drawRoundRect(
@@ -395,13 +397,13 @@ private fun UploadArea(onUploadClick: () -> Unit) {
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFECEEF0)),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Upload",
-                    tint = Color(0xFF464555),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -412,13 +414,13 @@ private fun UploadArea(onUploadClick: () -> Unit) {
                 stringResource(R.string.upload_resume),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF191C1E)
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 stringResource(R.string.pdf_maximum_5_mb),
                 fontSize = 14.sp,
-                color = Color(0xFF464555)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -428,7 +430,7 @@ private fun UploadArea(onUploadClick: () -> Unit) {
                     .fillMaxWidth()
                     .height(52.dp)
                     .clip(RoundedCornerShape(26.dp))
-                    .border(1.dp, Color(0xFF3525CD), RoundedCornerShape(26.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(26.dp))
                     .clickable { onUploadClick() },
                 contentAlignment = Alignment.Center
             ) {
@@ -436,7 +438,7 @@ private fun UploadArea(onUploadClick: () -> Unit) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add",
-                        tint = Color(0xFF3525CD),
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -444,7 +446,7 @@ private fun UploadArea(onUploadClick: () -> Unit) {
                         stringResource(R.string.upload_resume),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF3525CD)
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }

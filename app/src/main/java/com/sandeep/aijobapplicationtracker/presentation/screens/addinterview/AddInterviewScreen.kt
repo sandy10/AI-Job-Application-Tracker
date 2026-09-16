@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -23,7 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Notifications
@@ -69,6 +70,7 @@ fun AddInterviewScreen(
     viewModel: AddInterviewViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val formState by viewModel.formState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(uiState) {
@@ -76,30 +78,15 @@ fun AddInterviewScreen(
             onNavigateBack()
         } else if (uiState is UiState.Error) {
             snackbarHostState.showSnackbar((uiState as UiState.Error).message)
+            viewModel.onEvent(AddInterviewEvent.ClearError)
         }
     }
-
-    var date by remember { mutableStateOf("") }
-    var time by remember { mutableStateOf("") }
-    var meetingUrl by remember { mutableStateOf("") }
-    var interviewer by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
-    var remindMe by remember { mutableStateOf(true) }
-    var interviewRound by remember { mutableStateOf("1st Round") }
-    var interviewType by remember { mutableStateOf("Technical") }
-    var reminderTime by remember { mutableStateOf("1 day before") }
     
     val generatedSummary by viewModel.generatedSummary.collectAsState()
     val isGeneratingSummary by viewModel.isGeneratingSummary.collectAsState()
     
     val companyName by viewModel.companyName.collectAsState()
     val jobTitle by viewModel.jobTitle.collectAsState()
-
-    LaunchedEffect(generatedSummary) {
-        if (generatedSummary.isNotBlank()) {
-            notes = generatedSummary
-        }
-    }
 
     Scaffold(
         containerColor = Color(0xFFF8FAFC),
@@ -120,7 +107,7 @@ fun AddInterviewScreen(
                         onClick = onNavigateBack,
                         modifier = Modifier.padding(start = 8.dp)
                     ) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFF464555))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color(0xFF464555))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -130,20 +117,20 @@ fun AddInterviewScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues).imePadding()) {
             AddInterviewContent(
                 modifier = Modifier,
-                date = date, onDateChange = { date = it },
-                time = time, onTimeChange = { time = it },
-                meetingUrl = meetingUrl, onMeetingUrlChange = { meetingUrl = it },
-                interviewer = interviewer, onInterviewerChange = { interviewer = it },
-                notes = notes, onNotesChange = { notes = it },
-                remindMe = remindMe, onRemindMeChange = { remindMe = it },
-                interviewRound = interviewRound, onInterviewRoundChange = { interviewRound = it },
-                interviewType = interviewType, onInterviewTypeChange = { interviewType = it },
-                reminderTime = reminderTime, onReminderTimeChange = { reminderTime = it },
+                date = formState.date, onDateChange = { viewModel.onEvent(AddInterviewEvent.DateChanged(it)) },
+                time = formState.time, onTimeChange = { viewModel.onEvent(AddInterviewEvent.TimeChanged(it)) },
+                meetingUrl = formState.meetingUrl, onMeetingUrlChange = { viewModel.onEvent(AddInterviewEvent.MeetingUrlChanged(it)) },
+                interviewer = formState.interviewer, onInterviewerChange = { viewModel.onEvent(AddInterviewEvent.InterviewerChanged(it)) },
+                notes = formState.notes, onNotesChange = { viewModel.onEvent(AddInterviewEvent.NotesChanged(it)) },
+                remindMe = formState.remindMe, onRemindMeChange = { viewModel.onEvent(AddInterviewEvent.RemindMeChanged(it)) },
+                interviewRound = formState.interviewRound, onInterviewRoundChange = { viewModel.onEvent(AddInterviewEvent.InterviewRoundChanged(it)) },
+                interviewType = formState.interviewType, onInterviewTypeChange = { viewModel.onEvent(AddInterviewEvent.InterviewTypeChanged(it)) },
+                reminderTime = formState.reminderTime, onReminderTimeChange = { viewModel.onEvent(AddInterviewEvent.ReminderTimeChanged(it)) },
                 isGeneratingSummary = isGeneratingSummary,
-                onGenerateAiSummaryClick = { viewModel.generateAiSummary(interviewType) },
+                onGenerateAiSummaryClick = { viewModel.onEvent(AddInterviewEvent.GenerateAiSummaryClicked) },
                 companyName = companyName,
                 jobTitle = jobTitle
             )
@@ -162,7 +149,7 @@ fun AddInterviewScreen(
                         .height(52.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0xFF4F46E5))
-                        .clickable { viewModel.saveInterview(interviewRound, interviewType, "$date $time", meetingUrl, interviewer, notes, remindMe, reminderTime) },
+                        .clickable { viewModel.onEvent(AddInterviewEvent.SaveClicked) },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(stringResource(R.string.save_interview), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)

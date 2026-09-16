@@ -21,7 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
@@ -37,7 +37,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,13 +67,13 @@ fun HomeScreen(
     onNavigateToNotifications: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     val bottomNavItems = listOf(
-        BottomNavItem("Home", Icons.Filled.Home, Screen.Home.route),
-        BottomNavItem("Jobs", Icons.Filled.List, Screen.ApplicationsList.route),
-        BottomNavItem("AI Prep", Icons.Filled.Star, Screen.AiAssistant.route),
-        BottomNavItem("Profile", Icons.Filled.Person, Screen.ProfileSettings.route)
+        BottomNavItem(stringResource(R.string.nav_home), Icons.Filled.Home, Screen.Home.route),
+        BottomNavItem(stringResource(R.string.nav_jobs), Icons.AutoMirrored.Filled.List, Screen.ApplicationsList.route),
+        BottomNavItem(stringResource(R.string.nav_ai_prep), Icons.Filled.Star, Screen.AiAssistant.route),
+        BottomNavItem(stringResource(R.string.nav_profile), Icons.Filled.Person, Screen.ProfileSettings.route)
     )
 
     Scaffold(
@@ -160,14 +160,14 @@ private fun HomeContent(
                         val hour =
                             java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
                         val greeting = when {
-                            hour < 5 -> "Good night"
-                            hour < 12 -> "Good morning"
-                            hour < 16 -> "Good afternoon"
-                            hour < 21 -> "Good evening"
-                            else -> "Good night"
+                            hour < 5 -> stringResource(R.string.good_night)
+                            hour < 12 -> stringResource(R.string.good_morning)
+                            hour < 16 -> stringResource(R.string.good_afternoon)
+                            hour < 21 -> stringResource(R.string.good_evening)
+                            else -> stringResource(R.string.good_night)
                         }
                         Text(
-                            text = "$greeting, ${data.userName} \uD83D\uDC4B",
+                            text = stringResource(R.string.greeting_format, greeting, data.userName),
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -183,7 +183,7 @@ private fun HomeContent(
                         IconButton(onClick = onNavigateToNotifications) {
                             Icon(
                                 Icons.Filled.Notifications,
-                                contentDescription = "Notifications",
+                                contentDescription = stringResource(R.string.notifications),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -194,7 +194,7 @@ private fun HomeContent(
                                     .padding(8.dp)
                                     .size(8.dp)
                                     .clip(androidx.compose.foundation.shape.CircleShape)
-                                    .background(Color.Red)
+                                    .background(MaterialTheme.colorScheme.error)
                             )
                         }
                     }
@@ -276,12 +276,12 @@ private fun DashboardStatsSection(data: HomeData) {
         ) {
             StatCard(
                 count = data.totalApplications,
-                label = "Applications",
+                label = stringResource(R.string.applications),
                 modifier = Modifier.weight(1f)
             )
             StatCard(
                 count = data.totalInterviews,
-                label = "Interviews",
+                label = stringResource(R.string.interviews),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -292,14 +292,14 @@ private fun DashboardStatsSection(data: HomeData) {
         ) {
             StatCard(
                 count = data.totalFollowUps,
-                label = "Follow-ups",
+                label = stringResource(R.string.stat_followups),
                 modifier = Modifier.weight(1f)
             )
             StatCard(
                 count = data.totalOffers,
-                label = "Offer",
+                label = stringResource(R.string.offer_received),
                 modifier = Modifier.weight(1f),
-                countColor = Color(0xFF16A34A)
+                countColor = MaterialTheme.colorScheme.secondary
             )
         }
     }
@@ -342,8 +342,8 @@ fun NeedsAttentionCard(
 ) {
     val (iconColor, icon) = when (item.type) {
         AttentionType.URGENT -> MaterialTheme.colorScheme.error to Icons.Filled.Warning
-        AttentionType.UPCOMING -> Color(0xFFF59E0B) to Icons.Filled.Info // Amber
-        AttentionType.INFO -> Color(0xFF10B981) to Icons.Filled.Info // Green
+        AttentionType.UPCOMING -> MaterialTheme.colorScheme.tertiary to Icons.Filled.Info
+        AttentionType.INFO -> MaterialTheme.colorScheme.secondary to Icons.Filled.Info
     }
 
     AppCard(
@@ -365,7 +365,7 @@ fun NeedsAttentionCard(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Star,
-                        contentDescription = "AI Action",
+                        contentDescription = stringResource(R.string.ai_action),
                         tint = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.size(24.dp)
                     )
@@ -405,7 +405,7 @@ fun NeedsAttentionCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (item.type == AttentionType.URGENT) "Generate Follow-up" else "Prepare with AI",
+                    text = if (item.type == AttentionType.URGENT) stringResource(R.string.generate_follow_up_button) else stringResource(R.string.prepare_with_ai),
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -428,7 +428,7 @@ private fun RecentApplicationCard(app: JobApplicationItem, onClick: () -> Unit) 
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${app.company} ${app.role}",
+                    text = stringResource(R.string.app_company_role_format, app.company, app.role),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -459,8 +459,8 @@ private fun RecentApplicationCard(app: JobApplicationItem, onClick: () -> Unit) 
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val locText = if (app.location.isNotBlank()) app.location else "Location unknown"
-                val workText = if (app.workMode.isNotBlank()) app.workMode else "Mode unknown"
+                val locText = if (app.location.isNotBlank()) app.location else stringResource(R.string.location_unknown)
+                val workText = if (app.workMode.isNotBlank()) app.workMode else stringResource(R.string.mode_unknown)
                 val relativeTime = android.text.format.DateUtils.getRelativeTimeSpanString(
                     app.timestamp,
                     System.currentTimeMillis(),
@@ -468,7 +468,7 @@ private fun RecentApplicationCard(app: JobApplicationItem, onClick: () -> Unit) 
                 ).toString()
 
                 Text(
-                    text = "$locText • $workText",
+                    text = stringResource(R.string.loc_work_format, locText, workText),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -485,9 +485,9 @@ private fun RecentApplicationCard(app: JobApplicationItem, onClick: () -> Unit) 
                         shape = CircleShape
                     ) {
                         val displayStatus = when (app.status) {
-                            "Saved for later" -> "Saved"
-                            "Offer Received" -> "Offer"
-                            "Recruiter Contact" -> "Recruiter"
+                            "Saved for later" -> stringResource(R.string.saved_for_later)
+                            "Offer Received" -> stringResource(R.string.offer_received)
+                            "Recruiter Contact" -> stringResource(R.string.recruiter_contact)
                             else -> app.status
                         }
                         Text(
@@ -505,3 +505,4 @@ private fun RecentApplicationCard(app: JobApplicationItem, onClick: () -> Unit) 
         }
     }
 }
+

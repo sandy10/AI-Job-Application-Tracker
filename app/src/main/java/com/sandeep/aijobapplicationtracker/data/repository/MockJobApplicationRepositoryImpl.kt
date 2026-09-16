@@ -29,25 +29,27 @@ class MockJobApplicationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun saveApplication(application: JobApplicationModel) {
+    override suspend fun saveApplication(application: JobApplicationModel): Result<Unit> {
         dataStore.edit { prefs ->
             val jsonString = prefs[APPLICATIONS_KEY] ?: "[]"
             val currentList = parseApplications(jsonString).toMutableList()
             currentList.add(application)
             prefs[APPLICATIONS_KEY] = serializeApplications(currentList)
         }
+        return Result.success(Unit)
     }
 
-    override suspend fun deleteApplication(id: String) {
+    override suspend fun deleteApplication(id: String): Result<Unit> {
         dataStore.edit { prefs ->
             val jsonString = prefs[APPLICATIONS_KEY] ?: "[]"
             val currentList = parseApplications(jsonString).toMutableList()
             currentList.removeAll { it.id == id }
             prefs[APPLICATIONS_KEY] = serializeApplications(currentList)
         }
+        return Result.success(Unit)
     }
 
-    override suspend fun updateApplication(application: JobApplicationModel) {
+    override suspend fun updateApplication(application: JobApplicationModel): Result<Unit> {
         dataStore.edit { prefs ->
             val jsonString = prefs[APPLICATIONS_KEY] ?: "[]"
             val currentList = parseApplications(jsonString).toMutableList()
@@ -57,6 +59,7 @@ class MockJobApplicationRepositoryImpl @Inject constructor(
                 prefs[APPLICATIONS_KEY] = serializeApplications(currentList)
             }
         }
+        return Result.success(Unit)
     }
 
     private fun parseApplications(jsonString: String): List<JobApplicationModel> {

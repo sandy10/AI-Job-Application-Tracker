@@ -1,5 +1,8 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep
 
+import com.sandeep.aijobapplicationtracker.domain.model.InterviewPlan
+import com.sandeep.aijobapplicationtracker.domain.model.FocusArea
+import com.sandeep.aijobapplicationtracker.domain.model.QuestionAnswer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -62,7 +65,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sandeep.aijobapplicationtracker.R
 import com.sandeep.aijobapplicationtracker.utils.UiState
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,7 +80,7 @@ fun AiInterviewPrepScreen(
     onStartVideoInterview: () -> Unit = {},
     viewModel: AiInterviewPrepViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -93,7 +96,7 @@ fun AiInterviewPrepScreen(
                             text = stringResource(R.string.interview_prep),
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF3525CD) // primary color
+                            color = MaterialTheme.colorScheme.primary // primary color
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
@@ -115,7 +118,7 @@ fun AiInterviewPrepScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color(0xFF464555)
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
@@ -127,7 +130,7 @@ fun AiInterviewPrepScreen(
                         Icon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = "Regenerate",
-                            tint = Color(0xFF464555)
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
@@ -138,7 +141,7 @@ fun AiInterviewPrepScreen(
         },
         bottomBar = {
             if (uiState is UiState.Success) {
-                val isGenerating by viewModel.isGeneratingMore.collectAsState()
+                val isGenerating by viewModel.isGeneratingMore.collectAsStateWithLifecycle()
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -415,15 +418,15 @@ private fun AiInterviewPrepContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 16.dp, bottomEnd = 16.dp))
-                    .background(Color(0xFFEEF2FF))
-                    .border(1.dp, Color(0xFFEEF2FF))
+                    .background(androidx.compose.ui.graphics.Color.White)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Row(modifier = Modifier.height(androidx.compose.foundation.layout.IntrinsicSize.Min)) {
                     Box(
                         modifier = Modifier
                             .width(4.dp)
                             .fillMaxHeight()
-                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .background(MaterialTheme.colorScheme.primary)
                     )
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -470,7 +473,7 @@ private fun AiInterviewPrepContent(
         // Behavioral Questions list
         items(data.behavioralQuestions) { qa ->
             BehavioralCard(
-                lineColor = Color(0xFF004C76),
+                lineColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 question = qa.question,
                 tip = qa.answerHint
             )
@@ -546,7 +549,7 @@ private fun QuestionCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFFF8FAFC))
+                        .background(MaterialTheme.colorScheme.surface)
                         .padding(12.dp)
                 ) {
                     com.sandeep.aijobapplicationtracker.presentation.components.SimpleMarkdownText(
@@ -608,7 +611,7 @@ private fun BehavioralCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFFF8FAFC))
+                            .background(MaterialTheme.colorScheme.surface)
                             .padding(12.dp)
                     ) {
                         com.sandeep.aijobapplicationtracker.presentation.components.SimpleMarkdownText(
@@ -688,13 +691,13 @@ private fun InterviewPrepScanningView() {
                     modifier = Modifier
                         .size(60.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
+                        .background(androidx.compose.ui.graphics.Color.White),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Star,
                         contentDescription = "JD AI",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(32.dp)
                     )
                 }

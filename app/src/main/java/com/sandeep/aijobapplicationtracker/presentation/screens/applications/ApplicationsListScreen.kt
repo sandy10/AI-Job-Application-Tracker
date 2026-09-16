@@ -23,7 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
@@ -38,7 +38,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,22 +71,22 @@ fun ApplicationsListScreen(
     onNavigateToProfile: () -> Unit = {},
     viewModel: ApplicationsListViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val selectedFilter by viewModel.selectedFilter.collectAsState()
-    val selectedSortOption by viewModel.selectedSortOption.collectAsState()
-    val selectedWorkMode by viewModel.selectedWorkMode.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
+    val selectedSortOption by viewModel.selectedSortOption.collectAsStateWithLifecycle()
+    val selectedWorkMode by viewModel.selectedWorkMode.collectAsStateWithLifecycle()
     var showFilterSheet by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
 
     val bottomNavItems = listOf(
-        BottomNavItem("Home", Icons.Filled.Home, Screen.Home.route),
-        BottomNavItem("Jobs", Icons.Filled.List, Screen.ApplicationsList.route),
-        BottomNavItem("AI Prep", Icons.Filled.Star, Screen.AiAssistant.route),
-        BottomNavItem("Profile", Icons.Filled.Person, Screen.ProfileSettings.route)
+        BottomNavItem(stringResource(R.string.nav_home), Icons.Filled.Home, Screen.Home.route),
+        BottomNavItem(stringResource(R.string.nav_jobs), Icons.AutoMirrored.Filled.List, Screen.ApplicationsList.route),
+        BottomNavItem(stringResource(R.string.nav_ai_prep), Icons.Filled.Star, Screen.AiAssistant.route),
+        BottomNavItem(stringResource(R.string.nav_profile), Icons.Filled.Person, Screen.ProfileSettings.route)
     )
 
     Scaffold(
-        containerColor = Color(0xFFF7F9FB), // bg-background
+        containerColor = MaterialTheme.colorScheme.background, // bg-background
         bottomBar = {
             AppBottomBar(
                 items = bottomNavItems,
@@ -103,7 +103,7 @@ fun ApplicationsListScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToAddJob,
-                containerColor = Color(0xFF3525CD), // bg-primary
+                containerColor = MaterialTheme.colorScheme.primary, // bg-primary
                 contentColor = Color.White,
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.padding(bottom = 16.dp, end = 4.dp)
@@ -122,7 +122,7 @@ fun ApplicationsListScreen(
                         .padding(horizontal = 24.dp, vertical = 16.dp)
                         .padding(bottom = 32.dp)
                 ) {
-                    Text(stringResource(R.string.sort_by), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF191C1E))
+                    Text(stringResource(R.string.sort_by), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         androidx.compose.material3.FilterChip(
@@ -138,7 +138,7 @@ fun ApplicationsListScreen(
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text(stringResource(R.string.work_mode), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF191C1E))
+                    Text(stringResource(R.string.work_mode), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf("All", "Remote", "Hybrid", "Onsite").forEach { mode ->
@@ -161,7 +161,7 @@ fun ApplicationsListScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFFF7F9FB)) // bg-surface
+                    .background(MaterialTheme.colorScheme.background) // bg-surface
                     .padding(horizontal = 20.dp)
                     .padding(top = 48.dp, bottom = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -171,7 +171,7 @@ fun ApplicationsListScreen(
                     text = stringResource(R.string.applications),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF191C1E)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Box(
                     modifier = Modifier
@@ -181,9 +181,9 @@ fun ApplicationsListScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.List, // fallback for filter_list
+                        imageVector = Icons.AutoMirrored.Filled.List, // fallback for filter_list
                         contentDescription = "Filter",
-                        tint = Color(0xFF464555) // on-surface-variant
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant // on-surface-variant
                     )
                 }
             }
@@ -195,20 +195,20 @@ fun ApplicationsListScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 8.dp),
-                placeholder = { Text(stringResource(R.string.search_company_or_role), color = Color(0xFF64748B), fontSize = 14.sp) },
+                placeholder = { Text(stringResource(R.string.search_company_or_role), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp) },
                 leadingIcon = {
                     Icon(
                         Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = Color(0xFF64748B)
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = Color.White,
                     focusedContainerColor = Color.White,
-                    unfocusedBorderColor = Color(0xFFE2E8F0),
-                    focusedBorderColor = Color(0xFF3525CD)
+                    unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
                 ),
                 singleLine = true
             )
@@ -237,12 +237,12 @@ fun ApplicationsListScreen(
                     }
                 }
                 is UiState.Empty -> EmptyStateView(
-                    title = "No Applications Found",
-                    subtitle = "Try adjusting your search or filters"
+                    title = stringResource(R.string.no_apps_found),
+                    subtitle = stringResource(R.string.try_adjusting_search)
                 )
                 is UiState.Error -> EmptyStateView(
-                    title = "Error",
-                    subtitle = s.message.ifEmpty { "An unknown error occurred" }
+                    title = stringResource(R.string.error_title),
+                    subtitle = s.message.ifEmpty { stringResource(R.string.unknown_error) }
                 )
             }
         }
@@ -255,13 +255,13 @@ private fun FilterChipsRow(
     onFilterSelected: (ApplicationStatus) -> Unit
 ) {
     val filters = listOf(
-        ApplicationStatus.ALL to "All",
-        ApplicationStatus.SAVED to "Saved",
-        ApplicationStatus.APPLIED to "Applied",
-        ApplicationStatus.RECRUITER to "Recruiter",
-        ApplicationStatus.INTERVIEW to "Interview",
-        ApplicationStatus.OFFER to "Offer",
-        ApplicationStatus.REJECTED to "Rejected"
+        ApplicationStatus.ALL to stringResource(R.string.filter_all_label),
+        ApplicationStatus.SAVED to stringResource(R.string.filter_saved),
+        ApplicationStatus.APPLIED to stringResource(R.string.filter_applied),
+        ApplicationStatus.RECRUITER to stringResource(R.string.recruiter),
+        ApplicationStatus.INTERVIEW to stringResource(R.string.filter_interview),
+        ApplicationStatus.OFFER to stringResource(R.string.filter_offer),
+        ApplicationStatus.REJECTED to stringResource(R.string.filter_rejected)
     )
 
     LazyRow(
@@ -275,11 +275,11 @@ private fun FilterChipsRow(
                 modifier = Modifier
                     .clip(RoundedCornerShape(20.dp))
                     .background(
-                        color = if (isSelected) Color(0xFF4F46E5) else Color.White // primary-container vs surface
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White // primary-container vs surface
                     )
                     .border(
                         width = 1.dp,
-                        color = if (isSelected) Color.Transparent else Color(0xFFE2E8F0),
+                        color = if (isSelected) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(20.dp)
                     )
                     .clickable { onFilterSelected(status) }
@@ -287,7 +287,7 @@ private fun FilterChipsRow(
             ) {
                 Text(
                     text = label,
-                    color = if (isSelected) Color(0xFFDAD7FF) else Color(0xFF464555), // on-primary-container vs on-surface-variant
+                    color = if (isSelected) androidx.compose.ui.graphics.Color.White else MaterialTheme.colorScheme.onSurfaceVariant, // on-primary-container vs on-surface-variant
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -306,7 +306,7 @@ private fun DetailedApplicationCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
-            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(16.dp))
+            .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
             .clickable { onClick() }
             .padding(16.dp)
     ) {
@@ -319,14 +319,14 @@ private fun DetailedApplicationCard(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFECEEF0)) // surface-container
-                        .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(12.dp)),
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Info, // Use info or appropriate placeholder
                         contentDescription = "Logo",
-                        tint = Color(0xFF777587),
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -336,12 +336,12 @@ private fun DetailedApplicationCard(
                         text = app.role,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF191C1E) // on-background
+                        color = MaterialTheme.colorScheme.onSurface // on-background
                     )
                     Text(
-                        text = "${app.company} • ${app.location}",
+                        text = stringResource(R.string.loc_work_format, app.company, app.location),
                         fontSize = 14.sp,
-                        color = Color(0xFF464555) // on-surface-variant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant // on-surface-variant
                     )
                 }
             }
@@ -354,16 +354,16 @@ private fun DetailedApplicationCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val statusColor = when(app.status) {
-                    ApplicationStatus.INTERVIEW -> Color(0xFFD97706)
-                    ApplicationStatus.APPLIED -> Color(0xFF464555)
-                    ApplicationStatus.SAVED -> Color(0xFF464555)
-                    else -> Color(0xFF3525CD)
+                    ApplicationStatus.INTERVIEW -> MaterialTheme.colorScheme.tertiary
+                    ApplicationStatus.APPLIED -> MaterialTheme.colorScheme.onSurfaceVariant
+                    ApplicationStatus.SAVED -> MaterialTheme.colorScheme.onSurfaceVariant
+                    else -> MaterialTheme.colorScheme.primary
                 }
                 val statusBg = when(app.status) {
-                    ApplicationStatus.INTERVIEW -> Color(0xFFFEF3C7)
-                    ApplicationStatus.APPLIED -> Color(0xFFE6E8EA) // surface-container-high
-                    ApplicationStatus.SAVED -> Color(0xFFE0E3E5) // surface-variant
-                    else -> Color(0xFFECEEF0)
+                    ApplicationStatus.INTERVIEW -> MaterialTheme.colorScheme.tertiaryContainer
+                    ApplicationStatus.APPLIED -> MaterialTheme.colorScheme.surfaceVariant // surface-container-high
+                    ApplicationStatus.SAVED -> MaterialTheme.colorScheme.surfaceVariant // surface-variant
+                    else -> MaterialTheme.colorScheme.surfaceVariant
                 }
                 Box(
                     modifier = Modifier
@@ -383,10 +383,10 @@ private fun DetailedApplicationCard(
                     Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFEEF2FF))
+                            .background(MaterialTheme.colorScheme.primary)
                             .border(
                                 width = 1.dp,
-                                color = Color(0xFF3525CD).copy(alpha = 0.2f),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
                                 shape = RoundedCornerShape(12.dp)
                             )
                             .padding(horizontal = 8.dp, vertical = 4.dp),
@@ -396,13 +396,13 @@ private fun DetailedApplicationCard(
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = "AI Match",
-                            tint = Color(0xFF3525CD), // primary
+                            tint = androidx.compose.ui.graphics.Color.White, // primary
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
                             text = "${app.matchScore}% Match",
                             fontSize = 12.sp,
-                            color = Color(0xFF3525CD),
+                            color = androidx.compose.ui.graphics.Color.White,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
@@ -410,7 +410,7 @@ private fun DetailedApplicationCard(
             }
             
             Spacer(modifier = Modifier.height(12.dp))
-            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFE2E8F0)))
+            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.surfaceVariant))
             Spacer(modifier = Modifier.height(12.dp))
             
             Row(
@@ -424,10 +424,10 @@ private fun DetailedApplicationCard(
                 ).toString().lowercase(java.util.Locale.getDefault())
 
                 val (icon, text, color) = when(app.status) {
-                    ApplicationStatus.INTERVIEW -> Triple(Icons.Default.Star, "Interview scheduled", Color(0xFFD97706))
-                    ApplicationStatus.APPLIED -> Triple(Icons.Default.Info, "Applied $relativeTime", Color(0xFF464555))
-                    ApplicationStatus.SAVED -> Triple(Icons.Default.Info, "Saved $relativeTime", Color(0xFF464555))
-                    else -> Triple(Icons.Default.Info, "Updated $relativeTime", Color(0xFF464555))
+                    ApplicationStatus.INTERVIEW -> Triple(Icons.Default.Star, stringResource(R.string.interview_scheduled), MaterialTheme.colorScheme.tertiary)
+                    ApplicationStatus.APPLIED -> Triple(Icons.Default.Info, stringResource(R.string.applied_time_format, relativeTime), MaterialTheme.colorScheme.onSurfaceVariant)
+                    ApplicationStatus.SAVED -> Triple(Icons.Default.Info, stringResource(R.string.saved_time_format, relativeTime), MaterialTheme.colorScheme.onSurfaceVariant)
+                    else -> Triple(Icons.Default.Info, stringResource(R.string.updated_time_format, relativeTime), MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Icon(
                     imageVector = icon,

@@ -37,6 +37,8 @@ class FirestoreResumeRepositoryImpl @Inject constructor(
 
         val listener = resumesCollection()
             .orderBy("uploadedAt", Query.Direction.DESCENDING)
+            // H3 Fix: Limit initial load to prevent unbounded reads and billing spikes
+            .limit(20)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     Timber.e(error, "Firestore getResumes error")
@@ -66,8 +68,9 @@ class FirestoreResumeRepositoryImpl @Inject constructor(
         awaitClose { listener.remove() }
     }
 
-    override suspend fun addResume(resume: ResumeModel) {
-        try {
+    // C3 Fix: Returns Result<Unit> so callers know if the write succeeded
+    override suspend fun addResume(resume: ResumeModel): Result<Unit> {
+        return try {
             resumesCollection().document(resume.id).set(
                 mapOf(
                     "fileName" to resume.fileName,
@@ -78,8 +81,10 @@ class FirestoreResumeRepositoryImpl @Inject constructor(
                 )
             ).await()
             Timber.d("Resume added: ${resume.fileName}")
+            Result.success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Failed to add resume")
+            Result.failure(e)
         }
     }
 
@@ -114,34 +119,44 @@ class FirestoreResumeRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun setPrimaryResume(resumeId: String) {
-        try {
-            // Unset all other primary resumes
-            val currentPrimary = resumesCollection()
-                .whereEqualTo("isPrimary", true)
-                .get()
-                .await()
-            
-            firestore.runBatch { batch ->
+    // C3 Fix: Returns Result<Unit> for error propagation
+    // H4 Fix: Changed from runBatch to runTransaction to make the read-modify-write atomic.
+    // runBatch does NOT guarantee atomicity when the batch depends on a prior read,
+    // so a concurrent setPrimaryResume call could leave two resumes marked as primary.
+    override suspend fun setPrimaryResume(resumeId: String): Result<Unit> {
+        return try {
+            firestore.runTransaction { transaction ->
+                // Read current primaries inside the transaction for atomicity
+                val currentPrimary = resumesCollection()
+                    .whereEqualTo("isPrimary", true)
+                    .get()
+                    .result
+
                 for (doc in currentPrimary.documents) {
                     if (doc.id != resumeId) {
-                        batch.update(doc.reference, "isPrimary", false)
+                        transaction.update(doc.reference, "isPrimary", false)
                     }
                 }
-                batch.update(resumesCollection().document(resumeId), "isPrimary", true)
+                transaction.update(resumesCollection().document(resumeId), "isPrimary", true)
             }.await()
             Timber.d("Primary resume set to: $resumeId")
+            Result.success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Failed to set primary resume")
+            Result.failure(e)
         }
     }
 
-    override suspend fun deleteResume(resumeId: String) {
-        try {
+    // C3 Fix: Returns Result<Unit> for error propagation
+    override suspend fun deleteResume(resumeId: String): Result<Unit> {
+        return try {
             resumesCollection().document(resumeId).delete().await()
             Timber.d("Resume deleted: $resumeId")
+            Result.success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Failed to delete resume")
+            Result.failure(e)
         }
     }
 }
+

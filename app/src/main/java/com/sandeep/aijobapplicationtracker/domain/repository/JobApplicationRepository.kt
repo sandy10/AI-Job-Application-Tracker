@@ -15,16 +15,19 @@ interface JobApplicationRepository {
 
     /**
      * Saves a new job application.
+     * Returns Result.failure if the save operation fails.
      */
-    suspend fun saveApplication(application: JobApplicationModel)
+    suspend fun saveApplication(application: JobApplicationModel): Result<Unit>
 
     /**
      * Updates an existing job application.
+     * Returns Result.failure if the update operation fails.
      */
-    suspend fun updateApplication(application: JobApplicationModel)
+    suspend fun updateApplication(application: JobApplicationModel): Result<Unit>
     
     /**
      * Deletes a job application by its ID.
+     * Returns Result.failure if the delete operation fails.
      */
-    suspend fun deleteApplication(id: String)
+    suspend fun deleteApplication(id: String): Result<Unit>
 }

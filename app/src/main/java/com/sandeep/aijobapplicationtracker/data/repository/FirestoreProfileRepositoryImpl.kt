@@ -85,8 +85,8 @@ class FirestoreProfileRepositoryImpl @Inject constructor(
     /**
      * Saves the user profile to Firestore.
      */
-    override suspend fun saveProfile(profile: UserProfileModel) {
-        try {
+    override suspend fun saveProfile(profile: UserProfileModel): Result<Unit> {
+        return try {
             val uid = firebaseAuth.currentUser?.uid
                 ?: throw IllegalStateException("User not logged in")
 
@@ -107,8 +107,10 @@ class FirestoreProfileRepositoryImpl @Inject constructor(
                 .await()
 
             Timber.d("Profile saved for user: $uid")
+            Result.success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Failed to save profile")
+            Result.failure(e)
         }
     }
 }

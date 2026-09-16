@@ -20,9 +20,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,7 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,12 +62,12 @@ fun AiAssistantScreen(
     onNavigateToApplicationDetail: (String) -> Unit = {},
     viewModel: AiAssistantViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val latestJobId by viewModel.latestJobId.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val latestJobId by viewModel.latestJobId.collectAsStateWithLifecycle()
 
     val bottomNavItems = listOf(
         BottomNavItem("Home", Icons.Filled.Home, Screen.Home.route),
-        BottomNavItem("Jobs", Icons.Filled.List, Screen.ApplicationsList.route),
+        BottomNavItem("Jobs", Icons.AutoMirrored.Filled.List, Screen.ApplicationsList.route),
         BottomNavItem("AI Prep", Icons.Filled.Star, Screen.AiAssistant.route),
         BottomNavItem("Profile", Icons.Filled.Person, Screen.ProfileSettings.route)
     )
@@ -139,8 +139,8 @@ fun AiAssistantScreen(
                         modifier = Modifier.weight(1f),
                         title = "Analyze Job",
                         subtitle = "Match criteria",
-                        iconBgColor = Color(0xFFEEF2FF),
-                        iconTintColor = MaterialTheme.colorScheme.primaryContainer,
+                        iconBgColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        iconTintColor = MaterialTheme.colorScheme.primary,
                         hoverColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
                         onClick = onNavigateToJobAnalyzer
                     )
@@ -149,7 +149,7 @@ fun AiAssistantScreen(
                         modifier = Modifier.weight(1f),
                         title = "AI Chat",
                         subtitle = "Interactive Prep",
-                        iconBgColor = Color(0xFFCFFAFE),
+                        iconBgColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
                         iconTintColor = MaterialTheme.colorScheme.secondary,
                         hoverColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
                         onClick = onNavigateToAiChat
@@ -179,13 +179,13 @@ fun AiAssistantScreen(
                                 modifier = Modifier
                                     .size(48.dp)
                                     .clip(RoundedCornerShape(24.dp))
-                                    .background(Color(0xFFEEF2FF)),
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Star,
                                     contentDescription = "Mock Interview",
-                                    tint = MaterialTheme.colorScheme.primaryContainer,
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -201,7 +201,7 @@ fun AiAssistantScreen(
                                     Icon(
                                         imageVector = Icons.Default.Star,
                                         contentDescription = "AI",
-                                        tint = MaterialTheme.colorScheme.primaryContainer,
+                                        tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(14.dp)
                                     )
                                 }
@@ -220,7 +220,7 @@ fun AiAssistantScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Default.ArrowForward,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = "Go",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(16.dp)
@@ -267,7 +267,7 @@ fun AiAssistantScreen(
                         }
                     }
                     is UiState.Success -> {
-                        val actions = (uiState as UiState.Success<List<NextActionItem>>).data
+                        val actions = (uiState as UiState.Success).data
                         
                         if (actions.isEmpty()) {
                             Text(
@@ -281,16 +281,20 @@ fun AiAssistantScreen(
                                     modifier = Modifier.clickable { onNavigateToApplicationDetail(action.jobId) },
                                     title = action.title,
                                     subtitle = "${action.company} — ${action.description}",
-                                    tagText = if (action.actionType == ActionType.FOLLOW_UP) "ACTION" else "PREP",
-                                    tagColor = if (action.actionType == ActionType.FOLLOW_UP) Color(0xFFBA1A1A) else Color(0xFF92400E),
-                                    tagBgColor = if (action.actionType == ActionType.FOLLOW_UP) Color(0xFFFFDAD6) else Color(0xFFFEF3C7),
-                                    lineColor = if (action.actionType == ActionType.FOLLOW_UP) Color(0xFFBA1A1A) else Color(0xFFF59E0B)
+                                    tagText = when (action.actionType) {
+                                        ActionType.APPLY, ActionType.FOLLOW_UP, ActionType.THANK_YOU -> "ACTION"
+                                        ActionType.PREPARE_INTERVIEW -> "PREP"
+                                        ActionType.REVIEW_OFFER -> "OFFER"
+                                    },
+                                    tagColor = if (action.actionType == ActionType.PREPARE_INTERVIEW) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.error,
+                                    tagBgColor = if (action.actionType == ActionType.PREPARE_INTERVIEW) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.errorContainer,
+                                    lineColor = if (action.actionType == ActionType.PREPARE_INTERVIEW) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
                                 ) {
                                     Row(
                                         modifier = Modifier
                                             .padding(top = 12.dp)
                                             .clip(RoundedCornerShape(8.dp))
-                                            .background(if (action.actionType == ActionType.FOLLOW_UP) Color(0xFFFFDAD6).copy(alpha=0.3f) else MaterialTheme.colorScheme.surfaceVariant)
+                                            .background(if (action.actionType == ActionType.FOLLOW_UP) MaterialTheme.colorScheme.errorContainer.copy(alpha=0.3f) else MaterialTheme.colorScheme.surfaceVariant)
                                             .clickable {
                                                 if (action.actionType == ActionType.PREPARE_INTERVIEW) {
                                                     onNavigateToPrep(action.jobId)

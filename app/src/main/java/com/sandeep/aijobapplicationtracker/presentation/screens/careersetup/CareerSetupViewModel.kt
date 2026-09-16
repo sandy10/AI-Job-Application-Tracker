@@ -61,12 +61,16 @@ class CareerSetupViewModel @Inject constructor(
                 skills = skills
             )
             
-            profileRepository.saveProfile(profile)
+            val result = profileRepository.saveProfile(profile)
             
-            // Simulate slight delay for effect
-            delay(1000)
-            
-            _uiState.value = UiState.Success(Unit)
+            if (result.isSuccess) {
+                delay(1000)
+                _uiState.value = UiState.Success(Unit)
+            } else {
+                _uiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "Failed to save profile")
+                delay(3000)
+                _uiState.value = UiState.Idle
+            }
         }
     }
 }

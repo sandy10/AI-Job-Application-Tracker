@@ -68,42 +68,48 @@ class FirestoreJobApplicationRepositoryImpl @Inject constructor(
     /**
      * Saves a new job application document in Firestore under the user's collection.
      */
-    override suspend fun saveApplication(application: JobApplicationModel) {
-        try {
+    override suspend fun saveApplication(application: JobApplicationModel): Result<Unit> {
+        return try {
             applicationsCollection()
                 .document(application.id)
                 .set(application.toFirestoreMap())
                 .await()
             Timber.d("Application saved: ${application.id}")
+            Result.success(Unit)
         } catch (e: Exception) {
             crashlyticsHelper.recordException(e, "Failed to save application")
+            Result.failure(e)
         }
     }
 
     /**
      * Updates an existing job application in Firestore.
      */
-    override suspend fun updateApplication(application: JobApplicationModel) {
-        try {
+    override suspend fun updateApplication(application: JobApplicationModel): Result<Unit> {
+        return try {
             applicationsCollection()
                 .document(application.id)
                 .set(application.toFirestoreMap())
                 .await()
             Timber.d("Application updated: ${application.id}")
+            Result.success(Unit)
         } catch (e: Exception) {
             crashlyticsHelper.recordException(e, "Failed to update application")
+            Result.failure(e)
         }
     }
 
     /**
      * Deletes a job application document from Firestore by its ID.
      */
-    override suspend fun deleteApplication(id: String) {
-        try {
+    override suspend fun deleteApplication(id: String): Result<Unit> {
+        return try {
             applicationsCollection().document(id).delete().await()
             Timber.d("Application deleted: $id")
+            Result.success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Failed to delete application")
+            Result.failure(e)
         }
     }
 }
@@ -146,6 +152,9 @@ private fun com.google.firebase.firestore.DocumentSnapshot.toJobApplicationModel
         )
     } catch (e: Exception) {
         Timber.e(e, "Failed to parse application document: $id")
+        // NOTE: If using crashlyticsHelper, it would need to be injected or retrieved.
+        // For extension functions, we can just log. Wait, Crashlytics is a global instance usually.
+        com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e)
         null
     }
 }

@@ -153,7 +153,8 @@ fun AppNavGraph() {
                     navController.popBackStack()
                 },
                 onNavigateToHome = {
-                    navController.navigate(Screen.AddApplication.route) {
+                    // M5 Fix: Navigate to Home (not AddApplication)
+                    navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Home.route) { inclusive = false }
                     }
                 }

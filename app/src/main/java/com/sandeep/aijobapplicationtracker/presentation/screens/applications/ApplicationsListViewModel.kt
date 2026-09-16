@@ -7,6 +7,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.sandeep.aijobapplicationtracker.domain.repository.JobApplicationRepository
@@ -34,8 +36,8 @@ data class DetailedJobApplication(
 class ApplicationsListViewModel @Inject constructor(
     private val repository: JobApplicationRepository
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow<UiState<List<DetailedJobApplication>>>(UiState.Loading)
-    val uiState: StateFlow<UiState<List<DetailedJobApplication>>> = _uiState
+    private val _uiState = MutableStateFlow<UiState<ImmutableList<DetailedJobApplication>>>(UiState.Loading)
+    val uiState: StateFlow<UiState<ImmutableList<DetailedJobApplication>>> = _uiState
 
     private val _selectedFilter = MutableStateFlow(ApplicationStatus.ALL)
     val selectedFilter: StateFlow<ApplicationStatus> = _selectedFilter
@@ -90,7 +92,7 @@ class ApplicationsListViewModel @Inject constructor(
                 if (filteredList.isEmpty()) {
                     UiState.Empty
                 } else {
-                    UiState.Success(filteredList)
+                    UiState.Success(filteredList.toImmutableList())
                 }
             }.collect { state ->
                 _uiState.value = state
@@ -123,3 +125,4 @@ class ApplicationsListViewModel @Inject constructor(
         }
     }
 }
+

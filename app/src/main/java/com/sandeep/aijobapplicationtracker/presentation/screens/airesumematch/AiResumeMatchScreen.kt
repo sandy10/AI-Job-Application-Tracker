@@ -1,5 +1,9 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.airesumematch
 
+import androidx.compose.material3.MaterialTheme
+
+import com.sandeep.aijobapplicationtracker.domain.model.ResumeMatchResult
+
 import com.sandeep.aijobapplicationtracker.R
 import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -32,10 +36,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.Star
@@ -48,7 +52,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -77,11 +81,11 @@ fun AiResumeMatchScreen(
     onViewJobDetailsClick: (String) -> Unit,
     viewModel: AiResumeMatchViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val jobId = viewModel.jobId
 
     Scaffold(
-        containerColor = Color(0xFFF8FAFC),
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             TopAppBar(
                 title = { 
@@ -89,7 +93,7 @@ fun AiResumeMatchScreen(
                         stringResource(R.string.resume_match),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3525CD)
+                        color = MaterialTheme.colorScheme.primary
                     ) 
                 },
                 navigationIcon = {
@@ -99,11 +103,11 @@ fun AiResumeMatchScreen(
                             .padding(start = 8.dp)
                             .clip(CircleShape)
                     ) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFF464555))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF8FAFC)
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         }
@@ -130,8 +134,8 @@ fun AiResumeMatchScreen(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .background(Color(0xFFF7F9FB).copy(alpha = 0.9f))
-                        .border(1.dp, Color(0xFFC7C4D8).copy(alpha = 0.3f))
+                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.9f))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                         .padding(horizontal = 20.dp, vertical = 24.dp)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -140,7 +144,7 @@ fun AiResumeMatchScreen(
                                 .fillMaxWidth()
                                 .height(52.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFF3525CD))
+                                .background(MaterialTheme.colorScheme.primary)
                                 .clickable { onPrepareInterviewClick(jobId) },
                             contentAlignment = Alignment.Center
                         ) {
@@ -156,11 +160,11 @@ fun AiResumeMatchScreen(
                                 .height(52.dp)
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(Color.Transparent)
-                                .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(12.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                                 .clickable { onViewJobDetailsClick(jobId) },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(stringResource(R.string.view_job_details), fontSize = 14.sp, color = Color(0xFF191C1E))
+                            Text(stringResource(R.string.view_job_details), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 }
@@ -199,13 +203,13 @@ private fun AiResumeMatchContent(
                 text = data.jobTitle.ifBlank { "Senior Android Engineer" },
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF191C1E),
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.LocationOn, contentDescription = null, tint = Color(0xFF464555), modifier = Modifier.size(16.dp))
+                Icon(Icons.Outlined.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(data.company.ifBlank { "Google" }, fontSize = 14.sp, color = Color(0xFF464555))
+                Text(data.company.ifBlank { "Google" }, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
 
@@ -221,20 +225,22 @@ private fun AiResumeMatchContent(
                 animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing)
             )
             
+            val surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
+            val secondaryColor = MaterialTheme.colorScheme.secondary
             Box(
-                modifier = Modifier.size(160.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.padding(16.dp)
             ) {
                 Canvas(modifier = Modifier.size(160.dp)) {
                     drawArc(
-                        color = Color(0xFFE2E8F0),
+                        color = surfaceVariantColor,
                         startAngle = 0f,
                         sweepAngle = 360f,
                         useCenter = false,
                         style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round)
                     )
                     drawArc(
-                        color = Color(0xFF16A34A),
+                        color = secondaryColor,
                         startAngle = -90f,
                         sweepAngle = progress * 360f,
                         useCenter = false,
@@ -245,7 +251,7 @@ private fun AiResumeMatchContent(
                     text = "${data.score}%",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF191C1E)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
             
@@ -254,14 +260,14 @@ private fun AiResumeMatchContent(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFFDCFCE7))
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .padding(horizontal = 12.dp, vertical = 4.dp)
             ) {
                 Text(
                     text = data.scoreLabel.uppercase(),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF16A34A),
+                    color = MaterialTheme.colorScheme.secondary,
                     letterSpacing = 1.sp
                 )
             }
@@ -271,7 +277,7 @@ private fun AiResumeMatchContent(
             Text(
                 text = stringResource(R.string.your_experience_aligns_strongly_with_thi),
                 fontSize = 14.sp,
-                color = Color(0xFF464555),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
@@ -283,18 +289,18 @@ private fun AiResumeMatchContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(topEnd = 12.dp, bottomEnd = 12.dp, topStart = 0.dp, bottomStart = 0.dp))
-                .background(Color(0xFFEEF2FF))
-                .border(1.dp, Color(0xFF3525CD), RoundedCornerShape(12.dp)) // simpler border workaround
+                .clip(RoundedCornerShape(12.dp))
+                .background(androidx.compose.ui.graphics.Color.White)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)) // simpler border workaround
                 .padding(16.dp),
             verticalAlignment = Alignment.Top
         ) {
-            Icon(Icons.Outlined.Star, contentDescription = null, tint = Color(0xFF3525CD), modifier = Modifier.size(20.dp))
+            Icon(Icons.Outlined.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = data.recommendation,
                 fontSize = 14.sp,
-                color = Color(0xFF191C1E)
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
 
@@ -308,14 +314,14 @@ private fun AiResumeMatchContent(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color.White.copy(alpha = 0.7f))
-                    .border(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.8f), RoundedCornerShape(12.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f), RoundedCornerShape(12.dp))
                     .padding(16.dp)
             ) {
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF16A34A), modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.matched_skills), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                        Text(stringResource(R.string.matched_skills), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
                     }
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -326,10 +332,10 @@ private fun AiResumeMatchContent(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(Color(0xFFDCFCE7))
+                                    .background(MaterialTheme.colorScheme.secondaryContainer)
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
-                                Text(skill, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF15803D))
+                                Text(skill, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.secondary)
                             }
                         }
                     }
@@ -342,14 +348,14 @@ private fun AiResumeMatchContent(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color.White.copy(alpha = 0.7f))
-                    .border(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.8f), RoundedCornerShape(12.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f), RoundedCornerShape(12.dp))
                     .padding(16.dp)
             ) {
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
-                        Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFD97706), modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.skill_gaps), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                        Text(stringResource(R.string.skill_gaps), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
                     }
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -360,10 +366,10 @@ private fun AiResumeMatchContent(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(Color(0xFFFEF3C7))
+                                    .background(MaterialTheme.colorScheme.tertiary)
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
-                                Text(skill, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFFB45309))
+                                Text(skill, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = androidx.compose.ui.graphics.Color.White)
                             }
                         }
                     }
@@ -376,17 +382,17 @@ private fun AiResumeMatchContent(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color.White.copy(alpha = 0.7f))
-                    .border(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.8f), RoundedCornerShape(12.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f), RoundedCornerShape(12.dp))
                     .padding(16.dp)
             ) {
                 Column {
-                    Text(stringResource(R.string.experience_match), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E), modifier = Modifier.padding(bottom = 16.dp))
+                    Text(stringResource(R.string.experience_match), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(bottom = 16.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(stringResource(R.string.your_experience_9_years), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
-                        Text(stringResource(R.string.required_7_years), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
+                        Text(stringResource(R.string.your_experience_9_years), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+                        Text(stringResource(R.string.required_7_years), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Box(
@@ -394,14 +400,14 @@ private fun AiResumeMatchContent(
                             .fillMaxWidth()
                             .height(8.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(Color(0xFFECEEF0))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth() // 100% since 9 > 7
                                 .height(8.dp)
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(Color(0xFF3525CD))
+                                .background(MaterialTheme.colorScheme.primary)
                         )
                     }
                 }
@@ -450,29 +456,30 @@ private fun ResumeScanningView() {
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFEEF2FF))
-                    .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(12.dp)),
+                    .background(androidx.compose.ui.graphics.Color.White)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.List,
+                    imageVector = Icons.AutoMirrored.Filled.List,
                     contentDescription = "Resume Document",
-                    tint = Color(0xFF3525CD),
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(64.dp)
                 )
 
                 // Scanner line
+                val scanLineColor = MaterialTheme.colorScheme.secondary
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val yPos = size.height * scanPosition
                     drawLine(
-                        color = Color(0xFF16A34A).copy(alpha = 0.7f),
+                        color = scanLineColor.copy(alpha = 0.7f),
                         start = androidx.compose.ui.geometry.Offset(0f, yPos),
                         end = androidx.compose.ui.geometry.Offset(size.width, yPos),
                         strokeWidth = 4.dp.toPx()
                     )
                     // Scanner glow effect
                     drawRect(
-                        color = Color(0xFF16A34A).copy(alpha = 0.2f),
+                        color = scanLineColor.copy(alpha = 0.2f),
                         topLeft = androidx.compose.ui.geometry.Offset(0f, yPos - 10.dp.toPx()),
                         size = androidx.compose.ui.geometry.Size(size.width, 20.dp.toPx())
                     )
@@ -485,7 +492,7 @@ private fun ResumeScanningView() {
                 text = phases[currentPhaseIndex],
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF3525CD)
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }

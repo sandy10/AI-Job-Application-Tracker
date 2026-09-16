@@ -1,6 +1,7 @@
 package com.sandeep.aijobapplicationtracker
 
 import android.app.Application
+import com.sandeep.aijobapplicationtracker.BuildConfig
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
@@ -29,13 +30,26 @@ class MainApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        // Initialize Timber for logging
-        Timber.plant(Timber.DebugTree())
+
+        // C2 Fix: Only plant Timber debug tree in debug builds
+        // to prevent PII (AI responses, user data) from leaking to logcat in production
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
         
         FirebaseApp.initializeApp(this)
+
+        // C1 Fix: Use PlayIntegrity for release builds, Debug provider only for debug
+        // DebugAppCheckProviderFactory bypasses attestation — must never ship to production
         val firebaseAppCheck = FirebaseAppCheck.getInstance()
-        firebaseAppCheck.installAppCheckProviderFactory(
-            DebugAppCheckProviderFactory.getInstance()
-        )
+        if (BuildConfig.DEBUG) {
+            firebaseAppCheck.installAppCheckProviderFactory(
+                DebugAppCheckProviderFactory.getInstance()
+            )
+        } else {
+            firebaseAppCheck.installAppCheckProviderFactory(
+                PlayIntegrityAppCheckProviderFactory.getInstance()
+            )
+        }
     }
 }

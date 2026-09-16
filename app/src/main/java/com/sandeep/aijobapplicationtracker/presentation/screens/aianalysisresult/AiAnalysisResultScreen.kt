@@ -22,7 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.LocationOn
@@ -34,12 +34,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -62,7 +64,7 @@ fun AiAnalysisResultScreen(
     onNavigateToHome: () -> Unit,
     viewModel: AiAnalysisResultViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Assuming UiState.Empty indicates save success for MVP navigation
     LaunchedEffect(uiState) {
@@ -72,7 +74,7 @@ fun AiAnalysisResultScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF8FAFC),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { 
@@ -80,21 +82,21 @@ fun AiAnalysisResultScreen(
                         text = stringResource(R.string.analysis_complete),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3525CD), // primary
+                        color = MaterialTheme.colorScheme.primary, // primary
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFF464555))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 },
                 actions = {
                     Box(modifier = Modifier.size(48.dp)) // To center title
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF7F9FB)
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
@@ -102,8 +104,8 @@ fun AiAnalysisResultScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFFF7F9FB))
-                    .border(1.dp, Color(0xFFC7C4D8).copy(alpha = 0.3f))
+                    .background(MaterialTheme.colorScheme.background)
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                     .padding(horizontal = 20.dp, vertical = 16.dp)
                     .padding(bottom = 16.dp)
             ) {
@@ -118,9 +120,9 @@ fun AiAnalysisResultScreen(
                             .height(52.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent,
-                            contentColor = Color(0xFF3525CD)
+                            contentColor = MaterialTheme.colorScheme.primary
                         ),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF3525CD)),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(stringResource(R.string.edit_details), fontSize = 16.sp)
@@ -131,7 +133,7 @@ fun AiAnalysisResultScreen(
                             .weight(1.5f)
                             .height(52.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF3525CD)
+                            containerColor = MaterialTheme.colorScheme.primary
                         ),
                         shape = RoundedCornerShape(8.dp)
                     ) {
@@ -152,7 +154,12 @@ fun AiAnalysisResultScreen(
                 is UiState.Idle, is UiState.Loading -> LoadingView()
                 is UiState.Success -> AiAnalysisResultContent(data = s.data)
                 is UiState.Empty -> { /* Handled by LaunchedEffect */ }
-                is UiState.Error -> { /* Show error */ }
+                is UiState.Error -> {
+                    com.sandeep.aijobapplicationtracker.presentation.components.ErrorView(
+                        message = s.message,
+                        onRetry = { viewModel.confirmAndSave() } // Let's use back or try again, or just let them go back
+                    )
+                }
             }
         }
     }
@@ -176,8 +183,8 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFEEF2FF))
-                .border(width = 1.dp, color = Color(0xFF3525CD).copy(alpha = 0.5f), shape = RoundedCornerShape(12.dp)) // Emulated left border
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .border(width = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), shape = RoundedCornerShape(12.dp)) // Emulated left border
                 .padding(16.dp)
         ) {
             Column {
@@ -191,17 +198,17 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
                             modifier = Modifier
                                 .size(32.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF3525CD)),
+                                .background(MaterialTheme.colorScheme.primary),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.Check, contentDescription = "Check", tint = Color.White, modifier = Modifier.size(16.dp))
+                            Icon(Icons.Default.Check, contentDescription = "Check", tint = MaterialTheme.colorScheme.surface, modifier = Modifier.size(16.dp))
                         }
                         Column {
-                            Text(data.role.ifEmpty { "Unknown Role" }, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
-                            Text(data.company.ifEmpty { "Unknown Company" }, fontSize = 14.sp, color = Color(0xFF464555))
+                            Text(data.role.ifEmpty { "Unknown Role" }, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+                            Text(data.company.ifEmpty { "Unknown Company" }, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
-                    Icon(Icons.Default.Star, contentDescription = "AI", tint = Color(0xFF00687A), modifier = Modifier.size(24.dp))
+                    Icon(Icons.Default.Star, contentDescription = "AI", tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(24.dp))
                 }
                 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -209,20 +216,20 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
                 Row(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color.White.copy(alpha = 0.5f))
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.Star, contentDescription = "Trend", tint = Color(0xFF3525CD), modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.Star, contentDescription = "Trend", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.strong_opportunity_for_your_profile), fontSize = 14.sp, color = Color(0xFF3525CD))
+                    Text(stringResource(R.string.strong_opportunity_for_your_profile), fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
                 }
             }
         }
 
         // Extracted Information Section
         Column {
-            Text(stringResource(R.string.key_details), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF464555), letterSpacing = 1.sp)
+            Text(stringResource(R.string.key_details), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 1.sp)
             Spacer(modifier = Modifier.height(8.dp))
             
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -260,7 +267,7 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
         // Required Skills
         val skillsList = if (data.skills.isNotEmpty()) data.skills else listOf("Kotlin", "Jetpack Compose", "Coroutines", "MVVM", "Firebase", "CI/CD")
         Column {
-            Text(stringResource(R.string.required_skills), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF464555))
+            Text(stringResource(R.string.required_skills), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(8.dp))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -271,10 +278,10 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0xFFEEF2FF))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
-                        Text(skill, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF4F46E5))
+                        Text(skill, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -283,7 +290,7 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
         // Important Keywords
         val keywordsList = listOf("Clean Architecture", "Performance Testing", "Leadership")
         Column {
-            Text(stringResource(R.string.important_keywords), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF464555))
+            Text(stringResource(R.string.important_keywords), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(8.dp))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -294,11 +301,11 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White)
-                            .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
-                        Text(keyword, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF464555))
+                        Text(keyword, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -306,14 +313,14 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
 
         // Key Responsibilities
         Column {
-            Text(stringResource(R.string.key_responsibilities), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF464555))
+            Text(stringResource(R.string.key_responsibilities), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(8.dp))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White)
-                    .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                     .padding(16.dp)
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -324,9 +331,9 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
                     )
                     resps.forEach { resp ->
                         Row(verticalAlignment = Alignment.Top) {
-                            Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Arrow", tint = Color(0xFF3525CD), modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Arrow", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(resp, fontSize = 14.sp, color = Color(0xFF191C1E))
+                            Text(resp, fontSize = 14.sp, color = MaterialTheme.colorScheme.onBackground)
                         }
                     }
                 }
@@ -338,21 +345,21 @@ private fun AiAnalysisResultContent(data: ExtractedJobData) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFCFFAFE))
-                .border(width = 1.dp, color = Color(0xFF0891B2).copy(alpha = 0.5f), shape = RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .border(width = 1.dp, color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f), shape = RoundedCornerShape(12.dp))
                 .padding(16.dp)
         ) {
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Star, contentDescription = "AI", tint = Color(0xFF0891B2), modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.Star, contentDescription = "AI", tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.ai_summary), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF164E63))
+                    Text(stringResource(R.string.ai_summary), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSecondaryContainer)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "\"This role strongly focuses on modern Android development, scalable architecture and technical ownership.\"",
                     fontSize = 14.sp,
-                    color = Color(0xFF083344),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
                     lineHeight = 20.sp
                 )
             }
@@ -365,8 +372,8 @@ private fun DetailCard(icon: androidx.compose.ui.graphics.vector.ImageVector, la
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(Color.White)
-            .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -374,15 +381,17 @@ private fun DetailCard(icon: androidx.compose.ui.graphics.vector.ImageVector, la
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFF2F4F6)),
+                .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
-            Icon(icon, contentDescription = null, tint = Color(0xFF00659A), modifier = Modifier.size(20.dp))
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
         }
         Spacer(modifier = Modifier.width(12.dp))
         Column {
-            Text(label, fontSize = 12.sp, color = Color(0xFF777587))
-            Text(value, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+            Text(label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(value, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
         }
     }
 }
+
+

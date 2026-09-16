@@ -44,7 +44,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,7 +78,7 @@ fun ProfileSettingsScreen(
     onLogout: () -> Unit = {},
     viewModel: ProfileSettingsViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // When the ViewModel emits Empty state (after logout), navigate to SignIn
     LaunchedEffect(uiState) {
@@ -233,7 +233,7 @@ private fun ProfileContent(
                         modifier = Modifier
                             .size(72.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer),
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                         contentAlignment = Alignment.Center
                     ) {
                         // Show initials from name
@@ -420,8 +420,8 @@ private fun ProfileContent(
                     // Work Model
                     ProfileListItem(
                         icon = Icons.Default.Home,
-                        iconTint = Color(0xFF004C76),
-                        iconBg = Color(0xFF00659A).copy(alpha = 0.1f),
+                        iconTint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        iconBg = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
                         title = stringResource(id = R.string.work_preference_label),
                         value = profile.workPreference
                             .replaceFirstChar { it.uppercase() }
@@ -432,8 +432,8 @@ private fun ProfileContent(
                     // Expected CTC
                     ProfileListItem(
                         icon = Icons.Default.Star,
-                        iconTint = Color(0xFF004C76),
-                        iconBg = Color(0xFF00659A).copy(alpha = 0.1f),
+                        iconTint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        iconBg = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
                         title = stringResource(id = R.string.expected_ctc_label),
                         value = profile.expectedCtc.ifBlank { stringResource(id = R.string.not_set) }
                     )
@@ -442,8 +442,8 @@ private fun ProfileContent(
                     // Notice Period
                     ProfileListItem(
                         icon = Icons.Default.DateRange,
-                        iconTint = Color(0xFF004C76),
-                        iconBg = Color(0xFF00659A).copy(alpha = 0.1f),
+                        iconTint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        iconBg = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
                         title = stringResource(id = R.string.notice_period_label),
                         value = profile.noticePeriod.ifBlank { stringResource(id = R.string.not_set) }
                     )
@@ -472,7 +472,7 @@ private fun ProfileContent(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFFEEF2FF)),
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -522,7 +522,7 @@ private fun ProfileContent(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFFEEF2FF)),
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(

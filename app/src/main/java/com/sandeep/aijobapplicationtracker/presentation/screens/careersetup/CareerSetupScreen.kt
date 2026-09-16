@@ -42,7 +42,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,8 +69,8 @@ fun CareerSetupScreen(
     onBackClick: () -> Unit,
     viewModel: CareerSetupViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val initialProfile by viewModel.userProfile.collectAsState(initial = null)
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val initialProfile by viewModel.userProfile.collectAsStateWithLifecycle(initialValue = null)
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
@@ -392,21 +392,21 @@ fun CareerSetupScreen(
                         skillsList.forEach { skill ->
                             Row(
                                 modifier = Modifier
-                                    .background(Color(0xFFEEF2FF), CircleShape)
-                                    .border(1.dp, Color(0xFFC7D2FE), CircleShape)
+                                    .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
+                                    .border(1.dp, MaterialTheme.colorScheme.primaryContainer, CircleShape)
                                     .padding(horizontal = 12.dp, vertical = 6.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
                                     text = skill,
-                                    color = Color(0xFF4F46E5),
+                                    color = androidx.compose.ui.graphics.Color.White,
                                     style = MaterialTheme.typography.labelMedium
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Remove",
-                                    tint = Color(0xFF4F46E5),
+                                    tint = androidx.compose.ui.graphics.Color.White,
                                     modifier = Modifier
                                         .size(14.dp)
                                         .clickable { skillsList = skillsList - skill }
@@ -592,7 +592,8 @@ private fun CustomTextField(
             },
             leadingIcon = leadingIcon,
             trailingIcon = trailingIcon,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(52.dp),
+            textStyle = MaterialTheme.typography.bodyMedium,
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),

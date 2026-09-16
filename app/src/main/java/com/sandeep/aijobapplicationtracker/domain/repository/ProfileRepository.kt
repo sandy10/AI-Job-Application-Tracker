@@ -15,6 +15,7 @@ interface ProfileRepository {
 
     /**
      * Saves the user profile.
+     * Returns Result.failure if the save operation fails.
      */
-    suspend fun saveProfile(profile: UserProfileModel)
+    suspend fun saveProfile(profile: UserProfileModel): Result<Unit>
 }

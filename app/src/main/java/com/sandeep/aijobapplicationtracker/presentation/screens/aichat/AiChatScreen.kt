@@ -1,5 +1,7 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.aichat
 
+import androidx.compose.material3.MaterialTheme
+
 import com.sandeep.aijobapplicationtracker.R
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
@@ -13,11 +15,13 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,7 +33,7 @@ fun AiChatScreen(
     onNavigateBack: () -> Unit,
     viewModel: AiChatViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -136,7 +140,7 @@ fun AiChatScreen(
 
 @Composable
 fun ChatBubble(message: ChatMessage) {
-    val backgroundColor = if (message.isUser) MaterialTheme.colorScheme.primary else Color(0xFFF1F5F9)
+    val backgroundColor = if (message.isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
     val contentColor = if (message.isUser) Color.White else MaterialTheme.colorScheme.onSurface
     val shape = if (message.isUser) {
         RoundedCornerShape(20.dp, 20.dp, 4.dp, 20.dp)
@@ -156,7 +160,7 @@ fun ChatBubble(message: ChatMessage) {
                 .padding(16.dp)
         ) {
             Text(
-                text = message.text,
+                text = if (message.isUser) androidx.compose.ui.text.AnnotatedString(message.text) else formatAiMessage(message.text),
                 color = contentColor,
                 fontSize = 16.sp
             )
@@ -174,7 +178,7 @@ fun LoadingBubble() {
             modifier = Modifier
                 .widthIn(max = 280.dp)
                 .clip(RoundedCornerShape(20.dp, 20.dp, 20.dp, 4.dp))
-                .background(Color(0xFFF1F5F9))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(16.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -190,6 +194,35 @@ fun LoadingBubble() {
                     fontSize = 14.sp
                 )
             }
+        }
+    }
+}
+
+
+fun formatAiMessage(text: String): androidx.compose.ui.text.AnnotatedString {
+    val textWithBullets = text.replace(Regex("(?m)^\\s*\\* "), "\u2022 ")
+    
+    return androidx.compose.ui.text.buildAnnotatedString {
+        var currentIndex = 0
+        val boldRegex = Regex("\\*\\*(.*?)\\*\\*")
+        val matches = boldRegex.findAll(textWithBullets)
+        
+        for (match in matches) {
+            val start = match.range.first
+            val end = match.range.last
+            
+            if (start > currentIndex) {
+                append(textWithBullets.substring(currentIndex, start))
+            }
+            
+            withStyle(style = androidx.compose.ui.text.SpanStyle(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)) {
+                append(match.groupValues[1])
+            }
+            currentIndex = end + 1
+        }
+        
+        if (currentIndex < textWithBullets.length) {
+            append(textWithBullets.substring(currentIndex))
         }
     }
 }

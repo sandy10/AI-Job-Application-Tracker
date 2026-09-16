@@ -4,6 +4,10 @@ import com.google.firebase.Firebase
 import com.google.firebase.vertexai.vertexAI
 import com.google.firebase.vertexai.type.content
 import com.sandeep.aijobapplicationtracker.domain.model.ExtractedJobData
+import com.sandeep.aijobapplicationtracker.domain.model.InterviewPlan
+import com.sandeep.aijobapplicationtracker.domain.model.FocusArea
+import com.sandeep.aijobapplicationtracker.domain.model.QuestionAnswer
+import com.sandeep.aijobapplicationtracker.domain.model.ResumeMatchResult
 import com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepository
 import org.json.JSONObject
 import timber.log.Timber
@@ -111,7 +115,7 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun generateInterviewPlan(jobDescription: String, role: String, company: String): Result<com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep.InterviewPlan> {
+    override suspend fun generateInterviewPlan(jobDescription: String, role: String, company: String): Result<InterviewPlan> {
         return try {
             val prompt = """
                 Generate an interview preparation plan for the following job.
@@ -147,12 +151,12 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor(
             val strategyTip = json.optString("strategyTip", "Research the company and align your experience with their goals.")
 
             val focusAreasArray = json.optJSONArray("focusAreas")
-            val focusAreasList = mutableListOf<com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep.FocusArea>()
+            val focusAreasList = mutableListOf<FocusArea>()
             if (focusAreasArray != null) {
                 for (i in 0 until focusAreasArray.length()) {
                     val obj = focusAreasArray.getJSONObject(i)
                     focusAreasList.add(
-                        com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep.FocusArea(
+                        FocusArea(
                             topic = obj.optString("topic", ""),
                             priority = obj.optString("priority", "")
                         )
@@ -161,12 +165,12 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor(
             }
 
             val questionsArray = json.optJSONArray("likelyQuestions")
-            val questionsList = mutableListOf<com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep.QuestionAnswer>()
+            val questionsList = mutableListOf<QuestionAnswer>()
             if (questionsArray != null) {
                 for (i in 0 until questionsArray.length()) {
                     val obj = questionsArray.getJSONObject(i)
                     questionsList.add(
-                        com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep.QuestionAnswer(
+                        QuestionAnswer(
                             question = obj.optString("question", ""),
                             answerHint = obj.optString("answerHint", "")
                         )
@@ -175,12 +179,12 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor(
             }
 
             val behavioralArray = json.optJSONArray("behavioralQuestions")
-            val behavioralList = mutableListOf<com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep.QuestionAnswer>()
+            val behavioralList = mutableListOf<QuestionAnswer>()
             if (behavioralArray != null) {
                 for (i in 0 until behavioralArray.length()) {
                     val obj = behavioralArray.getJSONObject(i)
                     behavioralList.add(
-                        com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep.QuestionAnswer(
+                        QuestionAnswer(
                             question = obj.optString("question", ""),
                             answerHint = obj.optString("answerHint", "")
                         )
@@ -189,7 +193,7 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor(
             }
 
             Result.success(
-                com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep.InterviewPlan(
+                InterviewPlan(
                     company = company,
                     role = role,
                     strategyTip = strategyTip,
@@ -205,7 +209,7 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun generateMoreQuestions(role: String, existingQuestions: List<String>): Result<List<com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep.QuestionAnswer>> {
+    override suspend fun generateMoreQuestions(role: String, existingQuestions: List<String>): Result<List<QuestionAnswer>> {
         return try {
             val prompt = """
                 Generate 5 more likely interview questions for the role of $role.
@@ -226,11 +230,11 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor(
             Timber.d("RAW AI QUESTIONS RESPONSE: $responseText")
 
             val questionsArray = org.json.JSONArray(responseText)
-            val questionsList = mutableListOf<com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep.QuestionAnswer>()
+            val questionsList = mutableListOf<QuestionAnswer>()
             for (i in 0 until questionsArray.length()) {
                 val obj = questionsArray.getJSONObject(i)
                 questionsList.add(
-                    com.sandeep.aijobapplicationtracker.presentation.screens.aiinterviewprep.QuestionAnswer(
+                    QuestionAnswer(
                         question = obj.optString("question", ""),
                         answerHint = obj.optString("answerHint", "")
                     )
@@ -248,7 +252,7 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor(
     override suspend fun generateResumeMatchAnalysis(
         jobDescription: String,
         candidateProfile: String
-    ): Result<com.sandeep.aijobapplicationtracker.presentation.screens.airesumematch.ResumeMatchResult> {
+    ): Result<ResumeMatchResult> {
         return try {
             val prompt = """
                 Compare the following Candidate Profile with the Job Description.
@@ -300,7 +304,7 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor(
             }
             
             Result.success(
-                com.sandeep.aijobapplicationtracker.presentation.screens.airesumematch.ResumeMatchResult(
+                ResumeMatchResult(
                     company = "",
                     jobTitle = "",
                     score = score,

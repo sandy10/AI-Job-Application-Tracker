@@ -38,9 +38,11 @@ AI Job Application Tracker is an **Android-first workspace** tailored for studen
 
 This project strictly adheres to modern Android development standards and **Clean Architecture**:
 
-* **UI**: Jetpack Compose & Material 3
+* **UI**: Jetpack Compose & Material 3 (Custom Typography with Plus Jakarta Sans)
+* **Text Formatting**: Native Markdown parsing for AI chat responses
+* **State Management**: Lifecycle-aware state collection (collectAsStateWithLifecycle)
 * **Language**: 100% Kotlin
-* **Architecture**: Clean Architecture (Presentation, Domain, Data layers) + MVVM
+* **Architecture**: Clean Architecture (Strict separation of Domain/Presentation Models) + MVVM
 * **Asynchronous**: Kotlin Coroutines & StateFlow
 * **Dependency Injection**: Hilt
 * **Navigation**: Jetpack Navigation Compose

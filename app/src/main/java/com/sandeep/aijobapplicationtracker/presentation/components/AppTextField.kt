@@ -57,8 +57,8 @@ fun AppTextField(
             } else null,
             shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
             colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = androidx.compose.ui.graphics.Color(0xFFF8F9FA),
-                focusedContainerColor = androidx.compose.ui.graphics.Color(0xFFF8F9FA),
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
                 unfocusedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
                 focusedBorderColor = androidx.compose.material3.MaterialTheme.colorScheme.primary
             )
@@ -73,3 +73,6 @@ fun AppTextField(
         }
     }
 }
+
+
+

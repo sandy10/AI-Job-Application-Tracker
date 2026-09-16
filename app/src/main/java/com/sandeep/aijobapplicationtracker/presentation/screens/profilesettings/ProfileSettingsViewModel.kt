@@ -17,6 +17,8 @@ import javax.inject.Inject
 
 import com.sandeep.aijobapplicationtracker.utils.CrashlyticsHelper
 
+import com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepository
+
 /**
  * ViewModel for the Profile Settings screen.
  * Loads real user profile data from Firestore via [ProfileRepository].
@@ -25,6 +27,7 @@ import com.sandeep.aijobapplicationtracker.utils.CrashlyticsHelper
 class ProfileSettingsViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val profileRepository: ProfileRepository,
+    private val aiAnalyzerRepository: AiAnalyzerRepository,
     private val analyticsHelper: AnalyticsHelper,
     private val crashlyticsHelper: CrashlyticsHelper
 ) : ViewModel() {
@@ -70,6 +73,8 @@ class ProfileSettingsViewModel @Inject constructor(
         analyticsHelper.trackLogout()
         crashlyticsHelper.clearUserId()
         viewModelScope.launch {
+            // H5 Fix: Clear AI singleton state to prevent leaking across sessions
+            aiAnalyzerRepository.clearExtractedData()
             authRepository.logout()
             _uiState.value = UiState.Empty
         }

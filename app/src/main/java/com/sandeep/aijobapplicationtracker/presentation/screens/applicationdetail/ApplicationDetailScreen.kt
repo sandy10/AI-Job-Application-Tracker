@@ -24,7 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
@@ -43,7 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -71,20 +71,20 @@ fun ApplicationDetailScreen(
     onNavigateToEdit: () -> Unit = {},
     viewModel: ApplicationDetailViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = androidx.compose.ui.platform.LocalContext.current
     var topMenuExpanded by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     var bottomMenuExpanded by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     var showDeleteDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 
     Scaffold(
-        containerColor = Color(0xFFF7F9FB), // bg-background
+        containerColor = MaterialTheme.colorScheme.background, // bg-background
         topBar = {
             TopAppBar(
                 title = { },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFF3525CD))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.primary)
                     }
                 },
                 actions = {
@@ -99,11 +99,11 @@ fun ApplicationDetailScreen(
                         }
                         context.startActivity(android.content.Intent.createChooser(shareIntent, "Share Application"))
                     }) {
-                        Icon(Icons.Default.Share, contentDescription = "Share", tint = Color(0xFF464555))
+                        Icon(Icons.Default.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF7F9FB)
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
@@ -112,7 +112,7 @@ fun ApplicationDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.White.copy(alpha = 0.9f))
-                    .border(1.dp, Color(0xFFE2E8F0))
+                    .border(1.dp, MaterialTheme.colorScheme.surfaceVariant)
                     .padding(horizontal = 20.dp, vertical = 12.dp)
             ) {
                 Row(
@@ -126,9 +126,9 @@ fun ApplicationDetailScreen(
                             .height(48.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
-                            contentColor = Color(0xFF191C1E)
+                            contentColor = MaterialTheme.colorScheme.onSurface
                         ),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFC7C4D8)),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(stringResource(R.string.edit_application), fontSize = 14.sp)
@@ -140,9 +140,9 @@ fun ApplicationDetailScreen(
                                 .size(48.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.White,
-                                contentColor = Color(0xFF464555)
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                             ),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFC7C4D8)),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
                         ) {
@@ -249,7 +249,7 @@ private fun ApplicationDetailContent(
                         .size(64.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.White)
-                        .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp)),
+                        .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -265,21 +265,21 @@ private fun ApplicationDetailContent(
                         text = data.role,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF191C1E)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = data.company,
                         fontSize = 16.sp,
-                        color = Color(0xFF464555),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 4.dp)
                     )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(top = 4.dp)
                     ) {
-                        Icon(Icons.Default.LocationOn, contentDescription = "Location", tint = Color(0xFF777587), modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.LocationOn, contentDescription = "Location", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("${data.location} • Hybrid", fontSize = 14.sp, color = Color(0xFF777587))
+                        Text("${data.location} • Hybrid", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -290,22 +290,22 @@ private fun ApplicationDetailContent(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFFFEF3C7)) // amber-100
-                        .border(1.dp, Color(0xFFD97706).copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                        .background(androidx.compose.ui.graphics.Color.White) // amber-100
+                        .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
                         .padding(horizontal = 12.dp, vertical = 4.dp)
                 ) {
-                    Text(data.status.name.uppercase(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFD97706)) // amber-600
+                    Text(data.status.name.uppercase(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.tertiary) // amber-600
                 }
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFFEEF2FF)) // indigo-50
-                        .border(1.dp, Color(0xFF4F46E5).copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.primary) // indigo-50
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
                         .clickable(enabled = isActionEnabled) { onNavigateToResumeMatch() }
                         .padding(horizontal = 12.dp, vertical = 4.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Star, contentDescription = "AI", tint = Color(0xFF4F46E5), modifier = Modifier.size(14.dp))
+                        Icon(Icons.Default.Star, contentDescription = "AI", tint = androidx.compose.ui.graphics.Color.White, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                         val scoreText = when {
                             data.resumeUsed == "No Resume Uploaded" -> "Upload Resume to Match"
@@ -313,7 +313,7 @@ private fun ApplicationDetailContent(
                             data.matchScore == 0 -> "Calculate Match"
                             else -> "${data.matchScore}% Match"
                         }
-                        Text(scoreText, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF4F46E5))
+                        Text(scoreText, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = androidx.compose.ui.graphics.Color.White)
                     }
                 }
             }
@@ -326,28 +326,28 @@ private fun ApplicationDetailContent(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFEEF2FF))
-                    .border(width = 1.dp, color = Color(0xFFEEF2FF), shape = RoundedCornerShape(12.dp))
-                    .border(width = 4.dp, color = Color(0xFF4F46E5), shape = RoundedCornerShape(12.dp)) // Emulate left border by just using left padding hack or custom modifier, but let's just use standard border for now, or assume full border is ok based on compose limits without custom drawing. We will use a standard clip and border. Wait, to do left border:
+                    .background(androidx.compose.ui.graphics.Color.White)
+                    .border(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant, shape = RoundedCornerShape(12.dp))
+                    .border(width = 4.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(12.dp)) // Emulate left border by just using left padding hack or custom modifier, but let's just use standard border for now, or assume full border is ok based on compose limits without custom drawing. We will use a standard clip and border. Wait, to do left border:
                     .padding(16.dp)
             ) {
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Info, contentDescription = "Fire", tint = Color(0xFF4F46E5), modifier = Modifier.size(24.dp)) // flame icon equivalent
+                        Icon(Icons.Default.Info, contentDescription = "Fire", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp)) // flame icon equivalent
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.next_action), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                        Text(stringResource(R.string.next_action), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = data.nextAction.title,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF191C1E)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = data.nextAction.description,
                         fontSize = 14.sp,
-                        color = Color(0xFF464555),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
                     )
                     Button(
@@ -356,7 +356,7 @@ private fun ApplicationDetailContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5)),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Icon(Icons.Default.Star, contentDescription = "AI", modifier = Modifier.size(18.dp))
@@ -394,14 +394,14 @@ private fun ApplicationDetailContent(
 
         // Submitted Resume
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-            Text(stringResource(R.string.resume_analysis), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+            Text(stringResource(R.string.resume_analysis), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
             Spacer(modifier = Modifier.height(12.dp))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color.White.copy(alpha = 0.8f))
-                    .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(12.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
                     .clickable(enabled = isActionEnabled) { 
                         onNavigateToResumeMatch()
                     }
@@ -421,17 +421,17 @@ private fun ApplicationDetailContent(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFFEEF2FF)),
+                                .background(MaterialTheme.colorScheme.primary),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.Info, contentDescription = "File", tint = Color(0xFF3525CD))
+                            Icon(Icons.Default.Info, contentDescription = "File", tint = androidx.compose.ui.graphics.Color.White)
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = data.resumeUsed, 
                                 fontSize = 14.sp, 
                                 fontWeight = FontWeight.SemiBold, 
-                                color = Color(0xFF191C1E),
+                                color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
                                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                             )
@@ -444,7 +444,7 @@ private fun ApplicationDetailContent(
                                     else if (data.matchScore > 0) "${data.matchScore}% Match based on Job Description"
                                     else "Calculate Match",
                                     fontSize = 12.sp,
-                                    color = Color(0xFF3525CD),
+                                    color = MaterialTheme.colorScheme.primary,
                                     maxLines = 1,
                                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                 )
@@ -454,11 +454,11 @@ private fun ApplicationDetailContent(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(16.dp))
-                            .border(1.dp, Color(0xFF3525CD).copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
                             .clickable(enabled = isActionEnabled) { onNavigateToResumeMatch() }
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
-                        Text(stringResource(R.string.view_analysis), fontSize = 12.sp, color = Color(0xFF3525CD), fontWeight = FontWeight.Medium)
+                        Text(stringResource(R.string.view_analysis), fontSize = 12.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
                     }
                 }
             }
@@ -471,29 +471,29 @@ private fun ApplicationDetailContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResource(R.string.interviews), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                Text(stringResource(R.string.interviews), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable(enabled = isActionEnabled) { 
                     onNavigateToAddInterview()
                 }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add", tint = Color(0xFF3525CD), modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.Add, contentDescription = "Add", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(stringResource(R.string.add_interview), fontSize = 12.sp, color = Color(0xFF3525CD))
+                    Text(stringResource(R.string.add_interview), fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
             
             if (data.interviews.isEmpty()) {
-                Text(stringResource(R.string.no_interviews_scheduled_yet), fontSize = 14.sp, color = Color(0xFF777587))
+                Text(stringResource(R.string.no_interviews_scheduled_yet), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             } else {
                 Column(modifier = Modifier.padding(start = 12.dp)) {
                     data.interviews.forEachIndexed { index, interview ->
                         Row {
                             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 4.dp)) {
-                                Box(modifier = Modifier.size(20.dp).clip(CircleShape).background(Color(0xFFFEF3C7)).border(2.dp, Color(0xFFD97706), CircleShape), contentAlignment = Alignment.Center) {
-                                    Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFFD97706)))
+                                Box(modifier = Modifier.size(20.dp).clip(CircleShape).background(androidx.compose.ui.graphics.Color.White).border(1.dp, MaterialTheme.colorScheme.primary, CircleShape), contentAlignment = Alignment.Center) {
+                                    Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.tertiary))
                                 }
                                 if (index < data.interviews.size - 1) {
-                                    Box(modifier = Modifier.width(1.dp).height(48.dp).background(Color(0xFFC7C4D8).copy(alpha = 0.5f)))
+                                    Box(modifier = Modifier.width(1.dp).height(48.dp).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)))
                                 }
                             }
                             Column(modifier = Modifier.padding(start = 16.dp, bottom = if (index < data.interviews.size - 1) 16.dp else 0.dp)) {
@@ -501,14 +501,14 @@ private fun ApplicationDetailContent(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(12.dp))
                                         .background(Color.White.copy(alpha = 0.8f))
-                                        .border(1.dp, Color(0xFFC7C4D8))
-                                        .border(width = 4.dp, color = Color(0xFFD97706), shape = RoundedCornerShape(12.dp)) // Simulate left border
+                                        .border(1.dp, MaterialTheme.colorScheme.outline)
+                                        .border(width = 4.dp, color = MaterialTheme.colorScheme.tertiary, shape = RoundedCornerShape(12.dp)) // Simulate left border
                                         .padding(12.dp)
                                         .fillMaxWidth()
                                 ) {
                                     Column {
-                                        Text(interview.title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
-                                        Text("${interview.type} • ${interview.date}", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color(0xFFD97706))
+                                        Text(interview.title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                                        Text("${interview.type} • ${interview.date}", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.tertiary)
                                     }
                                 }
                             }
@@ -521,14 +521,14 @@ private fun ApplicationDetailContent(
         // Recruiter
         if (data.recruiter.isNotBlank()) {
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                Text(stringResource(R.string.recruiter), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                Text(stringResource(R.string.recruiter), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(modifier = Modifier.height(12.dp))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.White.copy(alpha = 0.8f))
-                        .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(12.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
                         .padding(16.dp)
                 ) {
                     Row(
@@ -544,13 +544,13 @@ private fun ApplicationDetailContent(
                                 modifier = Modifier
                                     .size(40.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFFE6E8EA)),
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.Info, contentDescription = "Avatar", tint = Color(0xFF777587))
+                                Icon(Icons.Default.Info, contentDescription = "Avatar", tint = MaterialTheme.colorScheme.primary)
                             }
                             Column {
-                                Text(data.recruiter, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                                Text(data.recruiter, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
                             }
                         }
                     }
@@ -565,13 +565,13 @@ private fun ApplicationDetailContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResource(R.string.notes), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
+                Text(stringResource(R.string.notes), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { 
                     showNoteDialog = true
                 }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add", tint = Color(0xFF3525CD), modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.Add, contentDescription = "Add", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(stringResource(R.string.add_note), fontSize = 12.sp, color = Color(0xFF3525CD))
+                    Text(stringResource(R.string.add_note), fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
                 }
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -579,8 +579,8 @@ private fun ApplicationDetailContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFF2F4F6))
-                    .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(12.dp))
+                    .background(androidx.compose.ui.graphics.Color.White)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
                     .padding(16.dp)
             ) {
                 val notesStr = if (data.notes == "No notes.") "No notes added yet." else data.notes
@@ -591,9 +591,9 @@ private fun ApplicationDetailContent(
                     
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Star, contentDescription = "AI", tint = Color(0xFF3525CD), modifier = Modifier.size(14.dp))
+                            Icon(Icons.Default.Star, contentDescription = "AI", tint = androidx.compose.ui.graphics.Color.White, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(stringResource(R.string.ai_extracted_skills), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF3525CD))
+                            Text(stringResource(R.string.ai_extracted_skills), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
                         }
                         
                         @OptIn(ExperimentalLayoutApi::class)
@@ -606,21 +606,21 @@ private fun ApplicationDetailContent(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(6.dp))
                                         .background(Color.White)
-                                        .border(1.dp, Color(0xFF3525CD).copy(alpha = 0.2f), RoundedCornerShape(6.dp))
+                                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
                                         .padding(horizontal = 8.dp, vertical = 4.dp)
                                 ) {
-                                    Text(skill, fontSize = 12.sp, color = Color(0xFF464555))
+                                    Text(skill, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                         }
                         
                         val userNotes = parts.getOrNull(1)
                         if (!userNotes.isNullOrBlank()) {
-                            androidx.compose.material3.HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = Color(0xFFC7C4D8).copy(alpha = 0.5f))
+                            androidx.compose.material3.HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
                             Text(
                                 text = userNotes,
                                 fontSize = 14.sp,
-                                color = Color(0xFF191C1E),
+                                color = MaterialTheme.colorScheme.onSurface,
                                 lineHeight = 20.sp
                             )
                         }
@@ -629,7 +629,7 @@ private fun ApplicationDetailContent(
                     Text(
                         text = notesStr,
                         fontSize = 14.sp,
-                        color = if (data.notes == "No notes.") Color(0xFF777587) else Color(0xFF191C1E),
+                        color = if (data.notes == "No notes.") MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                         fontStyle = if (data.notes == "No notes.") androidx.compose.ui.text.font.FontStyle.Italic else androidx.compose.ui.text.font.FontStyle.Normal,
                         lineHeight = 20.sp
                     )
@@ -657,12 +657,12 @@ private fun ApplicationDetailContent(
                     onAddNote(noteText)
                     showNoteDialog = false
                 }) {
-                    Text(stringResource(R.string.save), color = Color(0xFF3525CD))
+                    Text(stringResource(R.string.save), color = MaterialTheme.colorScheme.primary)
                 }
             },
             dismissButton = {
                 androidx.compose.material3.TextButton(onClick = { showNoteDialog = false }) {
-                    Text(stringResource(R.string.cancel), color = Color(0xFF777587))
+                    Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         )
@@ -675,12 +675,12 @@ private fun GlassCard(modifier: Modifier = Modifier, label: String, value: Strin
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White.copy(alpha = 0.8f))
-            .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(12.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
             .padding(16.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(label.uppercase(), fontSize = 12.sp, color = Color(0xFF777587))
-            Text(value, fontSize = 16.sp, color = Color(0xFF191C1E))
+            Text(label.uppercase(), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(value, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }

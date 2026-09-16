@@ -51,7 +51,7 @@ class MockProfileRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun saveProfile(profile: UserProfileModel) {
+    override suspend fun saveProfile(profile: UserProfileModel): Result<Unit> {
         dataStore.edit { prefs ->
             prefs[Keys.NAME] = profile.name
             prefs[Keys.TARGET_ROLE] = profile.targetRole
@@ -63,5 +63,6 @@ class MockProfileRepositoryImpl @Inject constructor(
             prefs[Keys.EXPECTED_CTC] = profile.expectedCtc
             prefs[Keys.NOTICE_PERIOD] = profile.noticePeriod
         }
+        return Result.success(Unit)
     }
 }

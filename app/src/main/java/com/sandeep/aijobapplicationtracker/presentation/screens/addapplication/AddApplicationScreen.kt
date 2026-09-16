@@ -18,7 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -27,7 +27,7 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,7 +43,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,67 +69,21 @@ fun AddApplicationScreen(
     onNavigateToAnalyzer: () -> Unit = {},
     viewModel: AddApplicationViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val formState by viewModel.formState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-
-    var company by remember { mutableStateOf("") }
-    var jobTitle by remember { mutableStateOf("") }
-    var jobUrl by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
-    var workMode by remember { mutableStateOf("") }
-    var source by remember { mutableStateOf("") }
-    var status by remember { mutableStateOf("Saved for later") }
-    var dateApplied by remember { mutableStateOf("") }
-    var salary by remember { mutableStateOf("") }
-    var recruiter by remember { mutableStateOf("") }
-    var noticePeriod by remember { mutableStateOf("") }
-    var jobDescription by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
-    var matchScore by remember { mutableStateOf(0) }
 
     LaunchedEffect(jobId) {
         if (jobId != null) {
-            val app = viewModel.getApplicationDirectly(jobId)
-            if (app != null) {
-                company = app.company
-                jobTitle = app.jobTitle
-                jobUrl = app.jobUrl
-                location = app.location
-                workMode = app.workMode
-                source = app.source
-                status = app.status
-                dateApplied = app.dateApplied
-                salary = app.salary
-                recruiter = app.recruiter
-                noticePeriod = app.noticePeriod
-                jobDescription = app.jobDescription
-                notes = app.notes
-                matchScore = app.matchScore
-            }
+            viewModel.onEvent(AddApplicationEvent.LoadApplication(jobId))
         }
     }
 
-    val latestExtractedData by viewModel.latestExtractedData.collectAsState()
+    val latestExtractedData by viewModel.latestExtractedData.collectAsStateWithLifecycle()
 
     LaunchedEffect(latestExtractedData) {
         latestExtractedData?.let { data ->
-            company = data.company
-            jobTitle = data.role
-            location = data.location
-            workMode = data.workMode
-            salary = data.salaryRange
-            noticePeriod = data.noticePeriod
-            jobDescription = data.jobDescription
-            jobUrl = data.jobUrl
-            source = data.source
-            recruiter = data.recruiter
-            if (data.dateApplied.isNotBlank()) dateApplied = data.dateApplied
-            matchScore = data.matchScore
-            // For MVP, we can append skills into notes or job description, 
-            // since we don't have a direct field for "Required Skills" yet.
-            if (data.skills.isNotEmpty()) {
-                notes = "AI Extracted Skills:\n${data.skills.joinToString(", ")}\n\n" + notes
-            }
+            viewModel.onEvent(AddApplicationEvent.ExtractedDataReceived(data))
             viewModel.clearExtractedData()
         }
     }
@@ -139,28 +93,29 @@ fun AddApplicationScreen(
             onNavigateBack()
         } else if (uiState is UiState.Error) {
             snackbarHostState.showSnackbar((uiState as UiState.Error).message)
+            viewModel.onEvent(AddApplicationEvent.ClearError)
         }
     }
 
     Scaffold(
-        containerColor = Color(0xFFF7F9FB), // bg-background
+        containerColor = MaterialTheme.colorScheme.background, // bg-background
         topBar = {
             TopAppBar(
                 title = { 
                     Text(
-                        text = if (jobId != null) "Edit Application" else "Add Application",
+                        text = if (jobId != null) stringResource(R.string.edit_application) else stringResource(R.string.add_application_title),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF191C1E)
+                        color = MaterialTheme.colorScheme.onBackground
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFF191C1E))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = MaterialTheme.colorScheme.onBackground)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF7F9FB)
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
@@ -169,41 +124,25 @@ fun AddApplicationScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
-                    .border(1.dp, Color(0xFFE2E8F0))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant)
                     .padding(horizontal = 20.dp, vertical = 16.dp)
                     .padding(bottom = 16.dp)
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(
                         onClick = {
-                            viewModel.saveApplication(
-                                existingId = jobId,
-                                company = company,
-                                jobTitle = jobTitle,
-                                jobUrl = jobUrl,
-                                location = location,
-                                workMode = workMode,
-                                source = source,
-                                status = status,
-                                dateApplied = dateApplied,
-                                salary = salary,
-                                recruiter = recruiter,
-                                noticePeriod = noticePeriod,
-                                jobDescription = jobDescription,
-                                notes = notes,
-                                matchScore = matchScore
-                            )
+                            viewModel.onEvent(AddApplicationEvent.SaveClicked(existingId = jobId))
                         },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4F46E5) // primary-container
+                            containerColor = MaterialTheme.colorScheme.primary // primary-container
                         ),
                         shape = RoundedCornerShape(28.dp)
                     ) {
-                        Text(stringResource(R.string.save_application), fontSize = 16.sp, color = Color.White)
+                        Text(stringResource(R.string.save_application), fontSize = 16.sp, color = MaterialTheme.colorScheme.surface)
                     }
                     TextButton(
                         onClick = onNavigateBack,
@@ -211,7 +150,7 @@ fun AddApplicationScreen(
                             .fillMaxWidth()
                             .height(48.dp)
                     ) {
-                        Text(stringResource(R.string.cancel), fontSize = 16.sp, color = Color(0xFF464555)) // on-surface-variant
+                        Text(stringResource(R.string.cancel), fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) // on-surface-variant
                     }
                 }
             }
@@ -220,19 +159,19 @@ fun AddApplicationScreen(
         AddApplicationContent(
             modifier = Modifier.padding(paddingValues),
             onAnalyzeClick = onNavigateToAnalyzer,
-            company = company, onCompanyChange = { company = it },
-            jobTitle = jobTitle, onJobTitleChange = { jobTitle = it },
-            jobUrl = jobUrl, onJobUrlChange = { jobUrl = it },
-            location = location, onLocationChange = { location = it },
-            workMode = workMode, onWorkModeChange = { workMode = it },
-            source = source, onSourceChange = { source = it },
-            status = status, onStatusChange = { status = it },
-            dateApplied = dateApplied, onDateAppliedChange = { dateApplied = it },
-            salary = salary, onSalaryChange = { salary = it },
-            recruiter = recruiter, onRecruiterChange = { recruiter = it },
-            noticePeriod = noticePeriod, onNoticePeriodChange = { noticePeriod = it },
-            jobDescription = jobDescription, onJobDescriptionChange = { jobDescription = it },
-            notes = notes, onNotesChange = { notes = it }
+            company = formState.company, onCompanyChange = { viewModel.onEvent(AddApplicationEvent.CompanyChanged(it)) },
+            jobTitle = formState.jobTitle, onJobTitleChange = { viewModel.onEvent(AddApplicationEvent.JobTitleChanged(it)) },
+            jobUrl = formState.jobUrl, onJobUrlChange = { viewModel.onEvent(AddApplicationEvent.JobUrlChanged(it)) },
+            location = formState.location, onLocationChange = { viewModel.onEvent(AddApplicationEvent.LocationChanged(it)) },
+            workMode = formState.workMode, onWorkModeChange = { viewModel.onEvent(AddApplicationEvent.WorkModeChanged(it)) },
+            source = formState.source, onSourceChange = { viewModel.onEvent(AddApplicationEvent.SourceChanged(it)) },
+            status = formState.status, onStatusChange = { viewModel.onEvent(AddApplicationEvent.StatusChanged(it)) },
+            dateApplied = formState.dateApplied, onDateAppliedChange = { viewModel.onEvent(AddApplicationEvent.DateAppliedChanged(it)) },
+            salary = formState.salary, onSalaryChange = { viewModel.onEvent(AddApplicationEvent.SalaryChanged(it)) },
+            recruiter = formState.recruiter, onRecruiterChange = { viewModel.onEvent(AddApplicationEvent.RecruiterChanged(it)) },
+            noticePeriod = formState.noticePeriod, onNoticePeriodChange = { viewModel.onEvent(AddApplicationEvent.NoticePeriodChanged(it)) },
+            jobDescription = formState.jobDescription, onJobDescriptionChange = { viewModel.onEvent(AddApplicationEvent.JobDescriptionChanged(it)) },
+            notes = formState.notes, onNotesChange = { viewModel.onEvent(AddApplicationEvent.NotesChanged(it)) }
         )
     }
 }
@@ -271,8 +210,8 @@ private fun AddApplicationContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFEEF2FF))
-                .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                 .padding(16.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -281,15 +220,15 @@ private fun AddApplicationContent(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White)
-                            .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(16.dp)),
+                            .background(MaterialTheme.colorScheme.surface)
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.Star, contentDescription = "AI", tint = Color(0xFF4F46E5), modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.Star, contentDescription = "AI", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                     }
                     Column {
-                        Text(stringResource(R.string.save_time_with_ai), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF191C1E))
-                        Text(stringResource(R.string.paste_a_job_description_and_let_ai_fill), fontSize = 14.sp, color = Color(0xFF464555))
+                        Text(stringResource(R.string.save_time_with_ai), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+                        Text(stringResource(R.string.paste_a_job_description_and_let_ai_fill), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
                 
@@ -299,7 +238,7 @@ private fun AddApplicationContent(
                         .fillMaxWidth()
                         .height(52.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF4F46E5)
+                        containerColor = MaterialTheme.colorScheme.primary
                     ),
                     shape = RoundedCornerShape(26.dp)
                 ) {
@@ -315,48 +254,55 @@ private fun AddApplicationContent(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Divider(modifier = Modifier.weight(1f), color = Color(0xFFC7C4D8))
+            HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outline)
             Text(
                 text = stringResource(R.string.or_enter_manually),
                 modifier = Modifier.padding(horizontal = 12.dp),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF777587),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 letterSpacing = 1.sp
             )
-            Divider(modifier = Modifier.weight(1f), color = Color(0xFFC7C4D8))
+            HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outline)
         }
 
         // Form Fields
         Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
             // Basic Details
-            FormSection(title = "Basic Details") {
-                FormInput(label = "Company Name *", value = company, onValueChange = onCompanyChange, placeholder = "e.g. Acme Corp")
-                FormInput(label = "Job Title *", value = jobTitle, onValueChange = onJobTitleChange, placeholder = "e.g. Senior Product Designer")
-                FormInput(label = "Job URL", value = jobUrl, onValueChange = onJobUrlChange, placeholder = "https://")
+            FormSection(title = stringResource(R.string.basic_details)) {
+                FormInput(label = stringResource(R.string.company_name_req), value = company, onValueChange = onCompanyChange, placeholder = stringResource(R.string.eg_acme_corp))
+                FormInput(label = stringResource(R.string.job_title_req), value = jobTitle, onValueChange = onJobTitleChange, placeholder = stringResource(R.string.eg_senior_product_designer))
+                FormInput(label = stringResource(R.string.job_url_label), value = jobUrl, onValueChange = onJobUrlChange, placeholder = stringResource(R.string.job_url_https))
             }
 
             // Location & Logistics
-            FormSection(title = "Location & Logistics") {
-                FormInput(label = "Location", value = location, onValueChange = onLocationChange, placeholder = "City, State or Country")
-                FormInput(label = "Work Mode", value = workMode, onValueChange = onWorkModeChange, placeholder = "Select mode")
-                FormInput(label = "Source", value = source, onValueChange = onSourceChange, placeholder = "Where did you find this?")
+            FormSection(title = stringResource(R.string.location_logistics)) {
+                FormInput(label = stringResource(R.string.location_label), value = location, onValueChange = onLocationChange, placeholder = stringResource(R.string.location_ph))
+                FormInput(label = stringResource(R.string.work_mode_label), value = workMode, onValueChange = onWorkModeChange, placeholder = stringResource(R.string.select_mode))
+                FormInput(label = stringResource(R.string.source_label), value = source, onValueChange = onSourceChange, placeholder = stringResource(R.string.source_ph))
             }
 
             // Application Status & Details
-            FormSection(title = "Application Status & Details") {
+            FormSection(title = stringResource(R.string.application_status_details)) {
                 var statusExpanded by remember { mutableStateOf(false) }
-                val statusOptions = listOf("Saved for later", "Applied", "Recruiter Contact", "Interviewing", "Offer Received", "Rejected")
+                val statusOptions = listOf(
+                    stringResource(R.string.saved_for_later),
+                    stringResource(R.string.status_applied),
+                    stringResource(R.string.recruiter_contact),
+                    stringResource(R.string.status_interviewing),
+                    stringResource(R.string.offer_received),
+                    stringResource(R.string.status_rejected)
+                )
                 Box(modifier = Modifier.fillMaxWidth()) {
                     FormInput(
-                        label = "Status", 
+                        label = stringResource(R.string.status_label), 
                         value = status, 
                         onValueChange = {}, 
-                        placeholder = "Saved for later",
+                        placeholder = stringResource(R.string.saved_for_later),
                         readOnly = true,
                         onClick = { statusExpanded = true },
                         trailingIcon = {
-                            Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Select Status")
+                            Icon(Icons.Default.KeyboardArrowDown, contentDescription = stringResource(R.string.select_status))
                         }
                     )
                     androidx.compose.material3.DropdownMenu(
@@ -377,14 +323,14 @@ private fun AddApplicationContent(
 
                 var showDatePicker by remember { mutableStateOf(false) }
                 FormInput(
-                    label = "Date Applied", 
+                    label = stringResource(R.string.date), 
                     value = dateApplied, 
                     onValueChange = onDateAppliedChange, 
-                    placeholder = "DD/MM/YYYY",
+                    placeholder = stringResource(R.string.date_applied_ph),
                     readOnly = true,
                     onClick = { showDatePicker = true },
                     trailingIcon = {
-                        Icon(Icons.Default.DateRange, contentDescription = "Select Date")
+                        Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.select_date))
                     }
                 )
                 
@@ -408,47 +354,47 @@ private fun AddApplicationContent(
                         androidx.compose.material3.DatePicker(state = datePickerState)
                     }
                 }
-                FormInput(label = "Salary Range / CTC", value = salary, onValueChange = onSalaryChange, placeholder = "e.g. $120k - $150k")
+                FormInput(label = stringResource(R.string.salary_range_ctc), value = salary, onValueChange = onSalaryChange, placeholder = stringResource(R.string.eg_salary))
             }
 
             // Additional Context
-            FormSection(title = "Additional Context") {
-                FormInput(label = "Recruiter Info / Contact", value = recruiter, onValueChange = onRecruiterChange, placeholder = "Name or Email")
-                FormInput(label = "Notice Period Required", value = noticePeriod, onValueChange = onNoticePeriodChange, placeholder = "e.g. 30 Days")
+            FormSection(title = stringResource(R.string.additional_context)) {
+                FormInput(label = stringResource(R.string.recruiter_info), value = recruiter, onValueChange = onRecruiterChange, placeholder = stringResource(R.string.recruiter_ph))
+                FormInput(label = stringResource(R.string.notice_period_req), value = noticePeriod, onValueChange = onNoticePeriodChange, placeholder = stringResource(R.string.eg_notice_period))
                 
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(stringResource(R.string.job_description), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
+                    Text(stringResource(R.string.job_description), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onBackground)
                     OutlinedTextField(
                         value = jobDescription,
                         onValueChange = onJobDescriptionChange,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(100.dp),
-                        placeholder = { Text(stringResource(R.string.paste_full_jd_here), color = Color(0xFF777587), fontSize = 14.sp) },
+                        placeholder = { Text(stringResource(R.string.paste_full_jd_here), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp) },
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedContainerColor = Color(0xFFF2F4F6),
-                            focusedContainerColor = Color.White,
-                            unfocusedBorderColor = Color(0xFFC7C4D8),
-                            focusedBorderColor = Color(0xFF3525CD)
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary
                         ),
                         shape = RoundedCornerShape(12.dp)
                     )
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(stringResource(R.string.personal_notes), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
+                    Text(stringResource(R.string.personal_notes), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onBackground)
                     OutlinedTextField(
                         value = notes,
                         onValueChange = onNotesChange,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(80.dp),
-                        placeholder = { Text(stringResource(R.string.any_thoughts_or_prep_notes), color = Color(0xFF777587), fontSize = 14.sp) },
+                        placeholder = { Text(stringResource(R.string.any_thoughts_or_prep_notes), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp) },
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedContainerColor = Color(0xFFF2F4F6),
-                            focusedContainerColor = Color.White,
-                            unfocusedBorderColor = Color(0xFFC7C4D8),
-                            focusedBorderColor = Color(0xFF3525CD)
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary
                         ),
                         shape = RoundedCornerShape(12.dp)
                     )
@@ -464,12 +410,12 @@ private fun FormSection(title: String, content: @Composable () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(Color.White)
-            .border(1.dp, Color(0xFFC7C4D8), RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
             .padding(16.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text(title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF464555))
+            Text(title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
             content()
         }
     }
@@ -486,19 +432,19 @@ private fun FormInput(
     onClick: (() -> Unit)? = null
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E))
+        Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onBackground)
         
         Box(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
                 value = value,
                 onValueChange = onValueChange,
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text(placeholder, color = Color(0xFF777587), fontSize = 14.sp) },
+                placeholder = { Text(placeholder, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp) },
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = Color(0xFFF2F4F6), // surface-container-low
-                    focusedContainerColor = Color.White,
-                    unfocusedBorderColor = Color(0xFFC7C4D8), // outline-variant
-                    focusedBorderColor = Color(0xFF3525CD) // primary
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant, // surface-container-low
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline, // outline-variant
+                    focusedBorderColor = MaterialTheme.colorScheme.primary // primary
                 ),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true,
@@ -517,3 +463,4 @@ private fun FormInput(
         }
     }
 }
+

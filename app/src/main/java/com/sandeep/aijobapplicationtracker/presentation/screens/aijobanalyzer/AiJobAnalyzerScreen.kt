@@ -1,5 +1,7 @@
 package com.sandeep.aijobapplicationtracker.presentation.screens.aijobanalyzer
 
+import androidx.compose.material3.MaterialTheme
+
 import com.sandeep.aijobapplicationtracker.R
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
@@ -17,7 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
@@ -35,7 +37,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,7 +60,7 @@ fun AiJobAnalyzerScreen(
     onNavigateToResult: () -> Unit,
     viewModel: AiJobAnalyzerViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(uiState) {
@@ -72,7 +74,7 @@ fun AiJobAnalyzerScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF7F9FB),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { 
@@ -80,21 +82,21 @@ fun AiJobAnalyzerScreen(
                         text = stringResource(R.string.analyze_job),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF191C1E),
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFF191C1E))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
                 actions = {
                     Box(modifier = Modifier.size(48.dp)) // To center title
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF7F9FB)
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
@@ -127,14 +129,14 @@ private fun AiJobAnalyzerContent(
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFFEEF2FF))
-                .border(width = 1.dp, color = Color(0xFF06B6D4).copy(alpha = 0.5f), shape = RoundedCornerShape(16.dp)) // Emulated left border
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .border(width = 1.dp, color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f), shape = RoundedCornerShape(16.dp)) // Emulated left border
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Star, contentDescription = "AI", tint = Color(0xFF06B6D4), modifier = Modifier.size(16.dp))
+            Icon(Icons.Default.Star, contentDescription = "AI", tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(16.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text(stringResource(R.string.ai_powered_analysis), fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color(0xFF3525CD))
+            Text(stringResource(R.string.ai_powered_analysis), fontSize = 14.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.primary)
         }
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -143,7 +145,7 @@ private fun AiJobAnalyzerContent(
             text = stringResource(R.string.turn_any_job_description_into_actionable),
             fontSize = 22.sp,
             fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF0F172A)
+            color = MaterialTheme.colorScheme.onSurface
         )
         
         Spacer(modifier = Modifier.height(12.dp))
@@ -151,13 +153,13 @@ private fun AiJobAnalyzerContent(
         Text(
             text = stringResource(R.string.paste_the_complete_job_description_below),
             fontSize = 14.sp,
-            color = Color(0xFF464555)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         
         Spacer(modifier = Modifier.height(24.dp))
         
         // Input Section
-        Text(stringResource(R.string.job_description), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF191C1E), modifier = Modifier.padding(start = 4.dp))
+        Text(stringResource(R.string.job_description), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
         Spacer(modifier = Modifier.height(4.dp))
         
         Box(modifier = Modifier.weight(1f)) {
@@ -165,19 +167,19 @@ private fun AiJobAnalyzerContent(
                 value = jobDescription,
                 onValueChange = { if (it.length <= maxChars) jobDescription = it },
                 modifier = Modifier.fillMaxSize(),
-                placeholder = { Text(stringResource(R.string.paste_the_job_description_here), color = Color(0xFF777587), fontSize = 14.sp) },
+                placeholder = { Text(stringResource(R.string.paste_the_job_description_here), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp) },
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = Color.White,
                     focusedContainerColor = Color.White,
-                    unfocusedBorderColor = Color(0xFFC7C4D8),
-                    focusedBorderColor = Color(0xFF3525CD)
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
                 ),
                 shape = RoundedCornerShape(12.dp)
             )
             Text(
                 text = "${jobDescription.length} / $maxChars",
                 fontSize = 12.sp,
-                color = if (jobDescription.length == maxChars) Color(0xFFBA1A1A) else Color(0xFF777587),
+                color = if (jobDescription.length == maxChars) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp)
@@ -192,9 +194,9 @@ private fun AiJobAnalyzerContent(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Warning, contentDescription = "Privacy", tint = Color(0xFF464555), modifier = Modifier.size(16.dp)) // Using Warning or Shield equivalent
+            Icon(Icons.Default.Warning, contentDescription = "Privacy", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp)) // Using Warning or Shield equivalent
             Spacer(modifier = Modifier.width(8.dp))
-            Text(stringResource(R.string.your_job_description_is_processed_secure), fontSize = 12.sp, color = Color(0xFF464555))
+            Text(stringResource(R.string.your_job_description_is_processed_secure), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -205,7 +207,7 @@ private fun AiJobAnalyzerContent(
                 .fillMaxWidth()
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF4F46E5)
+                containerColor = MaterialTheme.colorScheme.primary
             ),
             shape = RoundedCornerShape(12.dp),
             enabled = !isLoading && jobDescription.isNotBlank()
@@ -229,7 +231,7 @@ private fun AiJobAnalyzerContent(
         Text(
             text = stringResource(R.string.ai_can_make_mistakes_review_extracted_in),
             fontSize = 12.sp,
-            color = Color(0xFF94A3B8),
+            color = MaterialTheme.colorScheme.outline,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
         )

@@ -13,17 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-data class ResumeMatchResult(
-    val company: String,
-    val jobTitle: String,
-    val score: Int,
-    val scoreLabel: String,
-    val matchedSkills: List<String>,
-    val missingSkills: List<String>,
-    val experienceDetails: String,
-    val recommendation: String
-)
+import com.sandeep.aijobapplicationtracker.domain.model.ResumeMatchResult
 
 @HiltViewModel
 class AiResumeMatchViewModel @Inject constructor(

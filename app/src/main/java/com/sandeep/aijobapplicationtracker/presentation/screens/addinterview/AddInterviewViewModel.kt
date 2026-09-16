@@ -9,12 +9,39 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.sandeep.aijobapplicationtracker.domain.repository.AiAnalyzerRepository
-
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
+
+data class AddInterviewFormState(
+    val date: String = "",
+    val time: String = "",
+    val meetingUrl: String = "",
+    val interviewer: String = "",
+    val notes: String = "",
+    val remindMe: Boolean = true,
+    val interviewRound: String = "1st Round",
+    val interviewType: String = "Technical",
+    val reminderTime: String = "1 day before"
+)
+
+sealed class AddInterviewEvent {
+    data class DateChanged(val date: String) : AddInterviewEvent()
+    data class TimeChanged(val time: String) : AddInterviewEvent()
+    data class MeetingUrlChanged(val url: String) : AddInterviewEvent()
+    data class InterviewerChanged(val interviewer: String) : AddInterviewEvent()
+    data class NotesChanged(val notes: String) : AddInterviewEvent()
+    data class RemindMeChanged(val remindMe: Boolean) : AddInterviewEvent()
+    data class InterviewRoundChanged(val round: String) : AddInterviewEvent()
+    data class InterviewTypeChanged(val type: String) : AddInterviewEvent()
+    data class ReminderTimeChanged(val time: String) : AddInterviewEvent()
+    object SaveClicked : AddInterviewEvent()
+    object ClearError : AddInterviewEvent()
+    object GenerateAiSummaryClicked : AddInterviewEvent()
+}
 
 @HiltViewModel
 class AddInterviewViewModel @Inject constructor(
@@ -34,6 +61,9 @@ class AddInterviewViewModel @Inject constructor(
 
     private val _jobTitle = MutableStateFlow("")
     val jobTitle: StateFlow<String> = _jobTitle
+
+    private val _formState = MutableStateFlow(AddInterviewFormState())
+    val formState: StateFlow<AddInterviewFormState> = _formState
 
     init {
         viewModelScope.launch {
@@ -56,18 +86,31 @@ class AddInterviewViewModel @Inject constructor(
     private val _isGeneratingSummary = MutableStateFlow(false)
     val isGeneratingSummary: StateFlow<Boolean> = _isGeneratingSummary
 
-    fun generateAiSummary(type: String) {
+    fun onEvent(event: AddInterviewEvent) {
+        when (event) {
+            is AddInterviewEvent.DateChanged -> _formState.update { it.copy(date = event.date) }
+            is AddInterviewEvent.TimeChanged -> _formState.update { it.copy(time = event.time) }
+            is AddInterviewEvent.MeetingUrlChanged -> _formState.update { it.copy(meetingUrl = event.url) }
+            is AddInterviewEvent.InterviewerChanged -> _formState.update { it.copy(interviewer = event.interviewer) }
+            is AddInterviewEvent.NotesChanged -> _formState.update { it.copy(notes = event.notes) }
+            is AddInterviewEvent.RemindMeChanged -> _formState.update { it.copy(remindMe = event.remindMe) }
+            is AddInterviewEvent.InterviewRoundChanged -> _formState.update { it.copy(interviewRound = event.round) }
+            is AddInterviewEvent.InterviewTypeChanged -> _formState.update { it.copy(interviewType = event.type) }
+            is AddInterviewEvent.ReminderTimeChanged -> _formState.update { it.copy(reminderTime = event.time) }
+            is AddInterviewEvent.SaveClicked -> saveInterview()
+            is AddInterviewEvent.ClearError -> _uiState.value = UiState.Idle
+            is AddInterviewEvent.GenerateAiSummaryClicked -> generateAiSummary(_formState.value.interviewType)
+        }
+    }
+
+    private fun generateAiSummary(type: String) {
         viewModelScope.launch {
             _isGeneratingSummary.value = true
             try {
                 val apps = repository.getApplications().first()
                 val app = apps.find { it.id == jobId }
                 val jd = app?.jobDescription ?: ""
-                val prompt = "Generate a short bullet-point prep summary for a $type interview for the role of ${app?.jobTitle ?: "the candidate"}. Job description context: $jd"
                 
-                // Using analyzeJobDescription temporarily as a generic text generator, or we can use the generative model directly.
-                // Wait, it's better to add a generic `generateText` in AiAnalyzerRepository or just use the model here.
-                // Let's just create a prompt and use the repository's generateInterviewPlan but just extract the tip.
                 val plan = aiAnalyzer.generateInterviewPlan(jd, app?.jobTitle ?: "", app?.company ?: "")
                 if (plan.isSuccess) {
                     val p = plan.getOrNull()
@@ -75,6 +118,7 @@ class AddInterviewViewModel @Inject constructor(
                         "• Strategy: ${p?.strategyTip}\n" +
                         "• Focus Areas: ${p?.focusAreas?.joinToString(", ") { it.topic }}\n"
                     _generatedSummary.value = summary
+                    _formState.update { it.copy(notes = summary) }
                 } else {
                     _generatedSummary.value = "AI Generation Failed."
                 }
@@ -86,16 +130,8 @@ class AddInterviewViewModel @Inject constructor(
         }
     }
 
-    fun saveInterview(
-        roundNumber: String,
-        type: String,
-        dateTime: String,
-        meetingUrl: String,
-        interviewer: String,
-        notes: String,
-        remindMe: Boolean,
-        reminderTime: String
-    ) {
+    private fun saveInterview() {
+        val state = _formState.value
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
@@ -103,12 +139,12 @@ class AddInterviewViewModel @Inject constructor(
                 val app = apps.find { it.id == jobId }
                 if (app != null) {
                     val newInterview = com.sandeep.aijobapplicationtracker.domain.model.InterviewModel(
-                        roundNumber = roundNumber,
-                        type = type,
-                        dateTime = dateTime,
-                        meetingUrl = meetingUrl,
-                        interviewer = interviewer,
-                        notes = notes
+                        roundNumber = state.interviewRound,
+                        type = state.interviewType,
+                        dateTime = "${state.date} ${state.time}",
+                        meetingUrl = state.meetingUrl,
+                        interviewer = state.interviewer,
+                        notes = state.notes
                     )
                     
                     val updatedInterviews = app.interviews.toMutableList()
@@ -117,14 +153,14 @@ class AddInterviewViewModel @Inject constructor(
                     val updatedApp = app.copy(interviews = updatedInterviews)
                     repository.updateApplication(updatedApp)
 
-                    if (remindMe) {
+                    if (state.remindMe) {
                         try {
                             val inputData = androidx.work.Data.Builder()
                                 .putString("title", "Interview Reminder")
-                                .putString("message", "Upcoming $type interview for ${app.company}!")
+                                .putString("message", "Upcoming ${state.interviewType} interview for ${app.company}!")
                                 .build()
                             
-                            val delayMinutes = when(reminderTime) {
+                            val delayMinutes = when(state.reminderTime) {
                                 "15 minutes before" -> 15L
                                 "1 hour before" -> 60L
                                 "1 day before" -> 1440L
@@ -135,7 +171,7 @@ class AddInterviewViewModel @Inject constructor(
                             // dateTime format: "2026-10-15 02:30 PM"
                             try {
                                 val format = java.text.SimpleDateFormat("yyyy-MM-dd hh:mm a", java.util.Locale.getDefault())
-                                val interviewDate = format.parse(dateTime)
+                                val interviewDate = format.parse("${state.date} ${state.time}")
                                 if (interviewDate != null) {
                                     val reminderTimeMillis = interviewDate.time - (delayMinutes * 60 * 1000)
                                     val initialDelayMillis = reminderTimeMillis - System.currentTimeMillis()

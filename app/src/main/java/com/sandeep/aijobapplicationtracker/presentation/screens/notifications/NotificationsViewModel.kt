@@ -9,6 +9,8 @@ import com.sandeep.aijobapplicationtracker.utils.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,8 +19,8 @@ class NotificationsViewModel @Inject constructor(
     private val jobApplicationRepository: JobApplicationRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<UiState<List<AttentionItem>>>(UiState.Loading)
-    val uiState: StateFlow<UiState<List<AttentionItem>>> = _uiState
+    private val _uiState = MutableStateFlow<UiState<ImmutableList<AttentionItem>>>(UiState.Loading)
+    val uiState: StateFlow<UiState<ImmutableList<AttentionItem>>> = _uiState
 
     init {
         loadNotifications()
@@ -67,9 +69,10 @@ class NotificationsViewModel @Inject constructor(
                 if (attentionItems.isEmpty()) {
                     _uiState.value = UiState.Empty
                 } else {
-                    _uiState.value = UiState.Success(attentionItems)
+                    _uiState.value = UiState.Success(attentionItems.toImmutableList())
                 }
             }
         }
     }
 }
+
