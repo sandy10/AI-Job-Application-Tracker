@@ -21,12 +21,10 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // H2 Fix: Removed GEMINI_API_KEY BuildConfigField.
-        // Vertex AI SDK authenticates via Firebase App Check — no raw API key needed.
-        // Having the key in BuildConfig made it extractable from the APK via decompilation.
+
     }
 
-    // C4 Fix: Release signing configuration placeholder.
+    //  Release signing configuration placeholder.
     // TODO: Create a 'keystore.properties' file in the project root with:
     //   storeFile=path/to/your/release.keystore
     //   storePassword=your_store_password
@@ -84,8 +82,8 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.compose)
 
-    // H1 Fix: Lifecycle-aware flow collection for Compose
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+    //  Lifecycle-aware flow collection for Compose
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -115,7 +113,7 @@ dependencies {
 
     // Coroutines & Immutable Collections (M8)
     implementation(libs.kotlinx.coroutines.android)
-    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7")
+    implementation(libs.kotlinx.collections.immutable)
 
     // Timber
     implementation(libs.timber)
@@ -138,24 +136,23 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
     
-    // L2: CameraX & ML Kit Face Detection
-    // TODO: Move these to the version catalog (libs.versions.toml) for consistent version management
-    implementation("androidx.camera:camera-core:1.3.1")
-    implementation("androidx.camera:camera-camera2:1.3.1")
-    implementation("androidx.camera:camera-lifecycle:1.3.1")
-    implementation("androidx.camera:camera-view:1.3.1")
-    implementation("com.google.mlkit:face-detection:16.1.6")
-    implementation("com.google.guava:guava:31.1-android")
+    //  CameraX & ML Kit Face Detection
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.mlkit.face.detection)
+    implementation(libs.guava)
 
-    // H7 Fix: Test dependencies
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("io.mockk:mockk:1.13.13")
-    testImplementation("app.cash.turbine:turbine:1.2.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    //  Test dependencies
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
+    testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
 
