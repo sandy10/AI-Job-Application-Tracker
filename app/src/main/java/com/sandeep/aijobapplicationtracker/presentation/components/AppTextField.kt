@@ -27,7 +27,8 @@ fun AppTextField(
     placeholder: String = "",
     errorMessage: String? = null,
     isPassword: Boolean = false,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    singleLine: Boolean = true
 ) {
     var passwordVisible by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 
@@ -41,7 +42,7 @@ fun AppTextField(
             isError = errorMessage != null,
             visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = keyboardOptions,
-            singleLine = true,
+            singleLine = singleLine,
             trailingIcon = if (isPassword) {
                 {
                     androidx.compose.material3.IconButton(onClick = { passwordVisible = !passwordVisible }) {

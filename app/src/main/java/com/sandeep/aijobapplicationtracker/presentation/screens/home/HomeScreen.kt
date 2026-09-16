@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sandeep.aijobapplicationtracker.R
 import com.sandeep.aijobapplicationtracker.presentation.components.AppBottomBar
+import com.sandeep.aijobapplicationtracker.presentation.components.AppButton
 import com.sandeep.aijobapplicationtracker.presentation.components.AppCard
 import com.sandeep.aijobapplicationtracker.presentation.components.BottomNavItem
 import com.sandeep.aijobapplicationtracker.presentation.components.EmptyStateView
@@ -65,6 +66,7 @@ fun HomeScreen(
     onNavigateToProfile: () -> Unit = {},
     onNavigateToAssistant: () -> Unit = {},
     onNavigateToNotifications: () -> Unit = {},
+    onNavigateToBulkImport: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -113,7 +115,8 @@ fun HomeScreen(
                     data = s.data,
                     onNavigateToApplicationDetail = onNavigateToApplicationDetail,
                     onNavigateToApplications = onNavigateToApplications,
-                    onNavigateToNotifications = onNavigateToNotifications
+                    onNavigateToNotifications = onNavigateToNotifications,
+                    onNavigateToBulkImport = onNavigateToBulkImport
                 )
 
                 is UiState.Empty -> EmptyStateView(
@@ -136,7 +139,8 @@ private fun HomeContent(
     data: HomeData,
     onNavigateToApplicationDetail: (String) -> Unit,
     onNavigateToApplications: () -> Unit,
-    onNavigateToNotifications: () -> Unit
+    onNavigateToNotifications: () -> Unit,
+    onNavigateToBulkImport: () -> Unit
 ) {
 
 
@@ -199,6 +203,13 @@ private fun HomeContent(
                         }
                     }
                 }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                AppButton(
+                    text = "Bulk Import (Test Feature)",
+                    onClick = onNavigateToBulkImport,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
 

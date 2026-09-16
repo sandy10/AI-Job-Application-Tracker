@@ -68,6 +68,7 @@ fun ApplicationDetailScreen(
     onNavigateToResumeMatch: () -> Unit,
     onNavigateToAssistant: () -> Unit,
     onNavigateToAiInterviewPrep: () -> Unit,
+    onNavigateToFollowUp: () -> Unit = {},
     onNavigateToEdit: () -> Unit = {},
     viewModel: ApplicationDetailViewModel = hiltViewModel()
 ) {
@@ -202,6 +203,7 @@ fun ApplicationDetailScreen(
                     onNavigateToAddInterview = onNavigateToAddInterview,
                     onNavigateToAssistant = onNavigateToAssistant,
                     onNavigateToAiInterviewPrep = onNavigateToAiInterviewPrep,
+                    onNavigateToFollowUp = onNavigateToFollowUp,
                     onAddNote = { note -> viewModel.updateNotes(note) }
                 )
                 is UiState.Empty -> EmptyStateView(
@@ -224,6 +226,7 @@ private fun ApplicationDetailContent(
     onNavigateToAddInterview: () -> Unit,
     onNavigateToAssistant: () -> Unit,
     onNavigateToAiInterviewPrep: () -> Unit,
+    onNavigateToFollowUp: () -> Unit,
     onAddNote: (String) -> Unit
 ) {
     var showNoteDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
@@ -362,6 +365,22 @@ private fun ApplicationDetailContent(
                         Icon(Icons.Default.Star, contentDescription = "AI", modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(stringResource(R.string.prepare_with_ai_1), fontSize = 14.sp)
+                    }
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    Button(
+                        onClick = { onNavigateToFollowUp() },
+                        enabled = isActionEnabled,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Icon(Icons.Default.Star, contentDescription = "AI", modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("AI Follow-Up / Cover Letter", fontSize = 14.sp)
                     }
                 }
             }

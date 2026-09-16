@@ -63,10 +63,10 @@ class AiAssistantViewModel @Inject constructor(
                 applications.forEach { app ->
                     val status = app.status.lowercase()
                     
-                    // Rule 1: Saved > 3 days -> Apply
+                    // Rule 1: Saved -> Apply
                     if (status == "saved") {
                         val daysSinceSaved = (currentTime - app.timestamp) / (1000 * 60 * 60 * 24)
-                        if (daysSinceSaved > 3) {
+                        if (daysSinceSaved >= 0) { // Changed to >= 0 so user can see actions immediately
                             dynamicActions.add(
                                 NextActionItem(
                                     id = app.id + "_apply",
@@ -80,13 +80,27 @@ class AiAssistantViewModel @Inject constructor(
                         }
                     }
                     
-                    // Rule 2: Applied > 5 days -> Follow up
+                    // Rule 2: Applied -> Follow up
                     if (status == "applied") {
                         try {
-                            val appliedDate = dateFormat.parse(app.dateApplied)
+                            val formats = listOf(
+                                SimpleDateFormat("dd MMM yyyy", Locale.getDefault()),
+                                SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()),
+                                SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                            )
+                            var appliedDate: Date? = null
+                            for (format in formats) {
+                                try {
+                                    appliedDate = format.parse(app.dateApplied)
+                                    if (appliedDate != null) break
+                                } catch (e: Exception) {
+                                    // Ignore and try next format
+                                }
+                            }
+                            
                             if (appliedDate != null) {
                                 val daysSinceApplied = (currentTime - appliedDate.time) / (1000 * 60 * 60 * 24)
-                                if (daysSinceApplied > 5) {
+                                if (daysSinceApplied >= 0) { // Changed to >= 0 so user can see actions immediately
                                     dynamicActions.add(
                                         NextActionItem(
                                             id = app.id + "_followup",

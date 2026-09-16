@@ -92,7 +92,8 @@ fun AppNavGraph() {
                 onNavigateToApplications = { navController.navigate(Screen.ApplicationsList.route) },
                 onNavigateToProfile = { navController.navigate(Screen.ProfileSettings.route) },
                 onNavigateToAssistant = { navController.navigate(Screen.AiAssistant.route) },
-                onNavigateToNotifications = { navController.navigate(Screen.Notifications.route) }
+                onNavigateToNotifications = { navController.navigate(Screen.Notifications.route) },
+                onNavigateToBulkImport = { navController.navigate(Screen.BulkImport.route) }
             )
         }
         
@@ -130,6 +131,7 @@ fun AppNavGraph() {
                 onNavigateToResumeMatch = { navController.navigate(Screen.AiResumeMatch.createRoute(jobId)) },
                 onNavigateToAssistant = { navController.navigate(Screen.AiAssistant.route) },
                 onNavigateToAiInterviewPrep = { navController.navigate(Screen.AiInterviewPrep.createRoute(jobId)) },
+                onNavigateToFollowUp = { navController.navigate(Screen.AiFollowUp.createRoute(jobId)) },
                 onNavigateToEdit = { navController.navigate(Screen.EditApplication.createRoute(jobId)) }
             )
         }
@@ -249,6 +251,17 @@ fun AppNavGraph() {
             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
             com.sandeep.aijobapplicationtracker.presentation.screens.videointerview.VideoInterviewScreen(
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        
+        composable(Screen.BulkImport.route) {
+            com.sandeep.aijobapplicationtracker.presentation.screens.bulkimport.BulkImportScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
+                    }
+                }
             )
         }
     }

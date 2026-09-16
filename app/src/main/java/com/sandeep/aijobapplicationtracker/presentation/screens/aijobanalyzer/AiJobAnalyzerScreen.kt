@@ -134,9 +134,9 @@ private fun AiJobAnalyzerContent(
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Star, contentDescription = "AI", tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(16.dp))
+            Icon(Icons.Default.Star, contentDescription = "AI", tint = androidx.compose.ui.graphics.Color.White, modifier = Modifier.size(16.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text(stringResource(R.string.ai_powered_analysis), fontSize = 14.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.ai_powered_analysis), fontSize = 14.sp, fontWeight = FontWeight.Medium, color = androidx.compose.ui.graphics.Color.White)
         }
         
         Spacer(modifier = Modifier.height(16.dp))

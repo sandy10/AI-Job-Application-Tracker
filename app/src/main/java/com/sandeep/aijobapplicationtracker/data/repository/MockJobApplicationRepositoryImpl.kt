@@ -62,6 +62,24 @@ class MockJobApplicationRepositoryImpl @Inject constructor(
         return Result.success(Unit)
     }
 
+    override suspend fun saveDraft(draft: com.sandeep.aijobapplicationtracker.domain.model.DraftModel): Result<Unit> {
+        return Result.success(Unit)
+    }
+
+    override fun getDraftsForJob(jobId: String): Flow<List<com.sandeep.aijobapplicationtracker.domain.model.DraftModel>> {
+        return kotlinx.coroutines.flow.flowOf(emptyList())
+    }
+
+    override suspend fun batchIngestJobsAndDrafts(jobs: List<JobApplicationModel>, drafts: List<com.sandeep.aijobapplicationtracker.domain.model.DraftModel>): Result<Unit> {
+        dataStore.edit { prefs ->
+            val jsonString = prefs[APPLICATIONS_KEY] ?: "[]"
+            val currentList = parseApplications(jsonString).toMutableList()
+            currentList.addAll(jobs)
+            prefs[APPLICATIONS_KEY] = serializeApplications(currentList)
+        }
+        return Result.success(Unit)
+    }
+
     private fun parseApplications(jsonString: String): List<JobApplicationModel> {
         val list = mutableListOf<JobApplicationModel>()
         try {

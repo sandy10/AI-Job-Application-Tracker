@@ -50,4 +50,6 @@ sealed class Screen(val route: String) {
     object VideoInterview : Screen("video_interview/{jobId}") {
         fun createRoute(jobId: String) = "video_interview/$jobId"
     }
+    
+    object BulkImport : Screen("bulk_import")
 }

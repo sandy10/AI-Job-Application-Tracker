@@ -226,6 +226,18 @@
     <string name="ask_a_question">Ask a question...</string>
     <string name="finding_accurate_answer">Finding accurate answer...</string>
     <string name="ai_follow_up">AI Follow-Up</string>
+    <string name="generating_follow_up">Generating follow-up message...</string>
+    
+    <string name="bulk_import_data">Bulk Import Data</string>
+    <string name="bulk_import_desc">Paste your CSV data below based on the JD schemas to ingest jobs and drafts in bulk.</string>
+    <string name="jobs_csv_data">Jobs CSV Data</string>
+    <string name="jobs_csv">Jobs CSV</string>
+    <string name="jobs_csv_placeholder">&lt;id&gt;, &lt;from&gt;, &lt;to&gt;, &lt;type&gt;, &lt;description&gt;, &lt;location&gt;</string>
+    <string name="drafts_csv_data">Drafts CSV Data</string>
+    <string name="drafts_csv">Drafts CSV</string>
+    <string name="drafts_csv_placeholder">&lt;id&gt;, &lt;jobId&gt;, &lt;type&gt;, &lt;contents&gt;, &lt;status&gt;</string>
+    <string name="import_successful">Import Successful!</string>
+    <string name="start_ingestion">Start Ingestion</string>
     <string name="drafting_follow_up_email">Drafting follow-up email...</string>
     <string name="drafted_email">Drafted Email</string>
     <string name="follow_up_email">Follow-up Email</string>

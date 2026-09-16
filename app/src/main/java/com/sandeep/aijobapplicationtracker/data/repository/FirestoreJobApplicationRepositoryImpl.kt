@@ -112,6 +112,63 @@ class FirestoreJobApplicationRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun saveDraft(draft: com.sandeep.aijobapplicationtracker.domain.model.DraftModel): Result<Unit> {
+        return try {
+            firestore.collection("users").document(requireUserId()).collection("drafts")
+                .document(draft.id)
+                .set(draft)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override fun getDraftsForJob(jobId: String): Flow<List<com.sandeep.aijobapplicationtracker.domain.model.DraftModel>> = callbackFlow {
+        val uid = firebaseAuth.currentUser?.uid
+        if (uid == null) {
+            trySend(emptyList())
+            close()
+            return@callbackFlow
+        }
+        val listener = firestore.collection("users").document(uid).collection("drafts")
+            .whereEqualTo("jobId", jobId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
+                val list = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(com.sandeep.aijobapplicationtracker.domain.model.DraftModel::class.java)
+                } ?: emptyList()
+                trySend(list)
+            }
+        awaitClose { listener.remove() }
+    }
+
+    override suspend fun batchIngestJobsAndDrafts(jobs: List<JobApplicationModel>, drafts: List<com.sandeep.aijobapplicationtracker.domain.model.DraftModel>): Result<Unit> {
+        return try {
+            val uid = requireUserId()
+            val batch = firestore.batch()
+            
+            jobs.forEach { job ->
+                val ref = applicationsCollection().document(job.id)
+                batch.set(ref, job.toFirestoreMap())
+            }
+            
+            val draftsCol = firestore.collection("users").document(uid).collection("drafts")
+            drafts.forEach { draft ->
+                val ref = draftsCol.document(draft.id)
+                batch.set(ref, draft)
+            }
+            
+            batch.commit().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
 
 // --- Extension functions for Firestore serialization ---

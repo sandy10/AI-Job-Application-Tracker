@@ -335,6 +335,48 @@ class GeminiAiAnalyzerRepositoryImpl @Inject constructor(
     override fun clearExtractedData() {
         _latestExtractedData.value = null
     }
+
+    override suspend fun generateCoverLetter(
+        job: com.sandeep.aijobapplicationtracker.domain.model.JobApplicationModel,
+        profile: com.sandeep.aijobapplicationtracker.domain.model.UserProfileModel,
+        historicalDrafts: List<com.sandeep.aijobapplicationtracker.domain.model.DraftModel>
+    ): Result<String> {
+        return try {
+            val historyContext = if (historicalDrafts.isNotEmpty()) {
+                "Here are previous cover letters and emails the user has written:\n" +
+                historicalDrafts.joinToString("\n---\n") { it.contents } +
+                "\n\nPlease match the candidate's personal tone, writing style, and formatting preferences based on these previous drafts when generating this new cover letter."
+            } else {
+                "Generate a professional, compelling cover letter."
+            }
+            
+            val prompt = """
+                $historyContext
+                
+                You are generating a cover letter for the following job application:
+                Company: ${job.company}
+                Role: ${job.jobTitle}
+                Location: ${job.location}
+                Job Description: ${job.jobDescription}
+                
+                Candidate Profile:
+                Name: ${profile.name}
+                Experience: ${profile.yearsExperience} years
+                Primary Role: ${profile.targetRole}
+                Skills: ${profile.skills.joinToString(", ")}
+                
+                Write ONLY the body of the cover letter. Do not include placeholders like [Your Name] at the end, just the text.
+            """.trimIndent()
+            
+            val response = generativeModel.generateContent(prompt)
+            val text = response.text ?: return Result.failure(Exception("Empty response from AI"))
+            Result.success(text.trim())
+        } catch (e: Exception) {
+            Timber.e(e, "Error generating cover letter")
+            Result.failure(e)
+        }
+    }
+
     override suspend fun generateFollowUpEmail(company: String, role: String, recruiterName: String?, daysSinceApplied: Int): Result<String> {
         return try {
             val prompt = "Generate a professional follow-up email for a job application.\nCompany: $company\nRole: $role\nRecruiter Name: ${recruiterName ?: "Hiring Manager"}\nDays since applied: $daysSinceApplied\n\nThe email should be polite, concise, and express continued interest in the role.\nDo not include subject line or placeholders like [Your Name]. Just the email body."

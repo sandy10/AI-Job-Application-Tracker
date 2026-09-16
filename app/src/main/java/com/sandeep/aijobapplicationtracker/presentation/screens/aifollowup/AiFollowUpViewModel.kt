@@ -33,10 +33,10 @@ class AiFollowUpViewModel @Inject constructor(
     val uiState: StateFlow<UiState<String>> = _uiState
 
     init {
-        generateEmail()
+        generateDraft("follow_up")
     }
 
-    fun generateEmail() {
+    fun generateDraft(type: String = "follow_up") {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
@@ -56,24 +56,42 @@ class AiFollowUpViewModel @Inject constructor(
                             val date = format.parse(app.dateApplied)
                             if (date != null) {
                                 val diff = System.currentTimeMillis() - date.time
-                                daysSinceApplied = TimeUnit.MILLISECONDS.toDays(diff).toInt()
+                                daysSinceApplied = java.util.concurrent.TimeUnit.MILLISECONDS.toDays(diff).toInt()
                             }
                         } catch (e: Exception) {
                             Timber.e(e, "Error parsing dateApplied")
                         }
                     }
                     
-                    val result = aiRepository.generateFollowUpEmail(
-                        company = app.company,
-                        role = app.jobTitle,
-                        recruiterName = app.recruiter.takeIf { it.isNotBlank() },
-                        daysSinceApplied = daysSinceApplied
+                    val profile = com.sandeep.aijobapplicationtracker.domain.model.UserProfileModel(
+                        name = "User", 
+                        targetRole = app.jobTitle, 
+                        experienceLevel = "Mid",
+                        yearsExperience = "3",
+                        location = "Remote",
+                        workPreference = "Remote"
                     )
+                    val drafts = jobRepository.getDraftsForJob(jobId).first()
+                    
+                    val result = if (type == "cover_letter") {
+                        aiRepository.generateCoverLetter(app, profile, drafts)
+                    } else {
+                        aiRepository.generateFollowUpEmail(app.company, app.jobTitle, app.recruiter.takeIf { it.isNotBlank() }, daysSinceApplied)
+                    }
                     
                     if (result.isSuccess) {
+                        jobRepository.saveDraft(
+                            com.sandeep.aijobapplicationtracker.domain.model.DraftModel(
+                                id = java.util.UUID.randomUUID().toString(),
+                                jobId = jobId,
+                                type = type,
+                                contents = result.getOrNull()!!,
+                                status = "draft"
+                            )
+                        )
                         _uiState.value = UiState.Success(result.getOrNull()!!)
                     } else {
-                        _uiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "Failed to generate email")
+                        _uiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "Failed to generate draft")
                     }
                 } else {
                     _uiState.value = UiState.Error("Application not found.")
