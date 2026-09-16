@@ -29,7 +29,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.Icons.AutoMirrored.Filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
@@ -565,7 +565,7 @@ private fun ProfileContent(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.ExitToApp,
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                         contentDescription = stringResource(id = R.string.logout),
                         tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(20.dp)

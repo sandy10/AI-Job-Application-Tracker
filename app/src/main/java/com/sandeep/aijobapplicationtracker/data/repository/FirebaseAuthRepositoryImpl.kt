@@ -77,16 +77,17 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
      */
     override suspend fun sendPasswordResetEmail(email: String): Result<Unit> {
         return try {
-            val methods = firebaseAuth.fetchSignInMethodsForEmail(email).await()
-            if (methods.signInMethods.isNullOrEmpty()) {
-                return Result.failure(Exception("No account found with this email"))
-            }
             firebaseAuth.sendPasswordResetEmail(email).await()
             Timber.d("Password reset email sent to: $email")
             Result.success(Unit)
         } catch (e: Exception) {
+            val message = if (e.message?.contains("no user record") == true) {
+                "No account found with this email"
+            } else {
+                e.message ?: "Password reset failed"
+            }
             Timber.e(e, "Password reset failed")
-            Result.failure(e)
+            Result.failure(Exception(message))
         }
     }
 

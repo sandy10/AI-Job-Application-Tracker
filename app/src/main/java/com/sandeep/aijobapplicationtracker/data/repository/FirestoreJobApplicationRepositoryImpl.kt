@@ -176,6 +176,7 @@ class FirestoreJobApplicationRepositoryImpl @Inject constructor(
 /** Converts a Firestore document map to a [JobApplicationModel]. */
 private fun com.google.firebase.firestore.DocumentSnapshot.toJobApplicationModel(): JobApplicationModel? {
     return try {
+        @Suppress("UNCHECKED_CAST")
         val interviewsList = (get(Constants.Firestore.FIELD_INTERVIEWS) as? List<Map<String, Any>>)?.map { map ->
             InterviewModel(
                 roundNumber = map[Constants.Firestore.FIELD_ROUND_NUMBER] as? String ?: "",
