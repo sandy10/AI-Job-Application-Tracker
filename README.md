@@ -83,9 +83,10 @@ com.sandeep.aijobapplicationtracker/
    ```
 2. **Open in Android Studio**:
    Open the project using the latest stable release of Android Studio (Koala or newer).
-3. **Connect Firebase**:
+3. **Connect Firebase & App Check**:
    * Add your `google-services.json` file to the `app/` directory.
    * Ensure Firestore and Firebase Authentication (Email/Password) are enabled in your Firebase Console.
+   * **App Check (Optional for Testing)**: If you choose to *Enforce* Firebase App Check (to secure Vertex AI or Firestore), you must register your app's debug token (found in Logcat under `DebugAppCheckProvider`) in the Firebase Console for local testing, or register via Play Integrity for production. If App Check is left in "Monitoring" mode, the app will work on any device out of the box without debug tokens.
 4. **Build & Run**:
    Sync Gradle and run the app on an emulator or physical device running Android 8.0 (API 26) or higher.
 
